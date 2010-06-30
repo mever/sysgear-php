@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://www.symfony-project.org/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+    		<parameter key="request_parser.class">Sysgear\Symfony\Bundles\ServiceBundle\Listener\RequestParser</parameter>
+    		<parameter key="zend.json.server.class">Zend\JSON\Server\Server</parameter>
+    		<parameter key="zend.json.server.envelope" type="constant">Zend\JSON\Server\SMD::ENV_JSONRPC_2</parameter>
+    		<parameter key="sysgear.service.class">Sysgear\Symfony\Bundles\ServiceBundle\ServiceAdapter\Jsonrpc</parameter>
+    </parameters>
+    
+    <services>
+    	<service id="service_adapter.jsonrpc" class="%sysgear.service.class%">
+				<argument type="service" id="zend.json.server" />
+      </service>
+       
+      <service id="zend.json.server" class="%zend.json.server.class%">
+       	<call method="setEnvelope"><argument>%zend.json.server.envelope%</argument></call>
+       	<call method="setAutoEmitResponse"><argument type="constant">false</argument></call>
+      </service>
+    </services>
+</container>
