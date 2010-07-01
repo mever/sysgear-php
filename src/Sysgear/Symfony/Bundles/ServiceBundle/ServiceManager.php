@@ -57,9 +57,7 @@ class ServiceManager
 			throw new \InvalidArgumentException(sprintf('Unable to find service "%s:%s".', $bundle, $service));
 		}
 		
-		$adapterMethod = 'getServiceAdapter_' . $serviceAdapter . 'Service';
-		$adapter = $this->container->$adapterMethod();
-		
+		$adapter = $this->container->get('service_adapter.' . $serviceAdapter);
 		if ($adapter instanceof ServiceAdapter) {
 			$adapter->setContainer($this->container);
 			$adapter->setService($class);

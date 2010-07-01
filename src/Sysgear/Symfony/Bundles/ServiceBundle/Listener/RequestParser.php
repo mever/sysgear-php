@@ -89,6 +89,7 @@ class RequestParser
      */
     protected function resolvService(Event $event, Request $request)
     {
+    	// TODO: Implement optional checks to see if it is a service request.
     	if (!$service = $request->path->get('_service')) {
     		return;
     	}
