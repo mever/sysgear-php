@@ -94,10 +94,12 @@ class RequestParser
     		return;
     	}
     	
-    	$serviceManager = new ServiceManager($this->container, $this->logger);
-    	$adapter = $serviceManager->findAdapterAndService($service);
+    	$serviceManager = $this->container->getSysgear_ServiceManagerService();
+    	$adapter = $serviceManager->findAdapter();
+    	$adapter->addService($serviceManager->findService($service), true);
+    	$response = $adapter->handle();
     	
-    	$event->setReturnValue($adapter->handle());
+    	$event->setReturnValue($response);
     	$event->setProcessed(true);
     }
 }

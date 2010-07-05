@@ -4,7 +4,8 @@ namespace Sysgear\Symfony\Bundles\ServiceBundle;
 
 use Symfony\Components\DependencyInjection\ContainerInterface;
 use Symfony\Components\HttpKernel\Request;
-use Sysgear\Symfony\Bundles\ServiceBundle\ServiceAdapter;
+use Sysgear\Symfony\Bundles\ServiceBundle\ServiceAdapterInterface;
+use Sysgear\Symfony\Bundles\ServiceBundle\Service;
 
 class ServiceManager
 {
@@ -13,6 +14,7 @@ class ServiceManager
 	 */
 	protected $container;
 	protected $logger;
+	protected $adapter;
 	
 	/**
 	 * 
@@ -25,7 +27,21 @@ class ServiceManager
 		$this->logger = $logger;
 	}
 	
-	public function findAdapterAndService($service)
+	public function findAdapter($serviceAdapter = 'jsonrpc')
+	{
+		$adapter = $this->container->get('sysgear.service_protocol.' . $serviceAdapter);
+		if (! $adapter instanceof ServiceAdapterInterface) {
+			throw new \InvalidArgumentException(sprintf('Unable to find service adapter "%s:%s:%s".', $bundle, $service, $serviceAdapter));
+		}
+		
+		if (null !== $this->logger) {
+			$this->logger->info(sprintf('Using service adapter "%s"', $serviceAdapter));
+		}
+		
+		return $this->adapter = $adapter;
+	}
+	
+	public function findService($service)
 	{
 		list($bundle, $service, $serviceAdapter) = explode(':', $service);
 		$class = null;
@@ -57,18 +73,16 @@ class ServiceManager
 			throw new \InvalidArgumentException(sprintf('Unable to find service "%s:%s".', $bundle, $service));
 		}
 		
-		$adapter = $this->container->get('service_adapter.' . $serviceAdapter);
-		if ($adapter instanceof ServiceAdapter) {
-			$adapter->setContainer($this->container);
-			$adapter->setService($class);
-		} else {
-			throw new \InvalidArgumentException(sprintf('Unable to find service adapter "%s:%s:%s".', $bundle, $service, $serviceAdapter));
-		}
-
 		if (null !== $this->logger) {
 			$this->logger->info(sprintf('Using service "%s"', $class));
 		}
-
-		return $adapter;
+		
+		$serviceClass = new $class($this->container);
+		
+		if (! $serviceClass instanceof Service) {
+			throw new \InvalidArgumentException(sprintf('Service "%s:%s" is not type service.', $bundle, $service));
+		}
+		
+		return $serviceClass;
 	}
 }

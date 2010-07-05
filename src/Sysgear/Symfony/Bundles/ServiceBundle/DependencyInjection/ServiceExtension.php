@@ -33,7 +33,7 @@ class ServiceExtension extends LoaderExtension
      */
     public function configLoad($config, BuilderConfiguration $configuration)
     {
-        if (! $configuration->hasDefinition('service')) {
+        if (! $configuration->hasDefinition('sysgear.service')) {
             $loader = new XmlFileLoader(__DIR__.'/../Resources/config');
             $configuration->merge($loader->load($this->resources['services']));
         }
@@ -58,6 +58,6 @@ class ServiceExtension extends LoaderExtension
 
     public function getAlias()
     {
-        return 'service';
+        return 'sysgear.service';
     }
 }
