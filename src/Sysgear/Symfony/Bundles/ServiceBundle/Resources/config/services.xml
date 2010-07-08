@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-    		<parameter key="request_parser.class">Sysgear\Symfony\Bundles\ServiceBundle\Listener\RequestParser</parameter>
+    		<parameter key="request_listener.class">Sysgear\Symfony\Bundles\ServiceBundle\RequestListener</parameter>
     		<parameter key="sysgear.service_manager.class">Sysgear\Symfony\Bundles\ServiceBundle\ServiceManager</parameter>
     		<parameter key="zend.json.server.envelope" type="constant">Zend\JSON\Server\SMD::ENV_JSONRPC_2</parameter>
     		<parameter key="sysgear.service_adapter.jsonrpc.class">Sysgear\Symfony\Bundles\ServiceBundle\Adapter\Jsonrpc</parameter>

@@ -1,6 +1,6 @@
 <?php
 
-namespace Sysgear\Symfony\Bundles\ServiceBundle\Listener;
+namespace Sysgear\Symfony\Bundles\ServiceBundle;
 
 use Symfony\Components\HttpKernel\LoggerInterface;
 use Symfony\Components\DependencyInjection\ContainerInterface;
@@ -14,14 +14,14 @@ use Sysgear\Symfony\Bundles\ServiceBundle\Service;
 use Sysgear\Symfony\Bundles\ServiceBundle\ServiceManager;
 
 /**
- * RequestParser listen to the core.load_controller and finds web services
+ * RequestListener listen to the core.load_controller and finds web services
  * to execute based on the request parameters.
  *
  * @package    Sysgear
  * @subpackage Symfony_ServiceBundle
  * @author     Martijn Evers <martijn4evers@gmail.com>
  */
-class RequestParser
+class RequestListener
 {
     protected $container;
     protected $router;
