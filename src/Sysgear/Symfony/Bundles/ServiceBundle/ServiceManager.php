@@ -4,7 +4,7 @@ namespace Sysgear\Symfony\Bundles\ServiceBundle;
 
 use Symfony\Components\DependencyInjection\ContainerInterface;
 use Symfony\Components\HttpKernel\Request;
-use Sysgear\Symfony\Bundles\ServiceBundle\ServiceAdapterInterface;
+use Sysgear\Symfony\Bundles\ServiceBundle\ProtocolInterface;
 use Sysgear\Symfony\Bundles\ServiceBundle\Service;
 
 class ServiceManager
@@ -14,7 +14,6 @@ class ServiceManager
 	 */
 	protected $container;
 	protected $logger;
-	protected $adapter;
 	
 	/**
 	 * 
@@ -27,18 +26,18 @@ class ServiceManager
 		$this->logger = $logger;
 	}
 	
-	public function findAdapter($serviceAdapter = 'jsonrpc')
+	public function getProtocol($protocolName = 'jsonrpc')
 	{
-		$adapter = $this->container->get('sysgear.service_protocol.' . $serviceAdapter);
-		if (! $adapter instanceof ServiceAdapterInterface) {
-			throw new \InvalidArgumentException(sprintf('Unable to find service adapter "%s:%s:%s".', $bundle, $service, $serviceAdapter));
+		$protocol = $this->container->get('sysgear.service_protocol.' . $protocolName);
+		if (! $protocol instanceof ProtocolInterface) {
+			throw new \InvalidArgumentException(sprintf('Unable to find protocol "%s".', $protocolName));
 		}
 		
 		if (null !== $this->logger) {
-			$this->logger->info(sprintf('Using service adapter "%s"', $serviceAdapter));
+			$this->logger->info(sprintf('Using protocol "%s"', $protocolName));
 		}
 		
-		return $this->adapter = $adapter;
+		return $protocol;
 	}
 	
 	public function findService($service)

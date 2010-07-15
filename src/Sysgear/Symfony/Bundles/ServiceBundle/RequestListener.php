@@ -8,7 +8,7 @@ use Symfony\Components\EventDispatcher\EventDispatcher;
 use Symfony\Components\EventDispatcher\Event;
 use Symfony\Components\Routing\RouterInterface;
 use Symfony\Components\HttpKernel\HttpKernelInterface;
-use Symfony\Components\HttpKernel\Request;
+use Symfony\Components\HttpFoundation\Request;
 
 use Sysgear\Symfony\Bundles\ServiceBundle\Service;
 use Sysgear\Symfony\Bundles\ServiceBundle\ServiceManager;
@@ -79,7 +79,7 @@ class RequestListener
             $this->logger->err(sprintf('No route found for %s', $request->getPathInfo()));
         }
     }
-    
+
     /**
      * Resolve service request.
      * 
@@ -93,12 +93,12 @@ class RequestListener
     	if (!$service = $request->path->get('_service')) {
     		return;
     	}
-    	
+
     	$serviceManager = $this->container->getSysgear_ServiceManagerService();
-    	$adapter = $serviceManager->findAdapter();
-    	$adapter->addService($serviceManager->findService($service), true);
-    	$response = $adapter->handle();
-    	
+    	$protocol = $serviceManager->getProtocol();
+    	$protocol->addService($serviceManager->findService($service), true);
+    	$response = $protocol->handle();
+
     	$event->setReturnValue($response);
     	$event->setProcessed(true);
     }

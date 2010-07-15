@@ -10,7 +10,7 @@ class Service
 	 * @var $container \Symfony\Components\DependencyInjection\ContainerInterface
 	 */
 	protected $container;
-	
+
 	/**
 	 * 
 	 * @param \Symfony\Components\DependencyInjection\ContainerInterface $container A ContainerInterface instance
@@ -19,7 +19,7 @@ class Service
 	{
 		$this->container = $container;
 	}
-	
+
 	/**
 	 * Return the name of this service.
 	 * 
@@ -30,4 +30,54 @@ class Service
 		$class = get_class($this);
 		return strtolower(substr($class, strrpos($class, '\\') + 1, -7));
 	}
+
+    public function getDatabaseConnection($name = null)
+    {
+        if ($name) {
+            return $this->container->get(sprintf('doctrine.dbal.%s_connection', $name));
+        } else {
+            return $this->container->getDatabaseConnectionService();
+        }
+    }
+
+    /**
+     * Get the default entity manager service or the entity manager
+     * with the given name.
+     *
+     * @param string $name Optional entity manager service name
+     *
+     * @return object
+     */
+    protected function getEntityManager($name = null)
+    {
+        if ($name) {
+            return $this->container->get(sprintf('doctrine.orm.%s_entity_manager', $name));
+        } else {
+            return $this->container->getDoctrine_ORM_EntityManagerService();
+        }
+    }
+
+    /**
+     * Create a new QueryBuilder instance.
+     *
+     * @param string $name Optional entity manager service name
+     * @return object QueryBuilder
+     */
+    public function createQueryBuilder($name = null)
+    {
+        return $this->getEntityManager($name)->createQueryBuilder();
+    }
+
+    /**
+     * Create a new Query instance.
+     *
+     * @param string $dql  Optional Dql string to create the query from
+     * @param string $name Optional entity manager service name
+     *
+     * @return object QueryBuilder
+     */
+    public function createQuery($dql = '', $name = null)
+    {
+        return $this->getEntityManager($name)->createQuery($dql);
+    }
 }

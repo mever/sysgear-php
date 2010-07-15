@@ -20,11 +20,6 @@ class ServiceExtension extends LoaderExtension
     );
     
     /**
-     * Loads the logger configuration.
-     *
-     * Usage example:
-     *
-     *      <service:jsonrpc priority="info" path="/path/to/some.log" />
      *
      * @param array                $config        A configuration array
      * @param BuilderConfiguration $configuration A BuilderConfiguration instance

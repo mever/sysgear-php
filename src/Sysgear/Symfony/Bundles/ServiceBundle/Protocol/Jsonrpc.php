@@ -4,16 +4,16 @@ namespace Sysgear\Symfony\Bundles\ServiceBundle\Protocol;
 
 use Zend\JSON\Server\Server;
 use Symfony\Components\DependencyInjection\ContainerInterface;
-use Sysgear\Symfony\Bundles\ServiceBundle\ServiceAdapterInterface;
+use Sysgear\Symfony\Bundles\ServiceBundle\ProtocolInterface;
 use Sysgear\Symfony\Bundles\ServiceBundle\Service;
 
-class Jsonrpc implements ServiceAdapterInterface
+class Jsonrpc implements ProtocolInterface
 {
 	protected $container;
 	protected $adapter;
 	protected $request;
 	protected $service;
-	
+
 	public function __construct(ContainerInterface $container, Server $adapter)
 	{
 		$this->container = $container;
@@ -22,7 +22,7 @@ class Jsonrpc implements ServiceAdapterInterface
 		$this->request = $container->getRequestService();
 		$this->adapter->setTarget($this->request->getPathInfo());
 	}
-	
+
 	/**
 	 * Handle request.
 	 * 
@@ -37,7 +37,7 @@ class Jsonrpc implements ServiceAdapterInterface
 			$response->headers->set('Content-Type', 'application/json');
 			return $response;
 	}
-	
+
 	/**
 	 * Add a service object.
 	 * 
@@ -48,7 +48,7 @@ class Jsonrpc implements ServiceAdapterInterface
 	{
 		$namespace = $default ? '' : $service->getName();
 		$this->adapter->setClass($service, $namespace);
-		
+
 		$this->service = $service;
 		return $this;
 	}
