@@ -46,9 +46,13 @@ class Jsonrpc implements ProtocolInterface
 	 */
 	public function addService(Service $service, $default = false)
 	{
-		$namespace = $default ? '' : $service->getName();
-		$this->adapter->setClass($service, $namespace);
+		$namespace = '';
+		if (! $default) {
+			$class = get_class($service);
+			$namespace = strtolower(substr($class, strrpos($class, '\\') + 1, -7));
+		}
 
+		$this->adapter->setClass($service, $namespace);
 		$this->service = $service;
 		return $this;
 	}

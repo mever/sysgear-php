@@ -20,17 +20,6 @@ class Service
 		$this->container = $container;
 	}
 
-	/**
-	 * Return the name of this service.
-	 * 
-	 * @return string
-	 */
-	public function getName()
-	{
-		$class = get_class($this);
-		return strtolower(substr($class, strrpos($class, '\\') + 1, -7));
-	}
-
     public function getDatabaseConnection($name = null)
     {
         if ($name) {
