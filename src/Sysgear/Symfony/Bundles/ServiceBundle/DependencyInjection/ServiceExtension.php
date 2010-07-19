@@ -2,9 +2,9 @@
 
 namespace Sysgear\Symfony\Bundles\ServiceBundle\DependencyInjection;
 
-use Symfony\Components\DependencyInjection\Loader\LoaderExtension;
+use Symfony\Components\DependencyInjection\Extension\Extension;
 use Symfony\Components\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Components\DependencyInjection\BuilderConfiguration;
+use Symfony\Components\DependencyInjection\ContainerBuilder;
 
 /**
  * ServiceExtension.
@@ -13,7 +13,7 @@ use Symfony\Components\DependencyInjection\BuilderConfiguration;
  * @subpackage Symfony_Bundles_ServiceBundle
  * @author     Martijn Evers <martijn4evers@gmail.com>
  */
-class ServiceExtension extends LoaderExtension
+class ServiceExtension extends Extension
 {
     protected $resources = array(
         'services' => 'services.xml',
@@ -26,11 +26,11 @@ class ServiceExtension extends LoaderExtension
      *
      * @return BuilderConfiguration A BuilderConfiguration instance
      */
-    public function configLoad($config, BuilderConfiguration $configuration)
+    public function configLoad($config, ContainerBuilder $configuration)
     {
         if (! $configuration->hasDefinition('sysgear.service')) {
-            $loader = new XmlFileLoader(__DIR__.'/../Resources/config');
-            $configuration->merge($loader->load($this->resources['services']));
+            $loader = new XmlFileLoader($configuration, __DIR__.'/../Resources/config');
+            $loader->load($this->resources['services']);
         }
 
         return $configuration;

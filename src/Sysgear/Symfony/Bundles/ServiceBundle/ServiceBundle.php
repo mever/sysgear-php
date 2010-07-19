@@ -4,7 +4,7 @@ namespace Sysgear\Symfony\Bundles\ServiceBundle;
 
 use Symfony\Framework\Bundle\Bundle as BaseBundle;
 use Symfony\Components\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Components\DependencyInjection\Loader\Loader;
+use Symfony\Components\DependencyInjection\ContainerBuilder;
 use Sysgear\Symfony\Bundles\ServiceBundle\DependencyInjection\ServiceExtension;
 
 class ServiceBundle extends BaseBundle
@@ -18,6 +18,6 @@ class ServiceBundle extends BaseBundle
      */
     public function buildContainer(ParameterBagInterface $parameterBag)
     {
-        Loader::registerExtension(new ServiceExtension());
+        ContainerBuilder::registerExtension(new ServiceExtension());
     }
 }
