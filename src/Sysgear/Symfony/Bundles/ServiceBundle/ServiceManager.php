@@ -20,7 +20,7 @@ class ServiceManager
 	 * @param Symfony\Components\DependencyInjection\ContainerInterface $container A ContainerInterface instance
 	 * @param unknown_type $logger
 	 */
-	public function __construct($container, $logger)
+	public function __construct(ContainerInterface $container, $logger)
 	{
 		$this->container = $container;
 		$this->logger = $logger;
