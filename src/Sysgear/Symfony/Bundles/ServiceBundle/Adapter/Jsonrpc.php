@@ -2,7 +2,7 @@
 
 namespace Sysgear\Symfony\Bundles\ServiceBundle\Adapter;
 
-use Zend\JSON\Server\Server;
+use Zend\Json\Server\Server;
 use Zend\Server\Reflection;
 use Zend\Server\Method;
 
