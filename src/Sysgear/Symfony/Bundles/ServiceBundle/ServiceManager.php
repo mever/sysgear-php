@@ -46,7 +46,7 @@ class ServiceManager
 		$class = null;
 		$logs = array();
 		foreach (array_keys($this->container->getParameter('kernel.bundle_dirs')) as $namespace) {
-			$try = $namespace.'\\'.$bundle.'\\Service\\'.$service.'Service';
+			$try = $namespace.'\\'.$bundle.'\\Services\\'.$service.'Service';
 			if (!class_exists($try)) {
 				if (null !== $this->logger) {
 					$logs[] = sprintf('Failed finding service "%s:%s" from namespace "%s" (%s)', $bundle, $service, $namespace, $try);
