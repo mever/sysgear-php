@@ -64,7 +64,7 @@ class RequestListener
             ));
         }
 
-        if ($request->path->has('_controller')) {
+        if ($request->attributes->has('_controller')) {
             return;
         }
 
@@ -73,7 +73,7 @@ class RequestListener
                 $this->logger->info(sprintf('Matched route "%s" (parameters: %s)', $parameters['_route'], str_replace("\n", '', var_export($parameters, true))));
             }
 
-            $request->path->replace($parameters);
+            $request->attributes->replace($parameters);
             $this->resolvService($event, $request);
         } elseif (null !== $this->logger) {
             $this->logger->err(sprintf('No route found for %s', $request->getPathInfo()));
@@ -90,7 +90,7 @@ class RequestListener
     protected function resolvService(Event $event, Request $request)
     {
     	// TODO: Implement optional checks to see if it is a service request.
-    	if (!$service = $request->path->get('_service')) {
+    	if (!$service = $request->attributes->get('_service')) {
     		return;
     	}
 
