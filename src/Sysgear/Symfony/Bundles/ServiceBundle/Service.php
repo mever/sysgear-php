@@ -18,7 +18,10 @@ class Service
 	public function __construct(ContainerInterface $container)
 	{
 		$this->container = $container;
+		$this->_init();
 	}
+	
+	protected function _init() {}
 
     public function getDatabaseConnection($name = null)
     {
