@@ -2,7 +2,7 @@
 
 namespace Sysgear\Symfony\Bundles\ServiceBundle;
 
-use Symfony\Components\HttpKernel\LoggerInterface;
+use Symfony\Components\HttpKernel\Log\LoggerInterface;
 use Symfony\Components\DependencyInjection\ContainerInterface;
 use Symfony\Components\EventDispatcher\EventDispatcher;
 use Symfony\Components\EventDispatcher\Event;

@@ -13,7 +13,7 @@ class Type
     const JSON          = 6;
     const BOOL          = 7;
     const NUMBER        = 8;
-    const ARR           = 9;        // Enumerative javascript array
+    const ARR           = 9;        // Enumerative javascript array OR a list of values
     const XML           = 10;
     const MAP           = 11;       // Associative javascript array
 
