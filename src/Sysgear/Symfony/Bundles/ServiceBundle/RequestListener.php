@@ -4,7 +4,7 @@ namespace Sysgear\Symfony\Bundles\ServiceBundle;
 
 use Symfony\Component\HttpKernel\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Components\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -37,7 +37,7 @@ class RequestListener
     /**
      * Registers a core.request listener.
      *
-     * @param Symfony\Components\EventDispatcher\EventDispatcher $dispatcher An EventDispatcher instance
+     * @param Symfony\Component\EventDispatcher\EventDispatcher $dispatcher An EventDispatcher instance
      */
     public function register(EventDispatcher $dispatcher)
     {
@@ -47,7 +47,7 @@ class RequestListener
     /**
      * Resolve request.
      * 
-     * @param Symfony\Components\EventDispatcher\Event $event
+     * @param Symfony\Component\EventDispatcher\Event $event
      */
     public function resolve(Event $event)
     {
@@ -83,8 +83,8 @@ class RequestListener
     /**
      * Resolve service request.
      * 
-     * @param \Symfony\Components\EventDispatcher\Event $event
-     * @param \Symfony\Components\HttpKernel\Request $request
+     * @param \Symfony\Component\EventDispatcher\Event $event
+     * @param \Symfony\Component\HttpKernel\Request $request
      * @param array $parameters
      */
     protected function resolvService(Event $event, Request $request)
