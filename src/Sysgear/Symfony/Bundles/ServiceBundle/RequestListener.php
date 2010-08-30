@@ -2,13 +2,13 @@
 
 namespace Sysgear\Symfony\Bundles\ServiceBundle;
 
-use Symfony\Components\HttpKernel\Log\LoggerInterface;
-use Symfony\Components\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Components\EventDispatcher\EventDispatcher;
-use Symfony\Components\EventDispatcher\Event;
-use Symfony\Components\Routing\RouterInterface;
-use Symfony\Components\HttpKernel\HttpKernelInterface;
-use Symfony\Components\HttpFoundation\Request;
+use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 use Sysgear\Symfony\Bundles\ServiceBundle\Service;
 use Sysgear\Symfony\Bundles\ServiceBundle\ServiceManager;

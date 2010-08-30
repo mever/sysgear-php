@@ -2,8 +2,8 @@
 
 namespace Sysgear\Symfony\Bundles\ServiceBundle;
 
-use Symfony\Components\DependencyInjection\ContainerInterface;
-use Symfony\Components\HttpKernel\Request;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Request;
 use Sysgear\Symfony\Bundles\ServiceBundle\ProtocolInterface;
 use Sysgear\Symfony\Bundles\ServiceBundle\Service;
 

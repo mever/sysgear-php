@@ -2,7 +2,7 @@
 
 namespace Sysgear\Symfony\Bundles\ServiceBundle;
 
-use Symfony\Components\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class Service
 {

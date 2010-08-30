@@ -3,7 +3,7 @@
 namespace Sysgear\Symfony\Bundles\ServiceBundle\Protocol;
 
 use Zend\Json\Server\Server;
-use Symfony\Components\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Sysgear\Symfony\Bundles\ServiceBundle\ProtocolInterface;
 use Sysgear\Symfony\Bundles\ServiceBundle\Service;
 
