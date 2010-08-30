@@ -15,7 +15,7 @@
     <services> 
       <service id="service_listener" class="%service_listener.class%">
         <tag name="kernel.listener" />
-        <argument type="service" id="service_container" />
+        <argument type="service" id="sysgear.service_manager" />
         <argument type="service" id="router" />
         <argument type="service" id="logger" on-invalid="ignore" />
       </service>

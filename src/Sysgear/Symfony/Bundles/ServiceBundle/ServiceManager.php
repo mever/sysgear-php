@@ -10,23 +10,33 @@ use Sysgear\Symfony\Bundles\ServiceBundle\Service;
 class ServiceManager
 {
 	/**
-	 * @var $container \Symfony\Components\DependencyInjection\ContainerInterface
+	 * @var \Symfony\Component\DependencyInjection\ContainerInterface
 	 */
 	protected $container;
+	
+	/**
+	 * @var \Symfony\Component\HttpKernel\Log\LoggerInterface
+	 */
 	protected $logger;
 	
 	/**
 	 * 
-	 * @param Symfony\Components\DependencyInjection\ContainerInterface $container A ContainerInterface instance
-	 * @param unknown_type $logger
+	 * @param \Symfony\Component\DependencyInjection\ContainerInterface $container A ContainerInterface instance
+	 * @param \Symfony\Component\HttpKernel\Log\LoggerInterface $logger
 	 */
-	public function __construct(ContainerInterface $container, $logger)
+	public function __construct(ContainerInterface $container, $logger = null)
 	{
 		$this->container = $container;
 		$this->logger = $logger;
 	}
-	
-	public function getProtocol($protocolName = 'jsonrpc')
+
+	/**
+	 * Return a protocol adapter.
+	 * 
+	 * @param string $protocolName
+	 * @return \Sysgear\Symfony\Bundles\ServiceBundle\ProtocolInterface
+	 */
+	public function getProtocol($protocolName)
 	{
 		$protocol = $this->container->get('sysgear.service_protocol.' . $protocolName);
 		if (! $protocol instanceof ProtocolInterface) {
@@ -39,10 +49,16 @@ class ServiceManager
 		
 		return $protocol;
 	}
-	
+
+	/**
+	 * Find a service class.
+	 * 
+	 * @param string $service
+	 * @return \Sysgear\Symfony\Bundles\ServiceBundle\Service
+	 */
 	public function findService($service)
 	{
-		list($bundle, $service, $serviceAdapter) = explode(':', $service);
+		list($bundle, $service) = explode(':', $service);
 		$class = null;
 		$logs = array();
 		foreach (array_keys($this->container->getParameter('kernel.bundle_dirs')) as $namespace) {

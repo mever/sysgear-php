@@ -23,13 +23,13 @@ use Sysgear\Symfony\Bundles\ServiceBundle\ServiceManager;
  */
 class RequestListener
 {
-    protected $container;
+    protected $serviceManager;
     protected $router;
     protected $logger;
 
-    public function __construct(ContainerInterface $container, RouterInterface $router, LoggerInterface $logger = null)
+    public function __construct(ServiceManager $serviceManager, RouterInterface $router, LoggerInterface $logger = null)
     {
-        $this->container = $container;
+        $this->serviceManager = $serviceManager;
         $this->router = $router;
         $this->logger = $logger;
     }
@@ -37,7 +37,7 @@ class RequestListener
     /**
      * Registers a core.request listener.
      *
-     * @param Symfony\Component\EventDispatcher\EventDispatcher $dispatcher An EventDispatcher instance
+     * @param \Symfony\Component\EventDispatcher\EventDispatcher $dispatcher An EventDispatcher instance
      */
     public function register(EventDispatcher $dispatcher)
     {
@@ -47,7 +47,7 @@ class RequestListener
     /**
      * Resolve request.
      * 
-     * @param Symfony\Component\EventDispatcher\Event $event
+     * @param \Symfony\Component\EventDispatcher\Event $event
      */
     public function resolve(Event $event)
     {
@@ -85,18 +85,16 @@ class RequestListener
      * 
      * @param \Symfony\Component\EventDispatcher\Event $event
      * @param \Symfony\Component\HttpKernel\Request $request
-     * @param array $parameters
      */
     protected function resolvService(Event $event, Request $request)
     {
     	// TODO: Implement optional checks to see if it is a service request.
-    	if (!$service = $request->attributes->get('_service')) {
+    	if (! $service = $request->attributes->get('_service')) {
     		return;
     	}
 
-    	$serviceManager = $this->container->getSysgear_ServiceManagerService();
-    	$protocol = $serviceManager->getProtocol();
-    	$protocol->addService($serviceManager->findService($service), true);
+    	$protocol = $this->serviceManager->getProtocol('jsonrpc');
+    	$protocol->addService($this->serviceManager->findService($service), true);
     	$response = $protocol->handle();
 
     	$event->setReturnValue($response);
