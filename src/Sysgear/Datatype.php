@@ -2,7 +2,7 @@
 
 namespace Sysgear;
 
-class Type
+class Datatype
 {
     const INT           = 0;
     const STRING        = 1;

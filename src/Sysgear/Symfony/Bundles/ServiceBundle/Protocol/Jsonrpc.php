@@ -42,6 +42,7 @@ class Jsonrpc implements ProtocolInterface
 	 * Add a service object.
 	 * 
 	 * @param \Sysgear\Symfony\Bundles\ServiceBundle\Service $service
+	 * @param boolean $default
 	 * @return \Sysgear\Symfony\Bundles\ServiceBundle\ServiceAdapter\Jsonrpc
 	 */
 	public function addService(Service $service, $default = false)
