@@ -2,6 +2,7 @@
 
 namespace Sysgear;
 
+use Doctrine\ORM\EntityManager;
 use Zend\Json\Json;
 
 class Datatype
@@ -18,6 +19,7 @@ class Datatype
     const ARR           = 9;        // Enumerative javascript array
     const XML           = 10;
     const MAP           = 11;       // Associative javascript array
+    const ENTITY        = 12;
 
     /**
      * Return a oracle bind type (int constant).
@@ -51,13 +53,21 @@ class Datatype
      * 
      * @param int $datatype
      * @param mixed $value
+     * @param \Doctrine\ORM\EntityManager $entityManager
+     * @return string
      */
-    public static function typecastSet($datatype, $value)
+    public static function typecastSet($datatype, $value, EntityManager $entityManager = null)
     {
         switch($datatype) {
-            case self::JSON:   return (is_array($value)) ? Json::encode($value) : $value;
-            case self::MAP:    return (is_array($value)) ? Json::encode($value) : $value;
-            default:               return $value;
+            case self::JSON:    return (is_array($value)) ? Json::encode($value) : $value;
+            case self::MAP:     return (is_array($value)) ? Json::encode($value) : $value;
+            case self::ENTITY:
+                if (null === $entityManager) {
+                    throw new \Exception('Can not convert value, no entity manager provided');
+                } else {
+                    // TODO: Save like this so we can convert back: <ENTITY_NAME>:<PRIMARY_KEY>
+                }
+            default:            return $value;
         }
     }
 
@@ -66,13 +76,20 @@ class Datatype
      * 
      * @param int $datatype
      * @param string $value
+     * @param \Doctrine\ORM\EntityManager $entityManager
+     * @return mixed
      */
-    public static function typecastGet($datatype, $value)
+    public static function typecastGet($datatype, $value, EntityManager $entityManager = null)
     {
         switch($datatype) {
-            case self::JSON:   return (is_string($value)) ? Json::decode($value) : $value;
-            case self::MAP:    return (is_string($value)) ? Json::decode($value) : $value;
-            default:               return $value;
+            case self::JSON:    return (is_string($value)) ? Json::decode($value) : $value;
+            case self::MAP:     return (is_string($value)) ? Json::decode($value) : $value;
+            case self::ENTITY:
+                if (null === $entityManager) {
+                    throw new \Exception('Can not convert value, no entity manager provided');
+                } else {
+                }
+            default:            return $value;
         }
     }
 }
