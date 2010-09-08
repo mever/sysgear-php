@@ -1,6 +1,6 @@
 <?php
 
-namespace Realtime;
+namespace Sysgear;
 
 class Util
 {
@@ -41,5 +41,17 @@ class Util
     {
         $dirPath .= ('/' === substr($dirPath, - 1)) ? '' : '/';
         return $dirPath;
+    }
+
+    /**
+     * Return the number of seconds between two DateTime objects.
+     * 
+     * @param \DateTime $startDate
+     * @param \DateTime $endDate
+     * @return int
+     */
+    public static function getDateDiff($startDate, $endDate)
+    {
+        return strtotime($endDate->format('c')) - strtotime($startDate->format('c'));
     }
 }
