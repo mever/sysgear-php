@@ -53,20 +53,13 @@ class Datatype
      * 
      * @param int $datatype
      * @param mixed $value
-     * @param \Doctrine\ORM\EntityManager $entityManager
      * @return string
      */
-    public static function typecastSet($datatype, $value, EntityManager $entityManager = null)
+    public static function typecastSet($datatype, $value)
     {
         switch($datatype) {
             case self::JSON:    return (is_array($value)) ? Json::encode($value) : $value;
             case self::MAP:     return (is_array($value)) ? Json::encode($value) : $value;
-            case self::ENTITY:
-                if (null === $entityManager) {
-                    throw new \Exception('Can not convert value, no entity manager provided');
-                } else {
-                    // TODO: Save like this so we can convert back: <ENTITY_NAME>:<PRIMARY_KEY>
-                }
             default:            return $value;
         }
     }
@@ -76,19 +69,13 @@ class Datatype
      * 
      * @param int $datatype
      * @param string $value
-     * @param \Doctrine\ORM\EntityManager $entityManager
      * @return mixed
      */
-    public static function typecastGet($datatype, $value, EntityManager $entityManager = null)
+    public static function typecastGet($datatype, $value)
     {
         switch($datatype) {
             case self::JSON:    return (is_string($value)) ? Json::decode($value) : $value;
             case self::MAP:     return (is_string($value)) ? Json::decode($value) : $value;
-            case self::ENTITY:
-                if (null === $entityManager) {
-                    throw new \Exception('Can not convert value, no entity manager provided');
-                } else {
-                }
             default:            return $value;
         }
     }
