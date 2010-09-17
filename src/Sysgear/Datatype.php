@@ -33,11 +33,11 @@ class Datatype
         {
             case self::BOOL:
             case self::INT:
+            case self::NUMBER:
+            case self::FLOAT:
                 return SQLT_INT;
                 break;
                 
-            case self::NUMBER:
-            case self::FLOAT:
             case self::STRING:
                 return SQLT_CHR;
                 break;
