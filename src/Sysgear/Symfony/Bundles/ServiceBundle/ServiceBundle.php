@@ -2,10 +2,10 @@
 
 namespace Sysgear\Symfony\Bundles\ServiceBundle;
 
-use Symfony\Framework\Bundle\Bundle as BaseBundle;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Sysgear\Symfony\Bundles\ServiceBundle\DependencyInjection\ServiceExtension;
+use \Symfony\Component\HttpKernel\Bundle\Bundle as BaseBundle;
+use \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use \Symfony\Component\DependencyInjection\ContainerBuilder;
+use \Sysgear\Symfony\Bundles\ServiceBundle\DependencyInjection\ServiceExtension;
 
 class ServiceBundle extends BaseBundle
 {
