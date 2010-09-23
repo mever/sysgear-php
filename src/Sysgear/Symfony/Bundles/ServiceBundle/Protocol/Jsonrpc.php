@@ -31,8 +31,11 @@ class Jsonrpc implements ProtocolInterface
 	public function handle()
 	{
 			$response = $this->container->getResponseService();
-			$response->setContent((string)$this->adapter->handle());
-//			$response->setContent($this->adapter->getServiceMap());
+			if ('GET' === $this->request->getMethod()) {
+			    $response->setContent($this->adapter->getServiceMap());
+			} else {
+			    $response->setContent((string)$this->adapter->handle());
+			}
 			$response->setStatusCode(200);
 			$response->headers->set('Content-Type', 'application/json');
 			return $response;
