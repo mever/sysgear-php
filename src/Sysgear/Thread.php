@@ -5,16 +5,15 @@ use Zend\Registry, Zend\JSON\JSON;
 
 class Thread
 {
-    protected $_program;
-    protected $_params = array();
-    protected $_pid = null;
+    protected $program;
+    protected $params = array();
+    protected $pid = null;
+    protected $options = array();
 
-    private function __clone()
-    {}
-
-    private function __construct($program)
+    public function __construct($program, array $options = array())
     {
-        $this->_program = $program;
+        $this->program = $program;
+        $this->options = $options;
     }
 
     /**
@@ -26,8 +25,8 @@ class Thread
     public static function exec($program, array $params = array())
     {
         $i = new self($program);
-        $i->_params = $params;
-        return $i->_spawnThread()->getPid();
+        $i->params = $params;
+        return $i->spawnThread()->getPid();
     }
 
     /**
@@ -55,8 +54,8 @@ class Thread
      */
     public function getParam($key, $default = null)
     {
-        if (array_key_exists($key, $this->_params)) {
-            return $this->_params[$key];
+        if (array_key_exists($key, $this->params)) {
+            return $this->params[$key];
         } else {
             return $default;
         }
@@ -69,7 +68,7 @@ class Thread
      */
     public function getParams()
     {
-        return $this->_params;
+        return $this->params;
     }
 
     /**
@@ -79,7 +78,7 @@ class Thread
      */
     public function getPid()
     {
-        return $this->_pid;
+        return $this->pid;
     }
 
     /**
@@ -87,11 +86,10 @@ class Thread
      */
     protected function _spawnThread()
     {
-        $threadPath = Registry::get('config')->path->threads;
-        $threadPath = escapeshellcmd(Util::normalizeDirPath($threadPath));
+        $threadPath = escapeshellcmd(Util::normalizeDirPath($this->options['path']));
         $daemonizer = $threadPath . 'daemonize.sh';
-        $phpFile = escapeshellarg($threadPath . $this->_program . '.php');
-        $options = escapeshellarg(JSON::encode($this->_params));
+        $phpFile = escapeshellarg($threadPath . $this->program . '.php');
+        $options = escapeshellarg(JSON::encode($this->params));
         pclose(popen("'{$daemonizer}' {$phpFile} {$options}", 'r'));
         // TODO: Discover a way to obtain the PID.
         return $this;

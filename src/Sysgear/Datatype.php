@@ -22,6 +22,26 @@ class Datatype
     const ENTITY        = 12;
 
     /**
+     * Return a mysql datatype as string.
+     * 
+     * @param int $dt
+     * @param int $length
+     * @return string
+     */
+    public static function toMysql($dt, $length = 255)
+    {
+        if (null === $dt) {
+            $dt = self::STRING;
+        }
+        switch($dt) {
+            case self::INT:    return 'INT';
+            case self::NUMBER: return 'BIGINT';
+            case self::STRING: return "VARCHAR({$length})";
+            default:           return 'TEXT';
+        }
+    }
+
+    /**
      * Return a oracle bind type (int constant).
      * 
      * @param int $dt
@@ -60,6 +80,9 @@ class Datatype
         switch($datatype) {
             case self::JSON:    return (is_array($value)) ? Json::encode($value) : $value;
             case self::MAP:     return (is_array($value)) ? Json::encode($value) : $value;
+            case self::INT:     return (int) $value;
+            case self::FLOAT:   return (float) $value;
+            case self::NUMBER:  return (float) $value;
             default:            return $value;
         }
     }
@@ -76,6 +99,9 @@ class Datatype
         switch($datatype) {
             case self::JSON:    return (is_string($value)) ? Json::decode($value) : $value;
             case self::MAP:     return (is_string($value)) ? Json::decode($value) : $value;
+            case self::INT:     return (int) $value;
+            case self::FLOAT:   return (float) $value;
+            case self::NUMBER:  return (float) $value;
             default:            return $value;
         }
     }
