@@ -3,11 +3,33 @@
 namespace Sysgear\Symfony\Bundles\ServiceBundle\Adapter;
 
 use Zend\Json\Server\Server;
+use Zend\Json\Server\Error;
 use Zend\Server\Reflection;
 use Zend\Server\Method;
 
 class Jsonrpc extends Server
 {
+    /**
+     * Indicate fault response
+     *
+     * @param  string $fault
+     * @param  int $code
+     * @return false
+     */
+    public function fault($fault = null, $code = 404, $data = null)
+    {
+        if ($data instanceof \Exception) {
+            $data = array(
+                'code'  => $data->getCode(),
+                'file'  => $data->getFile(),
+                'line'  => $data->getLine(),
+                'trace' => $data->getTrace());
+        }
+        $error = new Error($fault, $code, $data);
+        $this->getResponse()->setError($error);
+        return $error;
+    }
+
 	/**
 	 * Build a method signature
 	 *
@@ -19,7 +41,7 @@ class Jsonrpc extends Server
 	protected function _buildSignature(Reflection\AbstractFunction $reflection, $class = null)
 	{
 		$ns		 = $reflection->getNamespace();
-		$name	   = substr($reflection->getName(), 0, -6);	// Subtract Action postfix
+		$name	 = substr($reflection->getName(), 0, -6);	// Subtract Action postfix
 		$method	 = empty($ns) ? $name : $ns . '.' . $name;
 
 		if (!$this->_overwriteExistingMethods && $this->_table->hasMethod($method)) {
@@ -54,7 +76,7 @@ class Jsonrpc extends Server
 		$this->_table->addMethod($definition);
 		return $definition;
 	}
-	
+
 	/**
 	 * Register a class with the server
 	 *
@@ -72,7 +94,6 @@ class Jsonrpc extends Server
 		}
 
 		$reflection = Reflection::reflectClass($class, $argv, $namespace);
-
 		foreach ($reflection->getMethods() as $method) {
 			if ('Action' !== substr($method->getName(), -6)) {
 				continue;
