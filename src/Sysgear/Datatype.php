@@ -80,9 +80,6 @@ class Datatype
         switch($datatype) {
             case self::JSON:    return (is_array($value)) ? Json::encode($value) : $value;
             case self::MAP:     return (is_array($value)) ? Json::encode($value) : $value;
-            case self::INT:     return (int) $value;
-            case self::FLOAT:   return (float) $value;
-            case self::NUMBER:  return (float) $value;
             default:            return $value;
         }
     }
@@ -102,6 +99,7 @@ class Datatype
             case self::INT:     return (int) $value;
             case self::FLOAT:   return (float) $value;
             case self::NUMBER:  return (float) $value;
+            case self::BOOL:    return (bool) $value;
             default:            return $value;
         }
     }
