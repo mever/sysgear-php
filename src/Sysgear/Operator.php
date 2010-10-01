@@ -1,6 +1,6 @@
 <?php
 
-namespace Realtime;
+namespace Sysgear;
 
 class Operator
 {
