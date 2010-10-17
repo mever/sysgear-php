@@ -20,6 +20,8 @@ class Datatype
     const XML           = 10;
     const MAP           = 11;       // Associative javascript array
     const ENTITY        = 12;
+    const PASSWORD      = 13;
+    const EMAIL         = 14;
 
     /**
      * Return a mysql datatype as string.
