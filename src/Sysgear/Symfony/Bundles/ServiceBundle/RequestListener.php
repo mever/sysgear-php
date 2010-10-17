@@ -93,8 +93,9 @@ class RequestListener
     		return;
     	}
 
-    	$protocol = $this->serviceManager->getProtocol('jsonrpc');
-    	$protocol->addService($this->serviceManager->findService($service), true);
+    	$sm = $this->serviceManager;
+    	$protocol = $sm->getProtocol('jsonrpc');
+    	$protocol->addService($sm->findService($service), true);
     	$response = $protocol->handle();
 
     	$event->setReturnValue($response);
