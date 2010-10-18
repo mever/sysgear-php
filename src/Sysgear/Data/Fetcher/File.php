@@ -4,7 +4,7 @@ namespace Sysgear\Data\Fetcher;
 
 class File extends Uri
 {
-    protected $scheme = 'file';
+    protected $schema = 'file';
     protected $content = '';
 
     public function __construct($filePath)
