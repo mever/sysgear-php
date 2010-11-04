@@ -93,7 +93,7 @@ class Jsonrpc extends Server
             $argv = array_slice($argv, 3);
         }
 
-        $reflection = Reflection::reflectClass($class, $argv, $namespace);
+        $reflection = Reflection\Reflection::reflectClass($class, $argv, $namespace);
         foreach ($reflection->getMethods() as $method) {
             if ('Action' !== substr($method->getName(), -6)) {
                 continue;
