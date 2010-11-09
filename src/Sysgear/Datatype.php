@@ -97,7 +97,7 @@ class Datatype
     {
         switch($datatype) {
             case self::JSON:    return (is_string($value)) ? Json::decode($value) : $value;
-            case self::MAP:     return (is_string($value)) ? Json::decode($value) : $value;
+            case self::MAP:     return (is_string($value)) ? Json::decode($value, Json::TYPE_ARRAY) : $value;
             case self::INT:     return (int) $value;
             case self::FLOAT:   return (float) $value;
             case self::NUMBER:  return (float) $value;

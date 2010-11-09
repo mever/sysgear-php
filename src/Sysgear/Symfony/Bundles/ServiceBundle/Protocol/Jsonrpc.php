@@ -36,10 +36,10 @@ class Jsonrpc implements ProtocolInterface
         if ('GET' === $this->request->getMethod()) {
             $response->setContent($this->adapter->getServiceMap());
         } else {
-            $postData = Json::decode(file_get_contents('php://input'));
+            $postData = Json::decode(file_get_contents('php://input'), Json::TYPE_ARRAY);
             $notBatch = array_key_exists('jsonrpc', $postData);
             if ($notBatch) {
-                $this->adapter->getRequest()->setOptions((array)$postData);
+                $this->adapter->getRequest()->setOptions($postData);
                 $this->adapter->handle();
                 $response->setContent($this->adapter->getResponse()->toJson());
             } else {
@@ -47,7 +47,7 @@ class Jsonrpc implements ProtocolInterface
                 $res = $this->adapter->getResponse();
                 $responses = array();
                 foreach ($postData as $options) {
-                    $req->setOptions((array)$options);
+                    $req->setOptions($options);
                     $this->adapter->handle();
                     $responses[] = $res->toJson();
                 }
