@@ -78,4 +78,20 @@ class Jsonrpc implements ProtocolInterface
         $this->service = $service;
         return $this;
     }
+
+    /**
+     * Indicate fault response
+     *
+     * @param $exception
+     * @return \Symfony\Components\HttpKernel\Response
+     */
+    public function fault($exception)
+    {
+        $response = $this->container->getResponseService();
+        $this->adapter->fault($exception->getMessage(), $exception->getCode(), $exception);
+        $response->setContent($this->adapter->getResponse()->toJson());
+        $response->setStatusCode(200);
+        $response->headers->set('Content-Type', 'application/json');
+        return $response;
+    }
 }

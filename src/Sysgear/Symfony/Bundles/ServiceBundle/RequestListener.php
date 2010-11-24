@@ -89,14 +89,22 @@ class RequestListener
     protected function resolvService(Event $event, Request $request)
     {
     	// TODO: Implement optional checks to see if it is a service request.
-    	if (! $service = $request->attributes->get('_service')) {
+    	if (! $serviceName = $request->attributes->get('_service')) {
     		return;
     	}
 
     	$sm = $this->serviceManager;
+    	$service = null;
     	$protocol = $sm->getProtocol('jsonrpc');
-    	$protocol->addService($sm->findService($service), true);
-    	$response = $protocol->handle();
+    	try {
+    	    $service = $sm->findService($serviceName);
+    	} catch (\Exception $e) {
+    	    $response = $protocol->fault($e);
+    	}
+    	if (null !== $service) {
+        	$protocol->addService($service, true);
+        	$response = $protocol->handle();
+    	}
 
     	$event->setReturnValue($response);
     	$event->setProcessed(true);
