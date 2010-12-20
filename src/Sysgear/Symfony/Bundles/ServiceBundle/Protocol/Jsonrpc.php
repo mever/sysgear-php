@@ -21,7 +21,7 @@ class Jsonrpc implements ProtocolInterface
         $this->adapter = $adapter;
         $this->adapter->setAutoEmitResponse(false);
         
-        $this->request = $container->getRequestService();
+        $this->request = $container->get('request');
         $this->adapter->setTarget($this->request->getPathInfo());
     }
 
@@ -32,7 +32,7 @@ class Jsonrpc implements ProtocolInterface
      */
     public function handle()
     {
-        $response = $this->container->getResponseService();
+        $response = $this->container->get('response');
         if ('GET' === $this->request->getMethod()) {
             $response->setContent($this->adapter->getServiceMap());
         } else {
@@ -87,7 +87,7 @@ class Jsonrpc implements ProtocolInterface
      */
     public function fault($exception)
     {
-        $response = $this->container->getResponseService();
+        $response = $this->container->get('response');
         $this->adapter->fault($exception->getMessage(), $exception->getCode(), $exception);
         $response->setContent($this->adapter->getResponse()->toJson());
         $response->setStatusCode(200);

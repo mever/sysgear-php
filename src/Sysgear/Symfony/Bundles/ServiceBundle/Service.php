@@ -28,7 +28,7 @@ class Service
         if ($name) {
             return $this->container->get(sprintf('doctrine.dbal.%s_connection', $name));
         } else {
-            return $this->container->getDatabaseConnectionService();
+            return $this->container->get('database.connection');
         }
     }
 
@@ -45,7 +45,7 @@ class Service
         if ($name) {
             return $this->container->get(sprintf('doctrine.orm.%s_entity_manager', $name));
         } else {
-            return $this->container->getDoctrine_ORM_EntityManagerService();
+            return $this->container->get('doctrine.orm.entity_manager');
         }
     }
 

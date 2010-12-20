@@ -41,7 +41,7 @@ class RequestListener
      */
     public function register(EventDispatcher $dispatcher)
     {
-        $dispatcher->connect('core.request', array($this, 'resolve'));
+        $dispatcher->connect('core.request', array($this, 'handle'));
     }
 
     /**
@@ -49,11 +49,11 @@ class RequestListener
      * 
      * @param \Symfony\Component\EventDispatcher\Event $event
      */
-    public function resolve(Event $event)
+    public function handle(Event $event)
     {
-        $request = $event->getParameter('request');
+        $request = $event->get('request');
 
-        if (HttpKernelInterface::MASTER_REQUEST === $event->getParameter('request_type')) {
+        if (HttpKernelInterface::MASTER_REQUEST === $event->get('request_type')) {
             // set the context even if the parsing does not need to be done
             // to have correct link generation
             $this->router->setContext(array(
