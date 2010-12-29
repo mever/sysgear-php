@@ -7,9 +7,10 @@ class Job
     protected $name;
     protected $parameters = array();
 
-    public function __construct($name)
+    public function __construct($name, array $parameters = array())
     {
         $this->name = $name;
+        $this->parameters = $parameters;
     }
 
     public function setParameter($key, $value)
@@ -20,5 +21,10 @@ class Job
     public function getParameter($key)
     {
         return $this->parameters[$key];
+    }
+
+    public function getParameters()
+    {
+        return $this->parameters;
     }
 }
