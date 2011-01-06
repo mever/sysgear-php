@@ -37,6 +37,9 @@ class Jsonrpc implements ProtocolInterface
             $response->setContent($this->adapter->getServiceMap());
         } else {
             $postData = Json::decode(file_get_contents('php://input'), Json::TYPE_ARRAY);
+            if (empty($postData)) {
+                throw new \Exception('No POST data received.');
+            }
             $notBatch = array_key_exists('jsonrpc', $postData);
             if ($notBatch) {
                 $this->adapter->getRequest()->setOptions($postData);
