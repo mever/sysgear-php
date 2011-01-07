@@ -1,6 +1,6 @@
 <?php
 
-namespace Sysgear\Data\Collector;
+namespace Sysgear\StructuredData\Collector;
 
 abstract class AbstractCollector implements CollectorInterface
 {

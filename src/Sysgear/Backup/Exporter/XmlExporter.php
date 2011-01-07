@@ -2,12 +2,12 @@
 
 namespace Sysgear\Backup\Exporter;
 
-use Sysgear\Data\Collector\CollectorInterface;
+use Sysgear\StructuredData\Collector\CollectorInterface;
 
 class XmlExporter implements ExporterInterface
 {
     /**
-     * @var \Sysgear\Data\Collector\CollectorInterface;
+     * @var \Sysgear\StructuredData\Collector\CollectorInterface;
      */
     protected $dataCollector;
 

@@ -1,11 +1,18 @@
 <?php
 
-namespace Sysgear\Data\Collector;
+namespace Sysgear\StructuredData\Collector;
 
 use Sysgear\Backup\BackupableInterface;
 
 class BackupableCollector extends ObjectCollector
 {
+    /**
+     * Scan composite object property.
+     * 
+     * @param \StdClass $object
+     * @param string $name
+     * @param mixed $value
+     */
     protected function scanCompositeProperty($object, $name, $value)
     {
         // Scan BackupableInterface implmentation

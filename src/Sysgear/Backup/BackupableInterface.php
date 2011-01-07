@@ -2,7 +2,7 @@
 
 namespace Sysgear\Backup;
 
-use Sysgear\Data\Collector\CollectorInterface;
+use Sysgear\StructuredData\Collector\CollectorInterface;
 
 interface BackupableInterface
 {

@@ -2,7 +2,7 @@
 
 namespace Sysgear\Backup\Exporter;
 
-use Sysgear\Data\Collector\CollectorInterface;
+use Sysgear\StructuredData\Collector\CollectorInterface;
 
 interface ExporterInterface
 {
@@ -16,7 +16,7 @@ interface ExporterInterface
     /**
      * Return the export as string.
      * 
-     * @param \Sysgear\Data\Collector\CollectorInterface $dataCollector
+     * @param \Sysgear\StructuredData\Collector\CollectorInterface $dataCollector
      * @return \Sysgear\Backup\Exporter\ExporterInterface
      */
     public function readDataCollector(CollectorInterface $dataCollector);

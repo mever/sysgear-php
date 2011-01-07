@@ -1,8 +1,6 @@
 <?php
 
-namespace Sysgear\Data\Collector;
-
-use Sysgear\Backup\BackupableInterface;
+namespace Sysgear\StructuredData\Collector;
 
 /**
  * Collector for data from objects.
@@ -21,7 +19,7 @@ class ObjectCollector extends AbstractCollector
 
     /**
      * (non-PHPdoc)
-     * @see Sysgear\Data\Collector.CollectorInterface::scanObject()
+     * @see Sysgear\StructuredData\Collector.CollectorInterface::scanObject()
      */
     public function scanObject($object, $name = null)
     {
@@ -57,11 +55,11 @@ class ObjectCollector extends AbstractCollector
     }
 
     /**
+     * Scan composite object property.
      * 
-     * 
-     * @param unknown_type $object
-     * @param unknown_type $name
-     * @param unknown_type $value
+     * @param \StdClass $object
+     * @param string $name
+     * @param mixed $value
      */
     protected function scanCompositeProperty($object, $name, $value)
     {

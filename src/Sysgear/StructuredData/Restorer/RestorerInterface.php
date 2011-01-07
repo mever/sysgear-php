@@ -1,6 +1,6 @@
 <?php
 
-namespace Sysgear\Data\Restorer;
+namespace Sysgear\StructuredData\Restorer;
 
 interface RestorerInterface
 {

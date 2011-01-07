@@ -2,7 +2,7 @@
 
 namespace Sysgear\Backup;
 
-use Sysgear\Data\Collector\CollectorInterface;
+use Sysgear\StructuredData\Collector\CollectorInterface;
 use Sysgear\Backup\Exporter\ExporterInterface;
 use Sysgear\Backup\Importer\ImporterInterface;
 
@@ -14,7 +14,7 @@ use Sysgear\Backup\Importer\ImporterInterface;
 class Backup
 {
     /**
-     * @var \Sysgear\Data\Collector\CollectorInterface;
+     * @var \Sysgear\StructuredData\Collector\CollectorInterface;
      */
     protected $dataCollector;
 

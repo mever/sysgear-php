@@ -1,6 +1,6 @@
 <?php
 
-namespace Sysgear\Data\Collector;
+namespace Sysgear\StructuredData\Collector;
 
 use Doctrine\ORM\Tools\Export\ClassMetadataExporter;
 
