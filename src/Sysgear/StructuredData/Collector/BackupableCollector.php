@@ -4,8 +4,21 @@ namespace Sysgear\StructuredData\Collector;
 
 use Sysgear\Backup\BackupableInterface;
 
+/**
+ * Collector for data from backupable objects.
+ * 
+ * @author (c) Martijn Evers <martijn4evers@gmail.com>
+ */
 class BackupableCollector extends ObjectCollector
 {
+    /**
+     * Each object which is collected is put on this list. That
+     * way we prevent infinit loops in recursive collections.
+     * 
+     * @var array
+     */
+    protected $excludedObjects = array();
+
     /**
      * Scan composite object property.
      * 
@@ -49,6 +62,8 @@ class BackupableCollector extends ObjectCollector
         // Make a copy of this collector to allow recursive collecting.
         $collector = clone $this;
         $collector->excludedObjects[] = $parentObj;
+
+        // Prevent infinite loops...
         if (in_array($backupable, $this->excludedObjects, true)) {
             $collector->recursiveScan = false;
         }

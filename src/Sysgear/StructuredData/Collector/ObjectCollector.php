@@ -10,14 +10,6 @@ namespace Sysgear\StructuredData\Collector;
 class ObjectCollector extends AbstractCollector
 {
     /**
-     * Each object which is collected is put on this list. That
-     * way we prevent infinit loops in recursive collections.
-     * 
-     * @var array
-     */
-    protected $excludedObjects = array();
-
-    /**
      * (non-PHPdoc)
      * @see Sysgear\StructuredData\Collector.CollectorInterface::scanObject()
      */
