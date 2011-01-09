@@ -1,6 +1,6 @@
 <?php
 
-namespace Sysgear\Backup\Importer;
+namespace Sysgear\StructuredData\Importer;
 
 use Sysgear\StructuredData\Restorer\RestorerInterface;
 

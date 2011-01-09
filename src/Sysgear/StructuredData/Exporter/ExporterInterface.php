@@ -1,6 +1,6 @@
 <?php
 
-namespace Sysgear\Backup\Exporter;
+namespace Sysgear\StructuredData\Exporter;
 
 use Sysgear\StructuredData\Collector\CollectorInterface;
 
@@ -10,7 +10,7 @@ interface ExporterInterface
      * Read a structed data collector so it can be exported.
      * 
      * @param \Sysgear\StructuredData\Collector\CollectorInterface $dataCollector
-     * @return \Sysgear\Backup\Exporter\ExporterInterface
+     * @return \Sysgear\StructuredData\Exporter\ExporterInterface
      */
     public function readDataCollector(CollectorInterface $dataCollector);
 

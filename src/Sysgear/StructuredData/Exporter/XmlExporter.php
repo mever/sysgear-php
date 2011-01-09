@@ -1,6 +1,6 @@
 <?php
 
-namespace Sysgear\Backup\Exporter;
+namespace Sysgear\StructuredData\Exporter;
 
 use Sysgear\StructuredData\Collector\CollectorInterface;
 

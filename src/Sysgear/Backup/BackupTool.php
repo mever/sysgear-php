@@ -4,8 +4,8 @@ namespace Sysgear\Backup;
 
 use Sysgear\StructuredData\Collector\BackupableCollector;
 use Sysgear\StructuredData\Restorer\BackupableRestorer;
-use Sysgear\Backup\Exporter\ExporterInterface;
-use Sysgear\Backup\Importer\ImporterInterface;
+use Sysgear\StructuredData\Exporter\ExporterInterface;
+use Sysgear\StructuredData\Importer\ImporterInterface;
 
 /**
  * Universal tool to backup about anything.
@@ -18,20 +18,20 @@ use Sysgear\Backup\Importer\ImporterInterface;
 class BackupTool
 {
     /**
-     * @var \Sysgear\Backup\Exporter\ExporterInterface
+     * @var \Sysgear\StructuredData\Exporter\ExporterInterface
      */
     protected $exporter;
 
     /**
-     * @var \Sysgear\Backup\Importer\ImporterInterface
+     * @var \Sysgear\StructuredData\Importer\ImporterInterface
      */
     protected $importer;
 
     /**
      * Create backup utility.
      * 
-     * @param \Sysgear\Backup\Exporter\ExporterInterface $exporter
-     * @param \Sysgear\Backup\Importer\ImporterInterface $importer
+     * @param \Sysgear\StructuredData\Exporter\ExporterInterface $exporter
+     * @param \Sysgear\StructuredData\Importer\ImporterInterface $importer
      */
     public function __construct(ExporterInterface $exporter, ImporterInterface $importer)
     {
@@ -43,8 +43,8 @@ class BackupTool
      * Backup collection of stuctured data from $object.
      * 
      * @param \Sysgear\Backup\BackupableInterface $collector
-     * @param \Sysgear\Backup\Exporter\ExporterInterface $exporter
-     * @return \Sysgear\Backup\Exporter\ExporterInterface
+     * @param \Sysgear\StructuredData\Exporter\ExporterInterface $exporter
+     * @return \Sysgear\StructuredData\Exporter\ExporterInterface
      */
     public function backup(BackupableInterface $object, ExporterInterface $exporter = null)
     {
@@ -72,7 +72,7 @@ class BackupTool
     /**
      * Return backup exporter.
      * 
-     * @param \Sysgear\Backup\Exporter\ExporterInterface $exporter
+     * @param \Sysgear\StructuredData\Exporter\ExporterInterface $exporter
      */
     protected function getExporter(ExporterInterface $exporter = null)
     {
