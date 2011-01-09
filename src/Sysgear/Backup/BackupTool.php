@@ -42,7 +42,7 @@ class BackupTool
     /**
      * Backup collection of stuctured data from $object.
      * 
-     * @param \Sysgear\Backup\BackupableInterface $collector
+     * @param \Sysgear\Backup\BackupableInterface $object
      * @param \Sysgear\StructuredData\Exporter\ExporterInterface $exporter
      * @return \Sysgear\StructuredData\Exporter\ExporterInterface
      */
@@ -50,7 +50,7 @@ class BackupTool
     {
         $collector = new BackupableCollector();
         $object->collectStructedData($collector);
-        
+
         $exporter = $this->getExporter($exporter);
         $exporter->readDataCollector($collector);
         return $exporter;
@@ -59,18 +59,21 @@ class BackupTool
     /**
      * Restore collection of structed data to $object.
      * 
-     * @param BackupableInterface $object
+     * @param \Sysgear\Backup\BackupableInterface $object
+     * @param \Sysgear\StructuredData\Importer\ImporterInterface $importer
      */
-    public function restore(BackupableInterface $object)
+    public function restore(BackupableInterface $object, ImporterInterface $importer = null)
     {
         $restorer = new BackupableRestorer();
-        $this->importer->writeDataCollector($restorer);
+        $importer = $this->getImporter($importer);
+        $importer->writeDataCollector($restorer);
+
         $object->restoreStructedData($restorer);
-        return $this;
+        return $object;
     }
 
     /**
-     * Return backup exporter.
+     * Return exporter.
      * 
      * @param \Sysgear\StructuredData\Exporter\ExporterInterface $exporter
      */
@@ -80,5 +83,18 @@ class BackupTool
             $exporter = $this->exporter;
         }
         return $exporter;
+    }
+
+    /**
+     * Return importer.
+     * 
+     * @param \Sysgear\StructuredData\Importer\ImporterInterface $importer
+     */
+    protected function getImporter(ImporterInterface $importer = null)
+    {
+        if (null === $importer) {
+            $importer = $this->importer;
+        }
+        return $importer;
     }
 }

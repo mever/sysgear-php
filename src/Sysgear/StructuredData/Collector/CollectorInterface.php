@@ -10,12 +10,12 @@ namespace Sysgear\StructuredData\Collector;
 interface CollectorInterface
 {
     /**
-     * Scan object for data.
+     * Collect data from object.
      * 
-     * @param mixed $object
+     * @param \StdClass $object
      * @param string $name
      */
-    public function scanObject($object, $name = null);
+    public function fromObject($object, $name = null);
 
     /**
      * Return the DOM document.

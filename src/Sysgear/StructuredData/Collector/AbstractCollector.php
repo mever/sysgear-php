@@ -23,6 +23,15 @@ abstract class AbstractCollector implements CollectorInterface
     protected $recursiveScan = true;
 
     /**
+     * To prevent the collector from infinitely scan recursive structures
+     * collectors can be marked as duplicate. A duplicated collector is
+     * a collector of an already collected object.
+     * 
+     * @var boolean
+     */
+    protected $duplicate = false;
+
+    /**
      * Construct abstract data collector.
      */
     public function __construct()

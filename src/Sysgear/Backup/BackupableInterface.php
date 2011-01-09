@@ -13,13 +13,13 @@ use Sysgear\StructuredData\CollectionInterface;
 interface BackupableInterface extends CollectionInterface
 {
     /**
-     * Return a propery name of the implementing class
+     * Return the primary property name of the implementing class
      * which can be used to uniquely identify this instance.
      * 
-     * For example; if the implementing class is used as active-record
-     * the primary key of the record can be used as backup reference.
+     * For example; if the implementing class is an active-record
+     * the property which represents the primary key can be used.
      * 
      * @return string
      */
-    // TODO: public function getBackupReference();
+    public function getPrimaryPropertyName();
 }

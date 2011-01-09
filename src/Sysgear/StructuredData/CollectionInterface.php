@@ -24,5 +24,5 @@ interface CollectionInterface
      * 
      * @param Sysgear\StructuredData\Restorer\RestorerInterface $dataRestorer
      */
-//    public function restoreStructedData(RestorerInterface $dataRestorer);
+    public function restoreStructedData(RestorerInterface $dataRestorer);
 }
