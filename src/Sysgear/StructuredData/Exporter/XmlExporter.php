@@ -7,23 +7,28 @@ use Sysgear\StructuredData\Collector\CollectorInterface;
 class XmlExporter implements ExporterInterface
 {
     /**
-     * @var \Sysgear\StructuredData\Collector\CollectorInterface;
+     * @var \DOMDocument
      */
-    protected $dataCollector;
+    protected $document;
 
     /**
-     * Pretty print XML output.
+     * Flag if output should be pretty-print.
      * 
-     * @var boolean
+     * @param boolean $formatOutput
+     * @return \Sysgear\StructuredData\Exporter\XmlExporter
      */
-    protected $formatOutput = true;
+    public function formatOutput($formatOutput)
+    {
+        $this->document->formatOutput = (boolean) $formatOutput;
+        return $this;
+    }
 
     /**
      * {@inheritDoc}
      */
     public function readDataCollector(CollectorInterface $dataCollector)
     {
-        $this->dataCollector = $dataCollector;
+        $this->document = $dataCollector->getDomDocument();
         return $this;
     }
 
@@ -32,11 +37,9 @@ class XmlExporter implements ExporterInterface
      */
     public function toString()
     {
-        if (null === $this->dataCollector) {
+        if (null === $this->document) {
             throw ExporterException::noDataToExport();
         }
-        $doc = $this->dataCollector->getDomDocument();
-        $doc->formatOutput = $this->formatOutput;
-        return $doc->saveXML();
+        return rtrim($this->document->saveXML());
     }
 }

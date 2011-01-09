@@ -13,12 +13,13 @@ interface CollectorInterface
      * Collect data from object.
      * 
      * @param \StdClass $object
-     * @param string $name
+     * @param string $name Name used for $object in the collection.
+     * 					   When no name is chosen, the class name of $object is used.
      */
     public function fromObject($object, $name = null);
 
     /**
-     * Return the DOM document.
+     * Return the DOM document representation of the collected data.
      * 
      * @return \DOMDocument
      */

@@ -15,7 +15,7 @@ interface ExporterInterface
     public function readDataCollector(CollectorInterface $dataCollector);
 
 	/**
-     * Return the export as string.
+     * Return the exporter as string.
      * 
      * @return string
      */
