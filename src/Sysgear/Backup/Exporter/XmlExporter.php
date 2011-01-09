@@ -32,6 +32,9 @@ class XmlExporter implements ExporterInterface
      */
     public function toString()
     {
+        if (null === $this->dataCollector) {
+            throw ExporterException::noDataToExport();
+        }
         $doc = $this->dataCollector->getDomDocument();
         $doc->formatOutput = $this->formatOutput;
         return $doc->saveXML();

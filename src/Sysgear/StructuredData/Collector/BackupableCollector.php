@@ -67,7 +67,7 @@ class BackupableCollector extends ObjectCollector
         if (in_array($backupable, $this->excludedObjects, true)) {
             $collector->recursiveScan = false;
         }
-        $backupable->backup($collector);
+        $backupable->collectStructedData($collector);
         
         if (null === $node) {
             $node = $this->element;

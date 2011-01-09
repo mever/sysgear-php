@@ -4,29 +4,16 @@ namespace Sysgear\Backup;
 
 use Sysgear\StructuredData\Collector\CollectorInterface;
 use Sysgear\StructuredData\Restorer\RestorerInterface;
+use Sysgear\StructuredData\CollectionInterface;
 
 /**
- * Classes implmenting this interface can be backupped by
- * providing a StructuredData\Collector and StructuredData\Restorer.
+ * Implementations of this interface can be backupped if it is passed
+ * a StructuredData\Collector and restored when passed a StructuredData\Restorer.
  * 
  * @author (c) Martijn Evers <martijn4evers@gmail.com>
  */
-interface BackupableInterface
+interface BackupableInterface extends CollectionInterface
 {
-    /**
-     * Collect data to backup using a collector.
-     * 
-     * @param \Sysgear\StructuredData\Collector\CollectorInterface $dataCollector
-     */
-    public function backup(CollectorInterface $dataCollector);
-
-    /**
-     * Restore data from backup using a restorer.
-     * 
-     * @param Sysgear\StructuredData\Restorer\RestorerInterface $dataRestorer
-     */
-    // TODO: public function restore(RestorerInterface $dataRestorer);
-
     /**
      * Return a propery name of the implementing class
      * which can be used to uniquely identify this instance.
