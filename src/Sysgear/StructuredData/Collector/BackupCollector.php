@@ -28,18 +28,14 @@ class BackupCollector extends AbstractCollector
             throw new CollectorException("Given object does not implement BackupableInterface.");
         }
 
-        if (null === $name) {
-            $fullClassname = get_class($object);
-            $pos = strrpos($fullClassname, '\\');
-            $name = (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
-        }
-
         // Add this object to the list of excluded objects to
         // prevent infinite recursive collecting.
         $this->excludedObjects[] = $object;
 
+        $name = $this->getNodeName($object);
         $this->element = $this->document->createElement($name);
-        $this->element->setAttribute('type', get_class($object));
+        $this->element->setAttribute('type', 'object');
+        $this->element->setAttribute('class', get_class($object));
         $refClass = new \ReflectionClass($object);
         if ($this->reference) {
             
@@ -105,6 +101,7 @@ class BackupCollector extends AbstractCollector
             if (is_array($value)) {
                 $collection->setAttribute('type', 'array');
             } else {
+                $collection->setAttribute('type', 'object');
                 $collection->setAttribute('class', get_class($value));
             }
 

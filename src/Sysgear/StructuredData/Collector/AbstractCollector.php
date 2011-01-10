@@ -58,4 +58,17 @@ abstract class AbstractCollector implements CollectorInterface
     {
         return $this->element;
     }
+
+    /**
+     * Return the node name which represents this $object.
+     * 
+     * @param object $object
+     * @return string
+     */
+    protected function getNodeName($object)
+    {
+        $fullClassname = get_class($object);
+        $pos = strrpos($fullClassname, '\\');
+        return (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
+    }
 }

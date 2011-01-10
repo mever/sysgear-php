@@ -20,4 +20,17 @@ abstract class AbstractRestorer implements RestorerInterface
         $this->document = $domDocument;
         return $this;
     }
+
+    /**
+     * Return the node name which represents this $object.
+     * 
+     * @param object $object
+     * @return string
+     */
+    protected function getNodeName($object)
+    {
+        $fullClassname = get_class($object);
+        $pos = strrpos($fullClassname, '\\');
+        return (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
+    }
 }

@@ -87,10 +87,20 @@ class BackupTool
     {
         $this->document = $this->getImporter($importer)->getDom();
         $restorer = new BackupRestorer();
-        $restorer->setDom($this->document);
+        $restorer->setDom($this->readBackup());
 
         $object->restoreStructedData($restorer);
         return $object;
+    }
+
+    protected function readBackup()
+    {
+        $doc = new \DOMDocument('1.0', 'utf8');
+        $content = $this->document->getElementsByTagName('content')->item(0);
+        foreach ($content->childNodes as $child) {
+            $doc->appendChild($doc->importNode($child, true));
+        }
+        return $doc;
     }
 
     /**

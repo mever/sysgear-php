@@ -20,9 +20,7 @@ class SimpleCollector extends AbstractCollector
         }
 
         if (null === $name) {
-            $fullClassname = get_class($object);
-            $pos = strrpos($fullClassname, '\\');
-            $name = (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
+            $name = $this->getNodeName($object);
         }
 
         // Add this object to the list of excluded objects to
