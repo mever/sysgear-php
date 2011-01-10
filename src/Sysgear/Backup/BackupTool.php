@@ -17,6 +17,9 @@ use Sysgear\StructuredData\Importer\ImporterInterface;
  */
 class BackupTool
 {
+    const META_DATETIME = 'datetime';
+    const DEFAULT_DATETIME_FORMAT = \DateTime::W3C;
+
     /**
      * @var \Sysgear\StructuredData\Exporter\ExporterInterface
      */
@@ -28,15 +31,31 @@ class BackupTool
     protected $importer;
 
     /**
+     * @var \DOMDocument
+     */
+    protected $document;
+
+    /**
+     * Configuration options for this backup tool.
+     * 
+     * @var array
+     */
+    protected $options = array();
+
+    /**
      * Create backup utility.
      * 
      * @param \Sysgear\StructuredData\Exporter\ExporterInterface $exporter
      * @param \Sysgear\StructuredData\Importer\ImporterInterface $importer
+     * @param array $options
      */
-    public function __construct(ExporterInterface $exporter, ImporterInterface $importer)
+    public function __construct(ExporterInterface $exporter, ImporterInterface $importer, array $options = array())
     {
         $this->exporter = $exporter;
         $this->importer = $importer;
+
+        $this->options = array_merge(array(
+            'datetime' => true), $options);
     }
 
     /**
@@ -50,9 +69,10 @@ class BackupTool
     {
         $collector = new BackupCollector();
         $object->collectStructedData($collector);
+        $this->writeBackup($collector->getDom());
 
         $exporter = $this->getExporter($exporter);
-        $exporter->setDom($collector->getDom());
+        $exporter->setDom($this->document);
         return $exporter;
     }
 
@@ -65,11 +85,66 @@ class BackupTool
      */
     public function restore(BackupableInterface $object, ImporterInterface $importer = null)
     {
+        $this->document = $this->getImporter($importer)->getDom();
         $restorer = new BackupRestorer();
-        $restorer->setDom($this->getImporter($importer)->getDom());
+        $restorer->setDom($this->document);
 
         $object->restoreStructedData($restorer);
         return $object;
+    }
+
+    /**
+     * Write backup data.
+     * 
+     * @param \DOMDocument $dom
+     */
+    protected function writeBackup(\DOMDocument $dom)
+    {
+        // Create backup
+        $doc = $this->document = new \DOMDocument('1.0', 'utf8');
+        $backupElem = $doc->createElement('backup');
+
+        // Create metadata
+        $metadataElem = $doc->createElement('metadata');
+        $backupElem->appendChild($metadataElem);
+        foreach ($this->options as $name => $option) {
+            $this->setMetadata($metadataElem, $name, $option);
+        }
+
+        // Create backup content
+        $content = $doc->createElement('content');
+        $backupElem->appendChild($content);
+        foreach ($dom->childNodes as $child) {
+            $content->appendChild($doc->importNode($child, true));
+        }
+
+        $doc->appendChild($backupElem);
+    }
+
+    /**
+     * Create metadata for this backup.
+     * 
+     * @param \DOMNode $node
+     * @param string $name
+     * @param mixed $option
+     */
+    protected function setMetadata(\DOMNode $node, $name, $option)
+    {
+        switch ($name) {
+        case self::META_DATETIME:
+            $format = self::DEFAULT_DATETIME_FORMAT;
+            if (is_array($option)) {
+                $format = $option['format'];
+                $option = true;
+            }
+            if ((boolean) $option) {
+                $dateElem = $this->document->createElement('datetime');
+                $node->appendChild($dateElem);
+                $dateElem->setAttribute('format', "W3C (php date format: {$format})");
+                $dateElem->setAttribute('value', date($format));
+            }
+            break;
+        }
     }
 
     /**

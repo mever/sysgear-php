@@ -35,21 +35,36 @@ class TestCase extends \PHPUnit_Framework_TestCase
     protected function expectedBasicCompanyXml()
     {
         return '<?xml version="1.0" encoding="utf8"?>
-<Company type="Sysgear\Tests\Backup\Company">
-  <id type="integer" value="1"/>
-  <name type="string" value="rts"/>
-  <Locale type="Sysgear\Tests\Backup\Locale">
-    <id type="integer" value="1"/>
-    <Language type="Sysgear\Tests\Backup\Language">
+<backup>
+  <metadata/>
+  <content>
+    <Company type="Sysgear\Tests\Backup\Company">
       <id type="integer" value="1"/>
-      <iso639 type="string" value="en_EN"/>
-    </Language>
-  </Locale>
-  <functions type="array">
-    <Role type="Sysgear\Tests\Backup\Role">
-      <id type="integer" value="1"/>
-      <name type="string" value="admin"/>
-      <members type="array">
+      <name type="string" value="rts"/>
+      <Locale type="Sysgear\Tests\Backup\Locale">
+        <id type="integer" value="1"/>
+        <Language type="Sysgear\Tests\Backup\Language">
+          <id type="integer" value="1"/>
+          <iso639 type="string" value="en_EN"/>
+        </Language>
+      </Locale>
+      <functions type="array">
+        <Role type="Sysgear\Tests\Backup\Role">
+          <id type="integer" value="1"/>
+          <name type="string" value="admin"/>
+          <members type="array">
+            <User type="Sysgear\Tests\Backup\User">
+              <id type="integer" value="1"/>
+              <name type="string" value="piet"/>
+              <password type="string" value="bf7s83s"/>
+              <Company type="Sysgear\Tests\Backup\Company" primaryProperty="id" reference="1"/>
+              <roles type="array"/>
+            </User>
+          </members>
+          <Company type="Sysgear\Tests\Backup\Company" primaryProperty="id" reference="1"/>
+        </Role>
+      </functions>
+      <employees type="array">
         <User type="Sysgear\Tests\Backup\User">
           <id type="integer" value="1"/>
           <name type="string" value="piet"/>
@@ -57,19 +72,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
           <Company type="Sysgear\Tests\Backup\Company" primaryProperty="id" reference="1"/>
           <roles type="array"/>
         </User>
-      </members>
-      <Company type="Sysgear\Tests\Backup\Company" primaryProperty="id" reference="1"/>
-    </Role>
-  </functions>
-  <employees type="array">
-    <User type="Sysgear\Tests\Backup\User">
-      <id type="integer" value="1"/>
-      <name type="string" value="piet"/>
-      <password type="string" value="bf7s83s"/>
-      <Company type="Sysgear\Tests\Backup\Company" primaryProperty="id" reference="1"/>
-      <roles type="array"/>
-    </User>
-  </employees>
-</Company>';
+      </employees>
+    </Company>
+  </content>
+</backup>';
     }
 }
