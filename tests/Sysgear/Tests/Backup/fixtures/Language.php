@@ -12,7 +12,7 @@ class Language implements BackupableInterface
 
 	public $iso639;
 
-	public function __construct($id, $iso639)
+	public function __construct($id = null, $iso639 = null)
 	{
 	    $this->id = $id;
 	    $this->iso639 = $iso639;

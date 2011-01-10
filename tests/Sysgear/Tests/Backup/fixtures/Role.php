@@ -16,7 +16,7 @@ class Role implements BackupableInterface
 
     public $company;
 
-    public function __construct($id, $name, Company $company)
+    public function __construct($id = null, $name = null, Company $company = null)
     {
         $this->id = $id;
         $this->name = $name;

@@ -27,7 +27,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $user = new User(1, 'piet', 'bf7s83s', $company);
         $role = new Role(1, 'admin', $company);
         $role->members[] = $user;
-        $company->employees[] = $user;
+        $company->addEmployee($user);
         $company->functions[] = $role;
         return $company;
     }
@@ -41,13 +41,13 @@ class TestCase extends \PHPUnit_Framework_TestCase
     <Company type="object" class="Sysgear\Tests\Backup\Company">
       <id type="integer" value="1"/>
       <name type="string" value="rts"/>
-      <Locale type="object" class="Sysgear\Tests\Backup\Locale">
+      <locale type="object" class="Sysgear\Tests\Backup\Locale">
         <id type="integer" value="1"/>
-        <Language type="object" class="Sysgear\Tests\Backup\Language">
+        <language type="object" class="Sysgear\Tests\Backup\Language">
           <id type="integer" value="1"/>
           <iso639 type="string" value="en_EN"/>
-        </Language>
-      </Locale>
+        </language>
+      </locale>
       <functions type="array">
         <Role type="object" class="Sysgear\Tests\Backup\Role">
           <id type="integer" value="1"/>
@@ -57,11 +57,11 @@ class TestCase extends \PHPUnit_Framework_TestCase
               <id type="integer" value="1"/>
               <name type="string" value="piet"/>
               <password type="string" value="bf7s83s"/>
-              <Company type="object" class="Sysgear\Tests\Backup\Company" primaryProperty="id" reference="1"/>
+              <employer type="object" class="Sysgear\Tests\Backup\Company" refName="id" refValue="1"/>
               <roles type="array"/>
             </User>
           </members>
-          <Company type="object" class="Sysgear\Tests\Backup\Company" primaryProperty="id" reference="1"/>
+          <company type="object" class="Sysgear\Tests\Backup\Company" refName="id" refValue="1"/>
         </Role>
       </functions>
       <employees type="array">
@@ -69,7 +69,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
           <id type="integer" value="1"/>
           <name type="string" value="piet"/>
           <password type="string" value="bf7s83s"/>
-          <Company type="object" class="Sysgear\Tests\Backup\Company" primaryProperty="id" reference="1"/>
+          <employer type="object" class="Sysgear\Tests\Backup\Company" refName="id" refValue="1"/>
           <roles type="array"/>
         </User>
       </employees>

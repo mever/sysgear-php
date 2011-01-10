@@ -12,7 +12,7 @@ class Locale implements BackupableInterface
 
 	public $language;
 
-	public function __construct($id, Language $language)
+	public function __construct($id = null, Language $language = null)
 	{
 	    $this->id = $id;
 	    $this->language = $language;

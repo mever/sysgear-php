@@ -33,7 +33,7 @@ class BackupTest extends TestCase
 
         // Assert that the company to restore is empty.
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"utf8\"?>\n<backup><metadata/><content>" .
-        	"<Company type=\"object\" class=\"Sysgear\Tests\Backup\Company\"><functions type=\"array\"/><employees type=\"array\"/>" .
+        	"<Company type=\"object\" class=\"Sysgear\\Tests\\Backup\\Company\"><functions type=\"array\"/><employees type=\"array\"/>" .
         	"</Company></content></backup>", $export->formatOutput(false)->toString());
 
         // Assert formatted XML structure.
@@ -45,13 +45,19 @@ class BackupTest extends TestCase
 
     public function testRestore()
     {
+        // Restore company.
         $importer = new XmlImporter();
         $importer->fromString($this->expectedBasicCompanyXml());
         $tool = new BackupTool(new XmlExporter(), $importer);
-        
-        // Restore company.
         $company = $tool->restore(new Company());
-        var_dump($company);
-//        $this->assertEquals('rts', $company->name);
+
+        // Assert relations.
+        $hash1 = spl_object_hash($company);
+        $hash2 = spl_object_hash($company->functions[0]->company);
+        $this->assertEquals($hash1, $hash2);
+
+        // Assert protected & private properties.
+        $this->assertEquals('rts', $company->getName());
+        $this->assertEquals('piet', $company->getEmployee(0)->getName());
     }
 }

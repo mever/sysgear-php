@@ -10,7 +10,7 @@ class User implements BackupableInterface
 {
     protected $id;
 
-    protected $name;
+    private $name;
 
     protected $password;
 
@@ -20,13 +20,18 @@ class User implements BackupableInterface
 
     protected $locale;
 
-    public function __construct($id, $name, $password, Company $employer, Locale $locale = null)
+    public function __construct($id = null, $name = null, $password = null, Company $employer = null, Locale $locale = null)
     {
         $this->id = $id;
         $this->name = $name;
         $this->password = $password;
         $this->employer = $employer;
         $this->locale = $locale;
+    }
+
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
@@ -42,7 +47,10 @@ class User implements BackupableInterface
      */
     public function restoreStructedData(BackupRestorer $backupDataRestorer)
     {
-        $backupDataRestorer->toObject($this);
+        $remaining = $backupDataRestorer->toObject($this);
+        foreach ($remaining as $name => $value) {
+            $this->{$name} = $value;
+        }
     }
 
     /**

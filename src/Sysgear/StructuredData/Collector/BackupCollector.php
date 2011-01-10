@@ -19,6 +19,13 @@ class BackupCollector extends AbstractCollector
     protected $reference = false;
 
     /**
+     * Name to use for this node.
+     * 
+     * @var string
+     */
+    protected $name;
+
+    /**
      * (non-PHPdoc)
      * @see Sysgear\StructuredData\Collector.CollectorInterface::fromObject()
      */
@@ -32,20 +39,21 @@ class BackupCollector extends AbstractCollector
         // prevent infinite recursive collecting.
         $this->excludedObjects[] = $object;
 
-        $name = $this->getNodeName($object);
+        $name = $this->name ?: $this->getNodeName($object);
         $this->element = $this->document->createElement($name);
         $this->element->setAttribute('type', 'object');
         $this->element->setAttribute('class', get_class($object));
         $refClass = new \ReflectionClass($object);
         if ($this->reference) {
             
+            // Create reference.
             $ppn = $object->getPrimaryPropertyName();
-            $this->element->setAttribute('primaryProperty', $ppn);
-            $this->element->setAttribute('reference',
-                $refClass->getProperty($ppn)->getValue($object));
+            $this->element->setAttribute('refName', $ppn);
+            $this->element->setAttribute('refValue', $refClass->getProperty($ppn)->getValue($object));
         } else {
             foreach ($refClass->getProperties() as $property) {
     
+                // Exclude properties. 
                 if ($this->filterProperty($property)) {
     
                     $property->setAccessible(true);
@@ -54,9 +62,9 @@ class BackupCollector extends AbstractCollector
     
                     // Scan scalar or composite property.
                     if (is_scalar($value)) {
-                        $this->scanScalarProperty($object, $name, $value);
+                        $this->addScalarNode($name, $value);
                     } elseif ($this->recursiveScan) {
-                        $this->scanCompositeProperty($object, $name, $value);
+                        $this->addCompositeNode($name, $value);
                     }
                 }
             }
@@ -65,13 +73,12 @@ class BackupCollector extends AbstractCollector
     }
 
     /**
-     * Scan scalar object property.
+     * Add scalar property node.
      * 
-     * @param \Sysgear\Backup\BackupableInterface $backupable
      * @param string $name
      * @param scalar $value
      */
-    protected function scanScalarProperty($backupable, $name, $value)
+    protected function addScalarNode($name, $value)
     {
         $property = $this->document->createElement($name);
         $this->element->appendChild($property);
@@ -80,17 +87,16 @@ class BackupCollector extends AbstractCollector
     }
 
     /**
-     * Scan composite object property.
+     * Add composite property node.
      * 
-     * @param \Sysgear\Backup\BackupableInterface $backupable
      * @param string $name
      * @param mixed $value
      */
-    protected function scanCompositeProperty($backupable, $name, $value)
+    protected function addCompositeNode($name, $value)
     {
         // Scan BackupableInterface implmentation
         if ($value instanceof BackupableInterface) {
-            $this->addBackupableChild($backupable, $value);
+            $this->addBackupable($name, $value);
         }
 
         // Scan sub-collection.
@@ -109,7 +115,7 @@ class BackupCollector extends AbstractCollector
 
                 // Collect array element objects implementing the BackupableInterface.
                 if ($elem instanceof BackupableInterface) {
-                    $this->addBackupableChild($backupable, $elem, $collection);
+                    $this->addBackupable($this->getNodeName($elem), $elem, $collection);
                 }
             }
         }
@@ -118,11 +124,11 @@ class BackupCollector extends AbstractCollector
     /**
      * Add child node to this collection.
      * 
-     * @param \Sysgear\Backup\BackupableInterface $parentBackupable
+     * @param string $name
      * @param \Sysgear\Backup\BackupableInterface $backupable
      * @param \DOMNode $node
      */
-    protected function addBackupableChild(BackupableInterface $parentBackupable, BackupableInterface $backupable, \DOMNode $node = null)
+    protected function addBackupable($name, BackupableInterface $backupable, \DOMNode $node = null)
     {
         if (null === $node) {
             $node = $this->element;
@@ -131,13 +137,15 @@ class BackupCollector extends AbstractCollector
         // Prevent infinite loops...
         if (in_array($backupable, $this->excludedObjects, true)) {
 
-            $this->createReference($backupable, $node);
+            $this->createReference($backupable, $node, $name);
         } else {
 
             // Make a copy of this collector to allow recursive collecting.
             $collector = clone $this;
+            $collector->name = $name;
             $backupable->collectStructedData($collector);
-            $node->appendChild($collector->getDomElement());
+            $element = $collector->getDomElement();
+            $node->appendChild($element);
         }
     }
 
@@ -146,12 +154,14 @@ class BackupCollector extends AbstractCollector
      * 
      * @param \BackupableInterface $backupable
      * @param \DOMNode $node
+     * @param string $name
      */
-    protected function createReference(BackupableInterface $backupable, \DOMNode $node)
+    protected function createReference(BackupableInterface $backupable, \DOMNode $node, $name)
     {
         $collector = clone $this;
         $collector->recursiveScan = false;
         $collector->reference = true;
+        $collector->name = $name;
         $backupable->collectStructedData($collector);
         $node->appendChild($collector->getDomElement());
     }

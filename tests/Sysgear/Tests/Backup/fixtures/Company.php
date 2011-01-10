@@ -10,19 +10,39 @@ class Company implements BackupableInterface
 {
     public $id;
  
-    public $name;
+    /**
+     * Test protected value.
+     * 
+     * @var string
+     */
+    protected $name;
 
     public $locale;
 
     public $functions = array();
 
-    public $employees = array();
+    protected $employees = array();
 
     public function __construct($id = null, $name = null, Locale $locale = null)
     {
         $this->id = $id;
         $this->name = $name;
         $this->locale = $locale;
+    }
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    public function addEmployee(User $employee)
+    {
+        $this->employees[] = $employee;
+    }
+
+    public function getEmployee($index)
+    {
+        return $this->employees[$index];
     }
 
     /**
@@ -38,7 +58,10 @@ class Company implements BackupableInterface
      */
     public function restoreStructedData(BackupRestorer $backupDataRestorer)
     {
-        $backupDataRestorer->toObject($this);
+        $remaining = $backupDataRestorer->toObject($this);
+        foreach ($remaining as $name => $value) {
+            $this->{$name} = $value;
+        }
     }
 
     /**
