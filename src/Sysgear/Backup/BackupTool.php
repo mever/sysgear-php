@@ -61,6 +61,7 @@ class BackupTool
      * 
      * @param \Sysgear\Backup\BackupableInterface $object
      * @param \Sysgear\StructuredData\Importer\ImporterInterface $importer
+     * @return \Sysgear\Backup\BackupableInterface
      */
     public function restore(BackupableInterface $object, ImporterInterface $importer = null)
     {

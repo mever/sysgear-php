@@ -47,6 +47,6 @@ class BackupTest extends TestCase
         
         // Restore company.
         $company = $tool->restore(new Company());
-        var_dump($company);
+        $this->assertEquals('rts', $company->name);
     }
 }
