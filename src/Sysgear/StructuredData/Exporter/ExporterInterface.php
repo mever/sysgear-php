@@ -7,12 +7,12 @@ use Sysgear\StructuredData\Collector\CollectorInterface;
 interface ExporterInterface
 {
     /**
-     * Read a structed data collector so it can be exported.
+     * Set the DOM to export.
      * 
-     * @param \Sysgear\StructuredData\Collector\CollectorInterface $dataCollector
+     * @param \DOMDocument $domDocument
      * @return \Sysgear\StructuredData\Exporter\ExporterInterface
      */
-    public function readDataCollector(CollectorInterface $dataCollector);
+    public function setDom(\DOMDocument $domDocument);
 
 	/**
      * Return the exporter as string.

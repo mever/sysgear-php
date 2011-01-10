@@ -36,24 +36,24 @@ class TestCase extends \PHPUnit_Framework_TestCase
     protected function expectedBasicCompanyXml()
     {
         return '<?xml version="1.0" encoding="utf8"?>
-<Company Mclass="Sysgear\Tests\StructuredData\Company" Pid="i:1;" Pname="s:3:&quot;rts&quot;;">
-  <Locale Mclass="Sysgear\Tests\StructuredData\Locale" Pid="i:1;">
-    <Language Mclass="Sysgear\Tests\StructuredData\Language" Pid="i:1;" Piso639="s:5:&quot;en_EN&quot;;"/>
+<Company id="1" name="rts">
+  <Locale id="1">
+    <Language id="1" iso639="en_EN"/>
   </Locale>
   <functions>
-    <Role Mclass="Sysgear\Tests\StructuredData\Role" Pid="i:1;" Pname="s:5:&quot;admin&quot;;">
+    <Role id="1" name="admin">
       <members>
-        <User Mclass="Sysgear\Tests\StructuredData\User" Pid="i:1;" Pname="s:4:&quot;piet&quot;;" Ppassword="s:7:&quot;bf7s83s&quot;;">
-          <Company Mclass="Sysgear\Tests\StructuredData\Company" Pid="i:1;" Pname="s:3:&quot;rts&quot;;"/>
+        <User id="1" name="piet" password="bf7s83s">
+          <Company id="1" name="rts"/>
           <roles/>
         </User>
       </members>
-      <Company Mclass="Sysgear\Tests\StructuredData\Company" Pid="i:1;" Pname="s:3:&quot;rts&quot;;"/>
+      <Company id="1" name="rts"/>
     </Role>
   </functions>
   <employees>
-    <User Mclass="Sysgear\Tests\StructuredData\User" Pid="i:1;" Pname="s:4:&quot;piet&quot;;" Ppassword="s:7:&quot;bf7s83s&quot;;">
-      <Company Mclass="Sysgear\Tests\StructuredData\Company" Pid="i:1;" Pname="s:3:&quot;rts&quot;;"/>
+    <User id="1" name="piet" password="bf7s83s">
+      <Company id="1" name="rts"/>
       <roles/>
     </User>
   </employees>

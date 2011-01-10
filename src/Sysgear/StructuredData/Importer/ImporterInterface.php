@@ -7,12 +7,11 @@ use Sysgear\StructuredData\Restorer\RestorerInterface;
 interface ImporterInterface
 {
     /**
-     * Write structed data to a restorer.
+     * Get DOM from importer.
      * 
-     * @param \Sysgear\StructuredData\Restorer\RestorerInterface $dataRestorer
-     * @return \Sysgear\StructuredData\Importer\ImporterInterface
+     * @return \DOMDocument
      */
-    public function writeDataCollector(RestorerInterface $dataRestorer);
+    public function getDom();
 
 	/**
      * Import the importer from string.

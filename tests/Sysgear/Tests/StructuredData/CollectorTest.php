@@ -11,18 +11,19 @@
 
 namespace Sysgear\Tests\StructuredData;
 
+use Sysgear\StructuredData\Exporter\XmlExporter;
 use Sysgear\StructuredData\Collector;
 
 class CollectorTest extends TestCase
 {
-    public function testObjectCollector()
+    public function testSimpleCollector()
     {
-        var_dump(serialize($this->backupBasicCompany()));
-        
-        $collector = new Collector\ObjectCollector();
+        $collector = new Collector\SimpleCollector();
         $collector->fromObject($this->backupBasicCompany());
-        $doc = $collector->getDomDocument();
-        $doc->formatOutput = true;
-        $this->assertEquals($this->expectedBasicCompanyXml(), rtrim($doc->saveXML()));
+
+        $exporter = new XmlExporter();
+        $collector->writeExport($exporter);
+
+        $this->assertEquals($this->expectedBasicCompanyXml(), rtrim($exporter->formatOutput(true)->toString()));
     }
 }

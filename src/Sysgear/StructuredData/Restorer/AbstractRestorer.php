@@ -2,6 +2,8 @@
 
 namespace Sysgear\StructuredData\Restorer;
 
+use Sysgear\StructuredData\Importer\ImporterInterface;
+
 abstract class AbstractRestorer implements RestorerInterface
 {
     /**
@@ -10,13 +12,14 @@ abstract class AbstractRestorer implements RestorerInterface
     protected $document;
 
     /**
-     * Sets the DOM document which uses this restorer to restore the object.
+     * Read structured data import to restorer.
      * 
-     * @param \DOMDocument $domDocument
+     * @param \Sysgear\StructuredData\Importer\ImporterInterface $importer
+     * @return \Sysgear\StructuredData\Restorer\RestorerInterface
      */
-    public function setDomDocument(\DOMDocument $document)
+    public function readImport(ImporterInterface $importer)
     {
-        $this->document = $document;
+        $this->document = $importer->getDom();
         return $this;
     }
 }

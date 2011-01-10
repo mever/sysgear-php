@@ -2,9 +2,10 @@
 
 namespace Sysgear\StructuredData\Restorer;
 
+use Sysgear\StructuredData\Restorer\AbstractRestorer;
 use Sysgear\Backup\BackupableInterface;
 
-class BackupableRestorer extends ObjectRestorer
+class BackupRestorer extends AbstractRestorer
 {
     /**
      * (non-PHPdoc)
@@ -15,6 +16,12 @@ class BackupableRestorer extends ObjectRestorer
         if (! ($object instanceof BackupableInterface)) {
             throw new RestorerException("Given object does not implement BackupableInterface.");
         }
-        return parent::toObject($object, $name);
+
+        if (null === $name) {
+            $fullClassname = get_class($object);
+            $pos = strrpos($fullClassname, '\\');
+            $name = (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
+        }
+        
     }
 }

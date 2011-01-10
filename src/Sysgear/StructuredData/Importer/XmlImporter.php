@@ -14,10 +14,9 @@ class XmlImporter implements ImporterInterface
 	/**
 	 * {@inheritDoc}
      */
-    public function writeDataCollector(RestorerInterface $dataRestorer)
+    public function getDom()
     {
-        $dataRestorer->setDomDocument($this->document);
-        return $this;
+        return $this->document;
     }
 
 	/**

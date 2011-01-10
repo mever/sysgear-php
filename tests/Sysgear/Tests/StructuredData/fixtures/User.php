@@ -2,11 +2,7 @@
 
 namespace Sysgear\Tests\StructuredData;
 
-use Sysgear\StructuredData\Collector\CollectorInterface;
-use Sysgear\StructuredData\Restorer\RestorerInterface;
-use Sysgear\Backup\BackupableInterface;
-
-class User implements BackupableInterface
+class User
 {
     protected $id;
 
@@ -27,29 +23,5 @@ class User implements BackupableInterface
         $this->password = $password;
         $this->employer = $employer;
         $this->locale = $locale;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function collectStructedData(CollectorInterface $collector)
-    {
-        $collector->fromObject($this, 'user');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function restoreStructedData(RestorerInterface $restorer)
-    {
-        $restorer->toObject($this, 'user');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getPrimaryPropertyName()
-    {
-        return 'id';
     }
 }

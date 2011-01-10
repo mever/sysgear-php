@@ -2,8 +2,8 @@
 
 namespace Sysgear\Backup;
 
-use Sysgear\StructuredData\Collector\BackupableCollector;
-use Sysgear\StructuredData\Restorer\BackupableRestorer;
+use Sysgear\StructuredData\Collector\BackupCollector;
+use Sysgear\StructuredData\Restorer\BackupRestorer;
 use Sysgear\StructuredData\Exporter\ExporterInterface;
 use Sysgear\StructuredData\Importer\ImporterInterface;
 
@@ -48,11 +48,11 @@ class BackupTool
      */
     public function backup(BackupableInterface $object, ExporterInterface $exporter = null)
     {
-        $collector = new BackupableCollector();
+        $collector = new BackupCollector();
         $object->collectStructedData($collector);
 
         $exporter = $this->getExporter($exporter);
-        $exporter->readDataCollector($collector);
+        $collector->writeExport($exporter);
         return $exporter;
     }
 
@@ -64,9 +64,8 @@ class BackupTool
      */
     public function restore(BackupableInterface $object, ImporterInterface $importer = null)
     {
-        $restorer = new BackupableRestorer();
-        $importer = $this->getImporter($importer);
-        $importer->writeDataCollector($restorer);
+        $restorer = new BackupRestorer();
+        $restorer->readImport($this->getImporter($importer));
 
         $object->restoreStructedData($restorer);
         return $object;

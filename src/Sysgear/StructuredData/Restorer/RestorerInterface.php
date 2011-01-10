@@ -2,6 +2,8 @@
 
 namespace Sysgear\StructuredData\Restorer;
 
+use Sysgear\StructuredData\Importer\ImporterInterface;
+
 /**
  * Responsible for restoring data.
  * 
@@ -19,9 +21,10 @@ interface RestorerInterface
     public function toObject($object, $name = null);
 
     /**
-     * Sets the DOM document which uses this restorer to restore the object.
+     * Read structured data import to restorer.
      * 
-     * @param \DOMDocument $domDocument
+     * @param \Sysgear\StructuredData\Importer\ImporterInterface $importer
+     * @return \Sysgear\StructuredData\Restorer\RestorerInterface
      */
-    public function setDomDocument(\DOMDocument $domDocument);
+    public function readImport(ImporterInterface $importer);
 }

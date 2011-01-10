@@ -2,11 +2,7 @@
 
 namespace Sysgear\Tests\StructuredData;
 
-use Sysgear\StructuredData\Collector\CollectorInterface;
-use Sysgear\StructuredData\Restorer\RestorerInterface;
-use Sysgear\Backup\BackupableInterface;
-
-class Locale implements BackupableInterface
+class Locale
 {
 	public $id;
 
@@ -17,28 +13,4 @@ class Locale implements BackupableInterface
 	    $this->id = $id;
 	    $this->language = $language;
 	}
-
-    /**
-     * {@inheritDoc}
-     */
-    public function collectStructedData(CollectorInterface $collector)
-    {
-        $collector->fromObject($this, 'locale');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function restoreStructedData(RestorerInterface $restorer)
-    {
-        $restorer->toObject($this, 'locale');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getPrimaryPropertyName()
-    {
-        return 'id';
-    }
 }

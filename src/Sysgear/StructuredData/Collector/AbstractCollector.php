@@ -2,6 +2,8 @@
 
 namespace Sysgear\StructuredData\Collector;
 
+use Sysgear\StructuredData\Exporter\ExporterInterface;
+
 abstract class AbstractCollector implements CollectorInterface
 {
     /**
@@ -13,6 +15,14 @@ abstract class AbstractCollector implements CollectorInterface
      * @var \DOMElement
      */
     protected $element;
+
+    /**
+     * Each object which is collected is put on this list. That
+     * way we prevent infinit loops in recursive collections.
+     * 
+     * @var array
+     */
+    protected $excludedObjects = array();
 
     /**
      * In search of data to backup, do we need to recursively
@@ -31,13 +41,15 @@ abstract class AbstractCollector implements CollectorInterface
     }
 
     /**
-     * Return the DOM document.
+     * Write structured data exporter.
      * 
-     * @return \DOMDocument
+     * @param \Sysgear\StructuredData\Exporter\ExporterInterface $exporter
+     * @return \Sysgear\StructuredData\Collector\CollectorInterface
      */
-    public function getDomDocument()
+    public function writeExport(ExporterInterface $exporter)
     {
-        return $this->document;
+        $exporter->setDom($this->document);
+        return $this;
     }
 
     /**

@@ -2,8 +2,8 @@
 
 namespace Sysgear\Tests\Backup;
 
-use Sysgear\StructuredData\Collector\CollectorInterface;
-use Sysgear\StructuredData\Restorer\RestorerInterface;
+use Sysgear\StructuredData\Collector\BackupCollector;
+use Sysgear\StructuredData\Restorer\BackupRestorer;
 use Sysgear\Backup\BackupableInterface;
 
 class Locale implements BackupableInterface
@@ -21,17 +21,17 @@ class Locale implements BackupableInterface
     /**
      * {@inheritDoc}
      */
-    public function collectStructedData(CollectorInterface $collector)
+    public function collectStructedData(BackupCollector $backupDataCollector)
     {
-        $collector->fromObject($this, 'locale');
+        $backupDataCollector->fromObject($this);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function restoreStructedData(RestorerInterface $restorer)
+    public function restoreStructedData(BackupRestorer $backupDataRestorer)
     {
-        $restorer->toObject($this, 'locale');
+        $backupDataRestorer->toObject($this);
     }
 
     /**

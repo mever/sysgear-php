@@ -26,9 +26,9 @@ class XmlExporter implements ExporterInterface
     /**
      * {@inheritDoc}
      */
-    public function readDataCollector(CollectorInterface $dataCollector)
+    public function setDom(\DOMDocument $domDocument)
     {
-        $this->document = $dataCollector->getDomDocument();
+        $this->document = $domDocument;
         return $this;
     }
 

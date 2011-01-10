@@ -3,28 +3,12 @@
 namespace Sysgear\StructuredData\Collector;
 
 /**
- * Collector for data from objects.
+ * Simple recursive collector.
  * 
  * @author (c) Martijn Evers <martijn4evers@gmail.com>
  */
-class ObjectCollector extends AbstractCollector
+class SimpleCollector extends AbstractCollector
 {
-    /**
-     * Namespaces.
-     * 
-     * @var string
-     */
-    const NS_PROPERTY = 'P';
-    const NS_METADATA = 'M';
-
-    /**
-     * Each object which is collected is put on this list. That
-     * way we prevent infinit loops in recursive collections.
-     * 
-     * @var array
-     */
-    protected $excludedObjects = array();
-
     /**
      * (non-PHPdoc)
      * @see Sysgear\StructuredData\Collector.CollectorInterface::fromObject()
@@ -46,7 +30,6 @@ class ObjectCollector extends AbstractCollector
         $this->excludedObjects[] = $object;
 
         $this->element = $this->document->createElement($name);
-        $this->element->setAttribute(self::NS_METADATA . 'class', get_class($object));
         $refClass = new \ReflectionClass($object);
         foreach ($refClass->getProperties() as $property) {
 
@@ -58,7 +41,7 @@ class ObjectCollector extends AbstractCollector
 
                 // Scan scalar or composite property.
                 if (is_scalar($value)) {
-                    $this->scanScalarProperty($object, self::NS_PROPERTY . $name, $this->toStringFromScalar($value));
+                    $this->scanScalarProperty($object, $name, $value);
                 } elseif ($this->recursiveScan) {
                     $this->scanCompositeProperty($object, $name, $value);
                 }
@@ -158,16 +141,5 @@ class ObjectCollector extends AbstractCollector
         // TODO: Allow configuration of the properties to filter.
         //       For now hard code none-underscore-prefixed properties.
         return ('_' !== substr($property->getName(), 0, 1));
-    }
-
-    /**
-     * Cast scalar to string value before storing.
-     * 
-     * @param mixed $value
-     * @return string
-     */
-    protected function toStringFromScalar($value)
-    {
-        return serialize($value);
     }
 }

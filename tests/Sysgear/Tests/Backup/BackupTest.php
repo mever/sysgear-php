@@ -19,38 +19,34 @@ class BackupTest extends TestCase
 {
     public function testBackup()
     {
-        return;
         $tool = new BackupTool(new XmlExporter(), new XmlImporter());
         $export = $tool->backup($this->backupBasicCompany());
-var_dump($export->formatOutput(true)->toString()); return;
         $this->assertEquals($this->expectedBasicCompanyXml(), $export->formatOutput(true)->toString());
     }
 
-    public function testRestore()
+    public function testXmlExporterFormat()
     {
-        return;
         $company = new Company();
         $tool = new BackupTool(new XmlExporter(), new XmlImporter());
         $export = $tool->backup($company);
 
         // Assert that the company to restore is empty.
-        $this->assertEquals("<?xml version=\"1.0\" encoding=\"utf8\"?>\n<company Mclass=\"Sysgear\\Tests\\Backup\\Company\">" .
-        	"<functions/><employees/></company>", $export->formatOutput(false)->toString());
+        $this->assertEquals("<?xml version=\"1.0\" encoding=\"utf8\"?>\n<Company type=\"Sysgear\\Tests\\Backup\\Company\">" .
+        	"<functions type=\"array\"/><employees type=\"array\"/></Company>", $export->formatOutput(false)->toString());
 
         // Assert formatted XML structure.
-        $this->assertEquals("<?xml version=\"1.0\" encoding=\"utf8\"?>\n<company Mclass=\"Sysgear\\Tests\\Backup\\Company\">" .
-        	"\n  <functions/>\n  <employees/>\n</company>", $export->formatOutput(true)->toString());
+        $this->assertEquals("<?xml version=\"1.0\" encoding=\"utf8\"?>\n<Company type=\"Sysgear\\Tests\\Backup\\Company\">" .
+        	"\n  <functions type=\"array\"/>\n  <employees type=\"array\"/>\n</Company>", $export->formatOutput(true)->toString());
+    }
 
-        // Remove old backup tool instance and create new one to restore the company to expectedBasicCompany.
-        unset($tool);
+    public function testRestore()
+    {
         $importer = new XmlImporter();
         $importer->fromString($this->expectedBasicCompanyXml());
         $tool = new BackupTool(new XmlExporter(), $importer);
-
-        // Restore company.
-        $tool->restore($company);
-        var_dump($company);
         
-//        $this->assertEquals($this->expectBasicCompanyXml(), $export->toString());
+        // Restore company.
+        $company = $tool->restore(new Company());
+        var_dump($company);
     }
 }

@@ -24,33 +24,52 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $lang = new Language(1, 'en_EN');
         $locale = new Locale(1, $lang);
         $company = new Company(1, 'rts', $locale);
-        $role = new Role(1, 'admin', $company);
         $user = new User(1, 'piet', 'bf7s83s', $company);
+        $role = new Role(1, 'admin', $company);
+        $role->members[] = $user;
         $company->employees[] = $user;
         $company->functions[] = $role;
-
         return $company;
     }
 
     protected function expectedBasicCompanyXml()
     {
         return '<?xml version="1.0" encoding="utf8"?>
-<company Mclass="Sysgear\Tests\Backup\Company" Pid="i:1;" Pname="s:3:&quot;rts&quot;;">
-  <locale Mclass="Sysgear\Tests\Backup\Locale" Pid="i:1;">
-    <language Mclass="Sysgear\Tests\Backup\Language" Pid="i:1;" Piso639="s:5:&quot;en_EN&quot;;"/>
-  </locale>
-  <functions>
-    <role Mclass="Sysgear\Tests\Backup\Role" Pid="i:1;" Pname="s:5:&quot;admin&quot;;">
-      <members/>
-      <company Mclass="Sysgear\Tests\Backup\Company"/>
-    </role>
+<Company type="Sysgear\Tests\Backup\Company">
+  <id type="integer" value="1"/>
+  <name type="string" value="rts"/>
+  <Locale type="Sysgear\Tests\Backup\Locale">
+    <id type="integer" value="1"/>
+    <Language type="Sysgear\Tests\Backup\Language">
+      <id type="integer" value="1"/>
+      <iso639 type="string" value="en_EN"/>
+    </Language>
+  </Locale>
+  <functions type="array">
+    <Role type="Sysgear\Tests\Backup\Role">
+      <id type="integer" value="1"/>
+      <name type="string" value="admin"/>
+      <members type="array">
+        <User type="Sysgear\Tests\Backup\User">
+          <id type="integer" value="1"/>
+          <name type="string" value="piet"/>
+          <password type="string" value="bf7s83s"/>
+          <Company type="Sysgear\Tests\Backup\Company" primaryProperty="id" reference="1"/>
+          <roles type="array"/>
+        </User>
+      </members>
+      <Company type="Sysgear\Tests\Backup\Company" primaryProperty="id" reference="1"/>
+    </Role>
   </functions>
-  <employees>
-    <user Mclass="Sysgear\Tests\Backup\User" Pid="i:1;" Pname="s:4:&quot;piet&quot;;" Ppassword="s:7:&quot;bf7s83s&quot;;">
-      <company Mclass="Sysgear\Tests\Backup\Company"/>
-      <roles/>
-    </user>
+  <employees type="array">
+    <User type="Sysgear\Tests\Backup\User">
+      <id type="integer" value="1"/>
+      <name type="string" value="piet"/>
+      <password type="string" value="bf7s83s"/>
+      <Company type="Sysgear\Tests\Backup\Company" primaryProperty="id" reference="1"/>
+      <roles type="array"/>
+    </User>
   </employees>
-</company>';
+</Company>';
     }
 }
