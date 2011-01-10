@@ -2,15 +2,8 @@
 
 namespace Sysgear\StructuredData\Exporter;
 
-use Sysgear\StructuredData\Collector\CollectorInterface;
-
-class XmlExporter implements ExporterInterface
+class XmlExporter extends AbstractExporter
 {
-    /**
-     * @var \DOMDocument
-     */
-    protected $document;
-
     /**
      * Flag if output should be pretty-print.
      * 
@@ -24,16 +17,8 @@ class XmlExporter implements ExporterInterface
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public function setDom(\DOMDocument $domDocument)
-    {
-        $this->document = $domDocument;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
+     * (non-PHPdoc)
+     * @see Sysgear\StructuredData\Exporter.ExporterInterface::toString()
      */
     public function toString()
     {

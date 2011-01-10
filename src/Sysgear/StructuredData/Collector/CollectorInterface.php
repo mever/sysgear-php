@@ -22,10 +22,9 @@ interface CollectorInterface
     public function fromObject($object, $name = null);
 
     /**
-     * Write structured data collector to exporter.
+     * Get DOM from collector.
      * 
-     * @param \Sysgear\StructuredData\Exporter\ExporterInterface $exporter
-     * @return \Sysgear\StructuredData\Collector\CollectorInterface
+     * @return \DOMDocument
      */
-    public function writeExport(ExporterInterface $exporter);
+    public function getDom();
 }

@@ -40,16 +40,13 @@ abstract class AbstractCollector implements CollectorInterface
         $this->document = new \DOMDocument('1.0', 'utf8');
     }
 
-    /**
-     * Write structured data exporter.
-     * 
-     * @param \Sysgear\StructuredData\Exporter\ExporterInterface $exporter
-     * @return \Sysgear\StructuredData\Collector\CollectorInterface
-     */
-    public function writeExport(ExporterInterface $exporter)
+	/**
+	 * (non-PHPdoc)
+	 * @see Sysgear\StructuredData\Collector.CollectorInterface::getDom()
+	 */
+    public function getDom()
     {
-        $exporter->setDom($this->document);
-        return $this;
+        return $this->document;
     }
 
     /**

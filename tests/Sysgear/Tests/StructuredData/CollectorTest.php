@@ -22,7 +22,7 @@ class CollectorTest extends TestCase
         $collector->fromObject($this->backupBasicCompany());
 
         $exporter = new XmlExporter();
-        $collector->writeExport($exporter);
+        $exporter->setDom($collector->getDom());
 
         $this->assertEquals($this->expectedBasicCompanyXml(), rtrim($exporter->formatOutput(true)->toString()));
     }

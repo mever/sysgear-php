@@ -52,7 +52,7 @@ class BackupTool
         $object->collectStructedData($collector);
 
         $exporter = $this->getExporter($exporter);
-        $collector->writeExport($exporter);
+        $exporter->setDom($collector->getDom());
         return $exporter;
     }
 
@@ -66,7 +66,7 @@ class BackupTool
     public function restore(BackupableInterface $object, ImporterInterface $importer = null)
     {
         $restorer = new BackupRestorer();
-        $restorer->readImport($this->getImporter($importer));
+        $restorer->setDom($this->getImporter($importer)->getDom());
 
         $object->restoreStructedData($restorer);
         return $object;

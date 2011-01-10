@@ -1,10 +1,8 @@
 <?php
 
-namespace Sysgear\StructuredData\Restorer;
+namespace Sysgear\StructuredData\Exporter;
 
-use Sysgear\StructuredData\Importer\ImporterInterface;
-
-abstract class AbstractRestorer implements RestorerInterface
+abstract class AbstractExporter implements ExporterInterface
 {
     /**
      * @var \DOMDocument
@@ -13,7 +11,7 @@ abstract class AbstractRestorer implements RestorerInterface
 
     /**
      * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Restorer.RestorerInterface::setDom()
+     * @see Sysgear\StructuredData\Exporter.ExporterInterface::setDom()
      */
     public function setDom(\DOMDocument $domDocument)
     {

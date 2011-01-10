@@ -22,6 +22,5 @@ class BackupRestorer extends AbstractRestorer
             $pos = strrpos($fullClassname, '\\');
             $name = (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
         }
-        
     }
 }

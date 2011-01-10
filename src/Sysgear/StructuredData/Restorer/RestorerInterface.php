@@ -21,10 +21,10 @@ interface RestorerInterface
     public function toObject($object, $name = null);
 
     /**
-     * Read structured data import to restorer.
+     * Set the DOM for restorer.
      * 
-     * @param \Sysgear\StructuredData\Importer\ImporterInterface $importer
+     * @param \DOMDocument $domDocument
      * @return \Sysgear\StructuredData\Restorer\RestorerInterface
      */
-    public function readImport(ImporterInterface $importer);
+    public function setDom(\DOMDocument $domDocument);
 }
