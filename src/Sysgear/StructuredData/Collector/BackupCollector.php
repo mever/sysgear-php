@@ -12,6 +12,16 @@ use Sysgear\Backup\BackupableInterface;
 class BackupCollector extends AbstractCollector
 {
     /**
+     * When true only collect data from the first
+     * implementor of the backupable interface, start search from parent to subclass.
+     * 
+     * e.g. preventing the Doctrine2 proxy objects from being collected.
+     * 
+     * @var boolean
+     */
+    public $onlyImplementor = true;
+
+    /**
      * This object is a reference.
      * 
      * @var boolean
@@ -24,6 +34,21 @@ class BackupCollector extends AbstractCollector
      * @var string
      */
     protected $name;
+
+    /**
+     * Set option.
+     * 
+     * @param string $key
+     * @param mixed $value
+     */
+    public function setOption($key, $value)
+    {
+        switch ($key) {
+        case 'onlyImplementor':
+            $this->onlyImplementor = (boolean) $value;
+            break;
+        }
+    }
 
     /**
      * (non-PHPdoc)
@@ -42,14 +67,20 @@ class BackupCollector extends AbstractCollector
         $name = $this->name ?: $this->getNodeName($object);
         $this->element = $this->document->createElement($name);
         $this->element->setAttribute('type', 'object');
-        $this->element->setAttribute('class', get_class($object));
+        $this->element->setAttribute('class', $this->getClassName($object));
         $refClass = new \ReflectionClass($object);
         if ($this->reference) {
             
             // Create reference.
-            $ppn = $object->getPrimaryPropertyName();
-            $this->element->setAttribute('refName', $ppn);
-            $this->element->setAttribute('refValue', $refClass->getProperty($ppn)->getValue($object));
+            if (null !== ($pk = $this->getMeta($object, 'pk'))) {
+                $prop = $refClass->getProperty($pk);
+                $prop->setAccessible(true);
+                $this->element->setAttribute('refName', $pk);
+                $this->element->setAttribute('refValue', $prop->getValue($object));
+            } else {
+                throw new CollectorException("We found a reference to an already collected " .
+                    "object, but no primary key was given to make it serializable.");
+            }
         } else {
             foreach ($refClass->getProperties() as $property) {
     
@@ -103,11 +134,9 @@ class BackupCollector extends AbstractCollector
         if (is_array($value) || ($value instanceof \IteratorAggregate)) {
 
             $collection = $this->document->createElement($name);
+            $collection->setAttribute('type', 'array');
             $this->element->appendChild($collection);
-            if (is_array($value)) {
-                $collection->setAttribute('type', 'array');
-            } else {
-                $collection->setAttribute('type', 'object');
+            if (! is_array($value)) {
                 $collection->setAttribute('class', get_class($value));
             }
 
@@ -164,6 +193,60 @@ class BackupCollector extends AbstractCollector
         $collector->name = $name;
         $backupable->collectStructedData($collector);
         $node->appendChild($collector->getDomElement());
+    }
+
+    /**
+     * Return backup metadata for this collection.
+     * 
+     * @param BackupableInterface $backupable
+     * @param string $key
+     * @param mixed $default
+     */
+    protected function getMeta(BackupableInterface $backupable, $key, $default = null)
+    {
+        $md = $backupable->getBackupMetadata();
+        return (array_key_exists($key, $md)) ? $md[$key] : $default;
+    }
+
+    /**
+     * Return the node name which represents this $object.
+     * 
+     * @param \Sysgear\Backup\BackupableInterface $backupable
+     * @return string
+     */
+    protected function getNodeName($backupable)
+    {
+        if (null !== ($name = $this->getMeta($backupable, 'name'))) {
+            return $name;
+        } else {
+            return parent::getNodeName($this->getClassName($backupable));
+        }
+    }
+
+    /**
+     * Return the class name of $backupable
+     * 
+     * @param \Sysgear\Backup\BackupableInterface $backupable
+     */
+    protected function getClassName(BackupableInterface $backupable)
+    {
+        if ($this->onlyImplementor) {
+
+            // Fetches the oldest parent name which implements the backupable interface.
+            $previousClass = $class = get_class($backupable);
+            while (false !== $class) {
+                $refClass = new \ReflectionClass($class);
+                if (! $refClass->implementsInterface('\\Sysgear\\Backup\\BackupableInterface')) {
+                    break;
+                }
+                $previousClass = $class;
+                $class = get_parent_class($class);
+            }
+            return $previousClass;
+
+        } else {
+            return get_class($backupable);
+        }
     }
 
     /**

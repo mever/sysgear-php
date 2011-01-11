@@ -33,11 +33,28 @@ abstract class AbstractCollector implements CollectorInterface
     protected $recursiveScan = true;
 
     /**
-     * Construct abstract data collector.
+     * Construct data collector.
+     * 
+     * @param array $options
      */
-    public function __construct()
+    public function __construct(array $options = null)
     {
         $this->document = new \DOMDocument('1.0', 'utf8');
+        if (null !== $options) {
+            foreach ($options as $key => $value) {
+                $this->setOption($key, $value);
+            }
+        }
+    }
+
+    /**
+     * Set option.
+     * 
+     * @param string $key
+     * @param mixed $value
+     */
+    public function setOption($key, $value)
+    {
     }
 
 	/**
@@ -62,12 +79,12 @@ abstract class AbstractCollector implements CollectorInterface
     /**
      * Return the node name which represents this $object.
      * 
-     * @param object $object
+     * @param mixed $object May be a class name
      * @return string
      */
     protected function getNodeName($object)
     {
-        $fullClassname = get_class($object);
+        $fullClassname = is_string($object) ? $object : get_class($object);
         $pos = strrpos($fullClassname, '\\');
         return (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
     }

@@ -29,6 +29,15 @@ class BackupRestorer extends AbstractRestorer
     protected $remainingProperties = array();
 
     /**
+     * Restore state, no remaining properties or other
+     * business that shouldn't be cloned.
+     */
+    public function __clone()
+    {
+        $this->remainingProperties = array();
+    }
+
+    /**
      * (non-PHPdoc)
      * @see Sysgear\StructuredData\Restorer.RestorerInterface::toObject()
      */
@@ -40,12 +49,12 @@ class BackupRestorer extends AbstractRestorer
 
         $name = $this->name ?: $this->getNodeName($object);
         $thisNode = $this->document->getElementsByTagName($name)->item(0);
+        
         $this->createReferenceCandidate($thisNode, $object);
         $refClass = new \ReflectionClass($object);
         foreach ($thisNode->childNodes as $propertyNode) {
 
             if ($propertyNode instanceof \DOMElement) {
-
                 $this->setProperty($refClass, $propertyNode, $object);
             }
         }
@@ -111,17 +120,17 @@ class BackupRestorer extends AbstractRestorer
     }
 
     /**
-     * Cast property to object.
+     * Cast property to backupable.
      * 
      * @param \DOMElement $propertyNode
-     * @return object
+     * @return \Sysgear\Backup\BackupableInterface
      */
     protected function castObject(\DOMElement $propertyNode)
     {
         $class = $propertyNode->getAttribute('class');
         if ($propertyNode->hasAttribute('refValue')) {
 
-            // Found reference, return it.
+            // Found reference, so return it.
             $prop = $class . '::' . $propertyNode->getAttribute('refName') .
                 '=' . $propertyNode->getAttribute('refValue');
             return $this->referenceCandidates['object'][$prop];
@@ -129,13 +138,14 @@ class BackupRestorer extends AbstractRestorer
 
         $restorer = clone $this;
         $restorer->name = $propertyNode->nodeName;
+        $restorer->referenceCandidates =& $this->referenceCandidates;
 
-        $object = new $class();
-        if (! ($object instanceof BackupableInterface)) {
-            throw RestorerException::canNotFindClass($class);
+        $backupable = new $class();
+        if (! ($backupable instanceof BackupableInterface)) {
+            throw new RestorerException("Can not restore class: '{$class}' or class does not implement backupable.");
         }
-        $object->restoreStructedData($restorer);
-        return $object;
+        $backupable->restoreStructedData($restorer);
+        return $backupable;
     }
 
     /**
@@ -164,15 +174,38 @@ class BackupRestorer extends AbstractRestorer
      */
     protected function createReferenceCandidate(\DOMelement $node, $object)
     {
-        $ppn = $object->getPrimaryPropertyName();
+        $md = $object->getBackupMetadata();
+        if (@empty($md['pk'])) {
+            return;
+        }
+
+        $pk = $md['pk'];
         $class = $node->getAttribute('class');
-        $nodeList = $node->getElementsByTagName($ppn);
+        $nodeList = $node->getElementsByTagName($pk);
         if (0 === $nodeList->length) {
-            throw new RestorerException("{$class} does not have primary property named: '{$ppn}'" . "\n{$propertyNode->nodeName}");
+            throw new RestorerException("{$class} does not have primary property named: '{$pk}'" . "\n{$propertyNode->nodeName}");
         }
 
         // Create reference.
-        $prop = $class . '::' . $ppn . '=' . $nodeList->item(0)->getAttribute('value');
+        $prop = $class . '::' . $pk . '=' . $nodeList->item(0)->getAttribute('value');
         $this->referenceCandidates['object'][$prop] = $object;
+    }
+
+    /**
+     * Return the node name which represents this $object.
+     * 
+     * @param BackupableInterface $backupable
+     * @return string
+     */
+    protected function getNodeName($backupable)
+    {
+        $md = $backupable->getBackupMetadata();
+        if (! @empty($md['name'])) {
+            return $md['name'];
+        }
+
+        $fullClassname = get_class($backupable);
+        $pos = strrpos($fullClassname, '\\');
+        return (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
     }
 }

@@ -28,13 +28,20 @@ interface BackupableInterface
     public function restoreStructedData(BackupRestorer $backupDataRestorer);
 
     /**
-     * Return the primary property name of the implementing class
-     * which can be used to uniquely identify this instance.
+     * Returns metadata about the implementation of this class.
      * 
-     * For example; if the implementing class is an active-record
-     * the property which represents the primary key can be used.
+     * *id* (required for relations)
+     * A scalar used to identify and reference the instance of
+     * the implmenting class. Can be used to refer an other (or same) instance of the
+     * implementing class. Used to establish relations between instances.
+     * E.g. If implementor is an active-record, this id should be the primary key value.
      * 
-     * @return string
+     * If omitted use the object hashes to prevent circular references when collecting.
+     *  
+     * *name* (optional)
+     * Name of this backup entry.
+     * 
+     * @return array
      */
-    public function getPrimaryPropertyName();
+    public function getBackupMetadata();
 }

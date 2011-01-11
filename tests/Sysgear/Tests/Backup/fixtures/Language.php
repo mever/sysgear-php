@@ -31,14 +31,17 @@ class Language implements BackupableInterface
      */
     public function restoreStructedData(BackupRestorer $backupDataRestorer)
     {
-        $backupDataRestorer->toObject($this);
+        $remaining = $backupDataRestorer->toObject($this);
+        foreach ($remaining as $name => $value) {
+            $this->{$name} = $value;
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getPrimaryPropertyName()
+    public function getBackupMetadata()
     {
-        return 'id';
+        return array('pk' => 'id');
     }
 }

@@ -17,14 +17,48 @@ use Sysgear\Backup\BackupTool;
 
 class BackupTest extends TestCase
 {
+    /**
+     * Test simple backup.
+     */
     public function testBackup()
     {
         $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
-        $export = $tool->backup($this->backupBasicCompany());
+        $export = $tool->backup($this->basicCompany());
 
-        $this->assertEquals($this->expectedBasicCompanyXml(), $export->formatOutput(true)->toString());
+        $this->assertEquals($this->expectedBasicCompanyXml(),
+            $export->formatOutput(true)->toString());
     }
 
+    /**
+     * Test backup with company object wrapped by a proxy. 
+     */
+    public function testProxyCompanyBackup()
+    {
+        $onlyImplementor = false;
+        $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
+        $export = $tool->backup($this->inheritedBasicCompany(), array('onlyImplementor' => $onlyImplementor));
+
+        $this->assertEquals($this->expectedInheritedBasicCompanyXml($onlyImplementor),
+            $export->formatOutput(true)->toString());
+    }
+
+    /**
+     * Test backup with company object wrapped by a proxy but with
+     * onlyImplementor directive on.
+     */
+    public function testOnlyImplementorBackup()
+    {
+        $onlyImplementor = true;
+        $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
+        $export = $tool->backup($this->inheritedBasicCompany(), array('onlyImplementor' => $onlyImplementor));
+
+        $this->assertEquals($this->expectedInheritedBasicCompanyXml($onlyImplementor),
+            $export->formatOutput(true)->toString());
+    }
+
+    /**
+     * Test xml export formatting.
+     */
     public function testXmlExporterFormat()
     {
         $company = new Company();
@@ -43,7 +77,10 @@ class BackupTest extends TestCase
             $export->formatOutput(true)->toString());
     }
 
-    public function testRestore()
+    /**
+     * Test restoring the object from XML.
+     */
+    public function testRestoreFromXml()
     {
         // Restore company.
         $importer = new XmlImporter();
@@ -59,5 +96,8 @@ class BackupTest extends TestCase
         // Assert protected & private properties.
         $this->assertEquals('rts', $company->getName());
         $this->assertEquals('piet', $company->getEmployee(0)->getName());
+
+        // Assert properties.
+        $this->assertFalse(isset($company->locale->language->name));
     }
 }

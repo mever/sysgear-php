@@ -42,8 +42,8 @@ class Role implements BackupableInterface
     /**
      * {@inheritDoc}
      */
-    public function getPrimaryPropertyName()
+    public function getBackupMetadata()
     {
-        return 'id';
+        return array('pk' => 'id');
     }
 }

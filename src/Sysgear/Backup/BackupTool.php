@@ -62,38 +62,42 @@ class BackupTool
      * Backup collection of stuctured data from $object.
      * 
      * @param \Sysgear\Backup\BackupableInterface $object
-     * @param \Sysgear\StructuredData\Exporter\ExporterInterface $exporter
+     * @param array $collectorOptions
      * @return \Sysgear\StructuredData\Exporter\ExporterInterface
      */
-    public function backup(BackupableInterface $object, ExporterInterface $exporter = null)
+    public function backup(BackupableInterface $object, array $collectorOptions = null)
     {
-        $collector = new BackupCollector();
+        $collector = new BackupCollector($collectorOptions);
         $object->collectStructedData($collector);
-        $this->writeBackup($collector->getDom());
+        $this->writeContent($collector->getDom());
 
-        $exporter = $this->getExporter($exporter);
-        $exporter->setDom($this->document);
-        return $exporter;
+        $this->exporter->setDom($this->document);
+        return $this->exporter;
     }
 
     /**
      * Restore collection of structed data to $object.
      * 
      * @param \Sysgear\Backup\BackupableInterface $object
-     * @param \Sysgear\StructuredData\Importer\ImporterInterface $importer
+     * @param array $restorerOptions
      * @return \Sysgear\Backup\BackupableInterface
      */
-    public function restore(BackupableInterface $object, ImporterInterface $importer = null)
+    public function restore(BackupableInterface $object, array $restorerOptions = null)
     {
-        $this->document = $this->getImporter($importer)->getDom();
-        $restorer = new BackupRestorer();
-        $restorer->setDom($this->readBackup());
+        $this->document = $this->importer->getDom();
+        $restorer = new BackupRestorer($restorerOptions);
+        $restorer->setDom($this->readContent());
 
         $object->restoreStructedData($restorer);
         return $object;
     }
 
-    protected function readBackup()
+    /**
+     * Read backup content.
+     * 
+     * @return \DOMDocument
+     */
+    protected function readContent()
     {
         $doc = new \DOMDocument('1.0', 'utf8');
         $content = $this->document->getElementsByTagName('content')->item(0);
@@ -104,11 +108,11 @@ class BackupTool
     }
 
     /**
-     * Write backup data.
+     * Write backup content.
      * 
      * @param \DOMDocument $dom
      */
-    protected function writeBackup(\DOMDocument $dom)
+    protected function writeContent(\DOMDocument $dom)
     {
         // Create backup
         $doc = $this->document = new \DOMDocument('1.0', 'utf8');
@@ -155,31 +159,5 @@ class BackupTool
             }
             break;
         }
-    }
-
-    /**
-     * Return exporter.
-     * 
-     * @param \Sysgear\StructuredData\Exporter\ExporterInterface $exporter
-     */
-    protected function getExporter(ExporterInterface $exporter = null)
-    {
-        if (null === $exporter) {
-            $exporter = $this->exporter;
-        }
-        return $exporter;
-    }
-
-    /**
-     * Return importer.
-     * 
-     * @param \Sysgear\StructuredData\Importer\ImporterInterface $importer
-     */
-    protected function getImporter(ImporterInterface $importer = null)
-    {
-        if (null === $importer) {
-            $importer = $this->importer;
-        }
-        return $importer;
     }
 }

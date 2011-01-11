@@ -4,7 +4,6 @@ namespace Sysgear;
 
 class Util
 {
-
     /**
      * Sort a two dimensional array on field.
      * 
