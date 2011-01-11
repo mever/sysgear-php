@@ -47,45 +47,46 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $company;
     }
 
-    protected function expectedInheritedBasicCompanyXml($onlyImplementor)
+    protected function expectedInheritedBasicCompanyXml(Company $comp, $onlyImplementor)
     {
+        $compHash = spl_object_hash($comp);
         $className = ($onlyImplementor) ? 'Company' : 'ProxyCompany';
         return '<?xml version="1.0" encoding="utf8"?>
 <backup>
   <metadata/>
   <content>
-    <'.$className.' type="object" class="Sysgear\\Tests\\Backup\\'.$className.'">
+    <'.$className.' type="object" class="Sysgear\\Tests\\Backup\\'.$className.'" id="'.$compHash.'">
       <id type="integer" value="1"/>
       <name type="string" value="rts"/>
-      <locale type="object" class="Sysgear\\Tests\\Backup\\Locale">
+      <locale type="object" class="Sysgear\\Tests\\Backup\\Locale" id="'.spl_object_hash($comp->locale).'">
         <id type="integer" value="1"/>
-        <language type="object" class="Sysgear\\Tests\Backup\\Language">
+        <language type="object" class="Sysgear\\Tests\Backup\\Language" id="'.spl_object_hash($comp->locale->language).'">
           <id type="integer" value="1"/>
           <iso639 type="string" value="en_EN"/>
         </language>
       </locale>
       <functions type="array">
-        <Role type="object" class="Sysgear\\Tests\\Backup\\Role">
+        <Role type="object" class="Sysgear\\Tests\\Backup\\Role" id="'.spl_object_hash($comp->functions[0]).'">
           <id type="integer" value="1"/>
           <name type="string" value="admin"/>
           <members type="array">
-            <User type="object" class="Sysgear\\Tests\\Backup\\User">
+            <User type="object" class="Sysgear\\Tests\\Backup\\User" id="'.spl_object_hash($comp->functions[0]->members[0]).'">
               <id type="integer" value="1"/>
               <name type="string" value="piet"/>
               <password type="string" value="bf7s83s"/>
-              <employer type="object" class="Sysgear\\Tests\\Backup\\'.$className.'" refName="id" refValue="1"/>
+              <employer type="object" class="Sysgear\\Tests\\Backup\\'.$className.'" ref="'.$compHash.'"/>
               <roles type="array"/>
             </User>
           </members>
-          <company type="object" class="Sysgear\\Tests\\Backup\\'.$className.'" refName="id" refValue="1"/>
+          <company type="object" class="Sysgear\\Tests\\Backup\\'.$className.'" ref="'.$compHash.'"/>
         </Role>
       </functions>
       <employees type="array">
-        <User type="object" class="Sysgear\\Tests\\Backup\\User">
+        <User type="object" class="Sysgear\\Tests\\Backup\\User" id="'.spl_object_hash($comp->getEmployee(0)).'">
           <id type="integer" value="1"/>
           <name type="string" value="piet"/>
           <password type="string" value="bf7s83s"/>
-          <employer type="object" class="Sysgear\\Tests\\Backup\\'.$className.'" refName="id" refValue="1"/>
+          <employer type="object" class="Sysgear\\Tests\\Backup\\'.$className.'" ref="'.$compHash.'"/>
           <roles type="array"/>
         </User>
       </employees>
@@ -94,44 +95,46 @@ class TestCase extends \PHPUnit_Framework_TestCase
 </backup>';
     }
 
-    protected function expectedBasicCompanyXml()
+    protected function expectedBasicCompanyXml(Company $comp = null)
     {
+        $empty = (null === $comp) ? 'N/A' : null;
+        $compHash = $empty ?: spl_object_hash($comp);
         return '<?xml version="1.0" encoding="utf8"?>
 <backup>
   <metadata/>
   <content>
-    <Company type="object" class="Sysgear\\Tests\\Backup\\Company">
+    <Company type="object" class="Sysgear\\Tests\\Backup\\Company" id="'.$compHash.'">
       <id type="integer" value="1"/>
       <name type="string" value="rts"/>
-      <locale type="object" class="Sysgear\\Tests\\Backup\\Locale">
+      <locale type="object" class="Sysgear\\Tests\\Backup\\Locale" id="'.($empty ?: spl_object_hash($comp->locale)).'">
         <id type="integer" value="1"/>
-        <language type="object" class="Sysgear\\Tests\\Backup\\Language">
+        <language type="object" class="Sysgear\\Tests\\Backup\\Language" id="'.($empty ?: spl_object_hash($comp->locale->language)).'">
           <id type="integer" value="1"/>
           <iso639 type="string" value="en_EN"/>
         </language>
       </locale>
       <functions type="array">
-        <Role type="object" class="Sysgear\\Tests\\Backup\\Role">
+        <Role type="object" class="Sysgear\\Tests\\Backup\\Role" id="'.($empty ?: spl_object_hash($comp->functions[0])).'">
           <id type="integer" value="1"/>
           <name type="string" value="admin"/>
           <members type="array">
-            <User type="object" class="Sysgear\\Tests\\Backup\\User">
+            <User type="object" class="Sysgear\\Tests\\Backup\\User" id="'.($empty ?: spl_object_hash($comp->functions[0]->members[0])).'">
               <id type="integer" value="1"/>
               <name type="string" value="piet"/>
               <password type="string" value="bf7s83s"/>
-              <employer type="object" class="Sysgear\\Tests\\Backup\\Company" refName="id" refValue="1"/>
+              <employer type="object" class="Sysgear\\Tests\\Backup\\Company" ref="'.$compHash.'"/>
               <roles type="array"/>
             </User>
           </members>
-          <company type="object" class="Sysgear\\Tests\\Backup\\Company" refName="id" refValue="1"/>
+          <company type="object" class="Sysgear\\Tests\\Backup\\Company" ref="'.$compHash.'"/>
         </Role>
       </functions>
       <employees type="array">
-        <User type="object" class="Sysgear\\Tests\\Backup\\User">
+        <User type="object" class="Sysgear\\Tests\\Backup\\User" id="'.($empty ?: spl_object_hash($comp->getEmployee(0))).'">
           <id type="integer" value="1"/>
           <name type="string" value="piet"/>
           <password type="string" value="bf7s83s"/>
-          <employer type="object" class="Sysgear\\Tests\\Backup\\Company" refName="id" refValue="1"/>
+          <employer type="object" class="Sysgear\\Tests\\Backup\\Company" ref="'.$compHash.'"/>
           <roles type="array"/>
         </User>
       </employees>

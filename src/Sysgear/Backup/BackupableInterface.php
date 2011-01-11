@@ -26,22 +26,4 @@ interface BackupableInterface
      * @param Sysgear\StructuredData\Restorer\BackupRestorer $backupDataRestorer
      */
     public function restoreStructedData(BackupRestorer $backupDataRestorer);
-
-    /**
-     * Returns metadata about the implementation of this class.
-     * 
-     * *id* (required for relations)
-     * A scalar used to identify and reference the instance of
-     * the implmenting class. Can be used to refer an other (or same) instance of the
-     * implementing class. Used to establish relations between instances.
-     * E.g. If implementor is an active-record, this id should be the primary key value.
-     * 
-     * If omitted use the object hashes to prevent circular references when collecting.
-     *  
-     * *name* (optional)
-     * Name of this backup entry.
-     * 
-     * @return array
-     */
-    public function getBackupMetadata();
 }

@@ -65,6 +65,7 @@ class BackupCollector extends AbstractCollector
         $this->excludedObjects[] = $object;
 
         $name = $this->name ?: $this->getNodeName($object);
+        $objHash = spl_object_hash($object);
         $this->element = $this->document->createElement($name);
         $this->element->setAttribute('type', 'object');
         $this->element->setAttribute('class', $this->getClassName($object));
@@ -72,16 +73,9 @@ class BackupCollector extends AbstractCollector
         if ($this->reference) {
             
             // Create reference.
-            if (null !== ($pk = $this->getMeta($object, 'pk'))) {
-                $prop = $refClass->getProperty($pk);
-                $prop->setAccessible(true);
-                $this->element->setAttribute('refName', $pk);
-                $this->element->setAttribute('refValue', $prop->getValue($object));
-            } else {
-                throw new CollectorException("We found a reference to an already collected " .
-                    "object, but no primary key was given to make it serializable.");
-            }
+            $this->element->setAttribute('ref', $objHash);
         } else {
+            $this->element->setAttribute('id', $objHash);
             foreach ($refClass->getProperties() as $property) {
     
                 // Exclude properties. 
@@ -138,6 +132,7 @@ class BackupCollector extends AbstractCollector
             $this->element->appendChild($collection);
             if (! is_array($value)) {
                 $collection->setAttribute('class', get_class($value));
+                $collection->setAttribute('id', spl_object_hash($value));
             }
 
             foreach ($value as $elem) {
@@ -196,19 +191,6 @@ class BackupCollector extends AbstractCollector
     }
 
     /**
-     * Return backup metadata for this collection.
-     * 
-     * @param BackupableInterface $backupable
-     * @param string $key
-     * @param mixed $default
-     */
-    protected function getMeta(BackupableInterface $backupable, $key, $default = null)
-    {
-        $md = $backupable->getBackupMetadata();
-        return (array_key_exists($key, $md)) ? $md[$key] : $default;
-    }
-
-    /**
      * Return the node name which represents this $object.
      * 
      * @param \Sysgear\Backup\BackupableInterface $backupable
@@ -216,11 +198,7 @@ class BackupCollector extends AbstractCollector
      */
     protected function getNodeName($backupable)
     {
-        if (null !== ($name = $this->getMeta($backupable, 'name'))) {
-            return $name;
-        } else {
-            return parent::getNodeName($this->getClassName($backupable));
-        }
+        return parent::getNodeName($this->getClassName($backupable));
     }
 
     /**

@@ -63,12 +63,4 @@ class Company implements BackupableInterface
             $this->{$name} = $value;
         }
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getBackupMetadata()
-    {
-        return array('pk' => 'id', 'id' => $this->id);
-    }
 }

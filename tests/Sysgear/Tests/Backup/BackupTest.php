@@ -15,6 +15,8 @@ use Sysgear\StructuredData\Exporter\XmlExporter;
 use Sysgear\StructuredData\Importer\XmlImporter;
 use Sysgear\Backup\BackupTool;
 
+require_once 'fixtures/Company.php';
+
 class BackupTest extends TestCase
 {
     /**
@@ -22,10 +24,11 @@ class BackupTest extends TestCase
      */
     public function testBackup()
     {
+        $comp = $this->basicCompany();
         $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
-        $export = $tool->backup($this->basicCompany());
+        $export = $tool->backup($comp);
 
-        $this->assertEquals($this->expectedBasicCompanyXml(),
+        $this->assertEquals($this->expectedBasicCompanyXml($comp),
             $export->formatOutput(true)->toString());
     }
 
@@ -35,10 +38,11 @@ class BackupTest extends TestCase
     public function testProxyCompanyBackup()
     {
         $onlyImplementor = false;
+        $comp = $this->inheritedBasicCompany();
         $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
-        $export = $tool->backup($this->inheritedBasicCompany(), array('onlyImplementor' => $onlyImplementor));
+        $export = $tool->backup($comp, array('onlyImplementor' => $onlyImplementor));
 
-        $this->assertEquals($this->expectedInheritedBasicCompanyXml($onlyImplementor),
+        $this->assertEquals($this->expectedInheritedBasicCompanyXml($comp, $onlyImplementor),
             $export->formatOutput(true)->toString());
     }
 
@@ -49,10 +53,11 @@ class BackupTest extends TestCase
     public function testOnlyImplementorBackup()
     {
         $onlyImplementor = true;
+        $comp = $this->inheritedBasicCompany();
         $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
-        $export = $tool->backup($this->inheritedBasicCompany(), array('onlyImplementor' => $onlyImplementor));
+        $export = $tool->backup($comp, array('onlyImplementor' => $onlyImplementor));
 
-        $this->assertEquals($this->expectedInheritedBasicCompanyXml($onlyImplementor),
+        $this->assertEquals($this->expectedInheritedBasicCompanyXml($comp, $onlyImplementor),
             $export->formatOutput(true)->toString());
     }
 
@@ -62,18 +67,20 @@ class BackupTest extends TestCase
     public function testXmlExporterFormat()
     {
         $company = new Company();
+        $objHash = spl_object_hash($company);
         $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
         $export = $tool->backup($company);
 
         // Assert that the company to restore is empty.
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"utf8\"?>\n<backup><metadata/><content>" .
-        	"<Company type=\"object\" class=\"Sysgear\\Tests\\Backup\\Company\"><functions type=\"array\"/><employees type=\"array\"/>" .
+        	"<Company type=\"object\" class=\"Sysgear\\Tests\\Backup\\Company\" id=\"{$objHash}\">" .
+        	"<functions type=\"array\"/><employees type=\"array\"/>" .
         	"</Company></content></backup>", $export->formatOutput(false)->toString());
 
         // Assert formatted XML structure.
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"utf8\"?>\n<backup>\n  <metadata/>\n  <content>" .
-        	"\n    <Company type=\"object\" class=\"Sysgear\\Tests\\Backup\\Company\">\n      <functions type=\"array\"/>" .
-        	"\n      <employees type=\"array\"/>\n    </Company>\n  </content>\n</backup>",
+        	"\n    <Company type=\"object\" class=\"Sysgear\\Tests\\Backup\\Company\" id=\"{$objHash}\">" 
+            ."\n      <functions type=\"array\"/>\n      <employees type=\"array\"/>\n    </Company>\n  </content>\n</backup>",
             $export->formatOutput(true)->toString());
     }
 
@@ -83,8 +90,9 @@ class BackupTest extends TestCase
     public function testRestoreFromXml()
     {
         // Restore company.
+        $dummyHashes = $this->basicCompany();
         $importer = new XmlImporter();
-        $importer->fromString($this->expectedBasicCompanyXml());
+        $importer->fromString($this->expectedBasicCompanyXml($dummyHashes));
         $tool = new BackupTool(new XmlExporter(), $importer);
         $company = $tool->restore(new Company());
 

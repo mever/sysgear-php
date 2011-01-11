@@ -38,12 +38,4 @@ class Role implements BackupableInterface
     {
         $backupDataRestorer->toObject($this);
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getBackupMetadata()
-    {
-        return array('pk' => 'id');
-    }
 }
