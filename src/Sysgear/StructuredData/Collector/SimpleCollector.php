@@ -13,20 +13,17 @@ class SimpleCollector extends AbstractCollector
      * (non-PHPdoc)
      * @see Sysgear\StructuredData\Collector.CollectorInterface::fromObject()
      */
-    public function fromObject($object, $name = null)
+    public function fromObject($object)
     {
         if (! is_object($object)) {
             throw new CollectorException("Given parameter is not an object.");
-        }
-
-        if (null === $name) {
-            $name = $this->getNodeName($object);
         }
 
         // Add this object to the list of excluded objects to
         // prevent infinite recursive collecting.
         $this->excludedObjects[] = $object;
 
+        $name = $this->getNodeName($object);
         $this->element = $this->document->createElement($name);
         $refClass = new \ReflectionClass($object);
         foreach ($refClass->getProperties() as $property) {

@@ -54,7 +54,7 @@ class BackupCollector extends AbstractCollector
      * (non-PHPdoc)
      * @see Sysgear\StructuredData\Collector.CollectorInterface::fromObject()
      */
-    public function fromObject($object, $name = null)
+    public function fromObject($object)
     {
         if (! ($object instanceof BackupableInterface)) {
             throw new CollectorException("Given object does not implement BackupableInterface.");

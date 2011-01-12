@@ -46,7 +46,7 @@ class BackupRestorer extends AbstractRestorer
      * (non-PHPdoc)
      * @see Sysgear\StructuredData\Restorer.RestorerInterface::toObject()
      */
-    public function toObject($object, $name = null)
+    public function toObject($object)
     {
         if (! ($object instanceof BackupableInterface)) {
             throw new RestorerException("Given object does not implement BackupableInterface.");
