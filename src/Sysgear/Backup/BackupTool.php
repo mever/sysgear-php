@@ -43,6 +43,20 @@ class BackupTool
     protected $options = array();
 
     /**
+     * Configuration options for the collector.
+     * 
+     * @var array
+     */
+    protected $collectorOptions = array();
+
+    /**
+     * Configuration options for the restorer.
+     * 
+     * @var array
+     */
+    protected $restorerOptions = array();
+
+    /**
      * Create backup utility.
      * 
      * @param \Sysgear\StructuredData\Exporter\ExporterInterface $exporter
@@ -59,18 +73,58 @@ class BackupTool
     }
 
     /**
+     * Set configuration option.
+     * 
+     * @param string $key
+     * @param mixed $value
+     * @return \Sysgear\Backup\BackupTool
+     */
+    public function setOption($key, $value)
+    {
+        $this->options[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * Set collector configuration option.
+     * 
+     * @param string $key
+     * @param mixed $value
+     * @return \Sysgear\Backup\BackupTool
+     */
+    public function setCollectorOption($key, $value)
+    {
+        $this->collectorOptions[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * Set restorer configuration option.
+     * 
+     * @param string $key
+     * @param mixed $value
+     * @return \Sysgear\Backup\BackupTool
+     */
+    public function setRestorerOption($key, $value)
+    {
+        $this->restorerOptions[$key] = $value;
+        return $this;
+    }
+
+    /**
      * Backup collection of stuctured data from $object.
      * 
      * @param \Sysgear\Backup\BackupableInterface $object
      * @param array $collectorOptions
      * @return \Sysgear\StructuredData\Exporter\ExporterInterface
      */
-    public function backup(BackupableInterface $object, array $collectorOptions = null)
+    public function backup(BackupableInterface $object, array $collectorOptions = array())
     {
+        $collectorOptions = array_merge($this->collectorOptions, $collectorOptions);
         $collector = new BackupCollector($collectorOptions);
         $object->collectStructedData($collector);
-        $this->writeContent($collector->getDom());
 
+        $this->writeContent($collector->getDom());
         $this->exporter->setDom($this->document);
         return $this->exporter;
     }
@@ -82,9 +136,11 @@ class BackupTool
      * @param array $restorerOptions
      * @return \Sysgear\Backup\BackupableInterface
      */
-    public function restore(BackupableInterface $object, array $restorerOptions = null)
+    public function restore(BackupableInterface $object, array $restorerOptions = array())
     {
         $this->document = $this->importer->getDom();
+
+        $restorerOptions = array_merge($this->restorerOptions, $restorerOptions);
         $restorer = new BackupRestorer($restorerOptions);
         $restorer->setDom($this->readContent());
 
@@ -154,7 +210,8 @@ class BackupTool
             if ((boolean) $option) {
                 $dateElem = $this->document->createElement('datetime');
                 $node->appendChild($dateElem);
-                $dateElem->setAttribute('format', "W3C (php date format: {$format})");
+                $dateElem->setAttribute('format', $format);
+                $dateElem->setAttribute('description', "PHP date format. See: http://nl3.php.net/manual/en/function.date.php");
                 $dateElem->setAttribute('value', date($format));
             }
             break;

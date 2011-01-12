@@ -37,13 +37,11 @@ abstract class AbstractCollector implements CollectorInterface
      * 
      * @param array $options
      */
-    public function __construct(array $options = null)
+    public function __construct(array $options = array())
     {
         $this->document = new \DOMDocument('1.0', 'utf8');
-        if (null !== $options) {
-            foreach ($options as $key => $value) {
-                $this->setOption($key, $value);
-            }
+        foreach ($options as $key => $value) {
+            $this->setOption($key, $value);
         }
     }
 

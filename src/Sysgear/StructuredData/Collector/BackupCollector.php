@@ -19,7 +19,7 @@ class BackupCollector extends AbstractCollector
      * 
      * @var boolean
      */
-    public $onlyImplementor = true;
+    public $onlyImplementor = false;
 
     /**
      * This object is a reference.
