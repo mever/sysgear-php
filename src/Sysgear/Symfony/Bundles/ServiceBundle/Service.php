@@ -6,22 +6,22 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class Service
 {
-	/**
-	 * @var $container \Symfony\Components\DependencyInjection\ContainerInterface
-	 */
-	protected $container;
+    /**
+     * @var $container \Symfony\Components\DependencyInjection\ContainerInterface
+     */
+    protected $container;
 
-	/**
-	 * 
-	 * @param \Symfony\Components\DependencyInjection\ContainerInterface $container A ContainerInterface instance
-	 */
-	public function __construct(ContainerInterface $container)
-	{
-		$this->container = $container;
-		$this->_init();
-	}
-	
-	protected function _init() {}
+    /**
+     * 
+     * @param \Symfony\Components\DependencyInjection\ContainerInterface $container A ContainerInterface instance
+     */
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+        $this->_init();
+    }
+
+    protected function _init() {}
 
     public function getDatabaseConnection($name = null)
     {
