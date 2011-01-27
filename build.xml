@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Sysgear" basedir="." default="build">
+
+<target name="build" depends="pull-stable,phpunit,php-codesniffer,phpmd" />
+
+<target name="pull-stable">
+  <exec executable="git" dir="${basedir}">
+    <arg line="pull" />
+  </exec>
+</target>
+
+<target name="phpunit">
+  <exec executable="php" dir="${basedir}" failonerror="on">
+    <arg line="
+    -d extension=/usr/local/zend/lib/php_extensions/xdebug.so -f /usr/bin/phpunit --
+    --log-junit ${basedir}/build/logs/phpunit.xml
+    --coverage-clover ${basedir}/build/logs/phpunit.coverage.xml
+    --coverage-html ${basedir}/build/coverage" />
+  </exec>
+</target>
+
+<target name="php-codesniffer">
+  <exec executable="phpcs" dir="${basedir}" output="${basedir}/build/logs/checkstyle.xml">
+    <arg line="--report=checkstyle --standard=Symfony2 ./src"/>
+  </exec>
+</target>
+
+<target name="phpmd">
+  <exec executable="phpmd" dir="${basedir}">
+    <arg line="./src xml codesize,unusedcode,naming"/>
+  </exec>
+</target>
+
+</project>
