@@ -27,7 +27,8 @@ class RequestListener
     protected $router;
     protected $logger;
 
-    public function __construct(ServiceManager $serviceManager, RouterInterface $router, LoggerInterface $logger = null)
+    public function __construct(ServiceManager $serviceManager,
+        RouterInterface $router, LoggerInterface $logger = null)
     {
         $this->serviceManager = $serviceManager;
         $this->router = $router;
@@ -37,7 +38,7 @@ class RequestListener
     /**
      * Registers a core.request listener.
      *
-     * @param \Symfony\Component\EventDispatcher\EventDispatcher $dispatcher An EventDispatcher instance
+     * @param \Symfony\Component\EventDispatcher\EventDispatcher $dispatcher
      */
     public function register(EventDispatcher $dispatcher)
     {
@@ -70,7 +71,8 @@ class RequestListener
 
         if (false !== $parameters = $this->router->match($request->getPathInfo())) {
             if (null !== $this->logger) {
-                $this->logger->info(sprintf('Matched route "%s" (parameters: %s)', $parameters['_route'], str_replace("\n", '', var_export($parameters, true))));
+                $this->logger->info(sprintf('Matched route "%s" (parameters: %s)',
+                  $parameters['_route'], str_replace("\n", '', var_export($parameters, true))));
             }
 
             $request->attributes->replace($parameters);
@@ -88,25 +90,25 @@ class RequestListener
      */
     protected function resolvService(Event $event, Request $request)
     {
-    	// TODO: Implement optional checks to see if it is a service request.
-    	if (! $serviceName = $request->attributes->get('_service')) {
-    		return;
-    	}
+        // TODO: Implement optional checks to see if it is a service request.
+        if (! $serviceName = $request->attributes->get('_service')) {
+            return;
+        }
 
-    	$sm = $this->serviceManager;
-    	$service = null;
-    	$protocol = $sm->getProtocol('jsonrpc');
-    	try {
-    	    $service = $sm->findService($serviceName);
-    	} catch (\Exception $e) {
-    	    $response = $protocol->fault($e);
-    	}
-    	if (null !== $service) {
-        	$protocol->addService($service, true);
-        	$response = $protocol->handle();
-    	}
+        $sm = $this->serviceManager;
+        $service = null;
+        $protocol = $sm->getProtocol('jsonrpc');
+        try {
+            $service = $sm->findService($serviceName);
+        } catch (\Exception $e) {
+            $response = $protocol->fault($e);
+        }
+        if (null !== $service) {
+            $protocol->addService($service, true);
+            $response = $protocol->handle();
+        }
 
-    	$event->setReturnValue($response);
-    	$event->setProcessed(true);
+        $event->setReturnValue($response);
+        $event->setProcessed(true);
     }
 }

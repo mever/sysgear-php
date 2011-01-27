@@ -13,12 +13,12 @@ interface ProtocolInterface
      */
     public function handle();
 
-	/**
-	 * Add a service object.
-	 * 
-	 * @param \Sysgear\Symfony\Bundles\ServiceBundle\Service $service
-	 * @param boolean $default
-	 * @return \Sysgear\Symfony\Bundles\ServiceBundle\Protocol\Jsonrpc
-	 */
-	public function addService(Service $service, $default);
+    /**
+     * Add a service object.
+     * 
+     * @param \Sysgear\Symfony\Bundles\ServiceBundle\Service $service
+     * @param boolean $default
+     * @return \Sysgear\Symfony\Bundles\ServiceBundle\Protocol\Jsonrpc
+     */
+    public function addService(Service $service, $default);
 }

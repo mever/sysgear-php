@@ -20,7 +20,7 @@ class Jsonrpc implements ProtocolInterface
         $this->container = $container;
         $this->adapter = $adapter;
         $this->adapter->setAutoEmitResponse(false);
-        
+
         $this->request = $container->get('request');
         $this->adapter->setTarget($this->request->getPathInfo());
     }

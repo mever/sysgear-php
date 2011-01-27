@@ -55,10 +55,10 @@ abstract class AbstractCollector implements CollectorInterface
     {
     }
 
-	/**
-	 * (non-PHPdoc)
-	 * @see Sysgear\StructuredData\Collector.CollectorInterface::getDom()
-	 */
+    /**
+     * (non-PHPdoc)
+     * @see Sysgear\StructuredData\Collector.CollectorInterface::getDom()
+     */
     public function getDom()
     {
         return $this->document;

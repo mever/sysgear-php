@@ -21,7 +21,7 @@ class ServiceManager
 
     /**
      * 
-     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container A ContainerInterface instance
+     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
      * @param \Symfony\Component\HttpKernel\Log\LoggerInterface $logger
      */
     public function __construct(ContainerInterface $container, $logger = null)
@@ -65,11 +65,16 @@ class ServiceManager
             $try = $namespace.'\\'.$bundle.'\\Service\\'.$service.'Service';
             if (!class_exists($try)) {
                 if (null !== $this->logger) {
-                    $logs[] = sprintf('Failed finding service "%s:%s" from namespace "%s" (%s)', $bundle, $service, $namespace, $try);
+                    $logs[] = sprintf('Failed finding service "%s:%s" from namespace "%s" (%s)',
+                        $bundle, $service, $namespace, $try);
                 }
             } else {
-                if (!in_array($namespace.'\\'.$bundle.'\\'.$bundle, array_map(function ($bundle) { return get_class($bundle); }, $this->container->get('kernel')->getBundles()))) {
-                    throw new \LogicException(sprintf('To use the "%s" service, you first need to enable the Bundle "%s" in your Kernel class.', $try, $namespace.'\\'.$bundle));
+                $bundles = array_map(function ($bundle) { return get_class($bundle); },
+                    $this->container->get('kernel')->getBundles());
+                if (!in_array($namespace.'\\'.$bundle.'\\'.$bundle, $bundles)) {
+                    throw new \LogicException(sprintf('To use the "%s" service, you first need '.
+                    	'to enable the Bundle "%s" in your Kernel class.',
+                        $try, $namespace.'\\'.$bundle));
                 }
 
                 $class = $try;

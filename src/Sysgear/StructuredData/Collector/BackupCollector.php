@@ -71,20 +71,20 @@ class BackupCollector extends AbstractCollector
         $this->element->setAttribute('class', $this->getClassName($object));
         $refClass = new \ReflectionClass($object);
         if ($this->reference) {
-            
+
             // Create reference.
             $this->element->setAttribute('ref', $objHash);
         } else {
             $this->element->setAttribute('id', $objHash);
             foreach ($refClass->getProperties() as $property) {
-    
+
                 // Exclude properties. 
                 if ($this->filterProperty($property)) {
-    
+
                     $property->setAccessible(true);
                     $name = $property->getName();
                     $value = $property->getValue($object);
-    
+
                     // Scan scalar or composite property.
                     if (is_scalar($value)) {
                         $this->addScalarNode($name, $value);

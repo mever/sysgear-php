@@ -59,11 +59,11 @@ class Datatype
             case self::FLOAT:
                 return SQLT_INT;
                 break;
-                
+
             case self::STRING:
                 return SQLT_CHR;
                 break;
-                
+
             default:
                 throw new \Exception('This datatype is not supported!');
                 break;

@@ -13,7 +13,7 @@ use Sysgear\StructuredData\Restorer\BackupRestorer;
  */
 interface BackupableInterface
 {
-	/**
+    /**
      * Collect structed data using a backup collector.
      * 
      * @param \Sysgear\StructuredData\Collector\BackupCollector $backupDataCollector

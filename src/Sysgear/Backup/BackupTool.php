@@ -63,7 +63,8 @@ class BackupTool
      * @param \Sysgear\StructuredData\Importer\ImporterInterface $importer
      * @param array $options
      */
-    public function __construct(ExporterInterface $exporter, ImporterInterface $importer, array $options = array())
+    public function __construct(ExporterInterface $exporter,
+        ImporterInterface $importer, array $options = array())
     {
         $this->exporter = $exporter;
         $this->importer = $importer;
@@ -211,8 +212,9 @@ class BackupTool
                 $dateElem = $this->document->createElement('datetime');
                 $node->appendChild($dateElem);
                 $dateElem->setAttribute('format', $format);
-                $dateElem->setAttribute('description', "PHP date format. See: http://nl3.php.net/manual/en/function.date.php");
                 $dateElem->setAttribute('value', date($format));
+                $dateElem->setAttribute('description', "PHP date format. See: ". 
+                	"http://nl3.php.net/manual/en/function.date.php");
             }
             break;
         }

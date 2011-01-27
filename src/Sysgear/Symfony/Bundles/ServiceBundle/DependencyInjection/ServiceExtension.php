@@ -18,7 +18,7 @@ class ServiceExtension extends Extension
     protected $resources = array(
         'services' => 'services.xml',
     );
-    
+
     /**
      *
      * @param array                $config        A configuration array

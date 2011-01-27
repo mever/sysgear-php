@@ -19,9 +19,9 @@ class Client
 
     public function doBackground($name, Job $job)
     {
-        $job_handle = $this->gearmanClient->doBackground($name, serialize($job));
+        $jobHandle = $this->gearmanClient->doBackground($name, serialize($job));
         if (\GEARMAN_SUCCESS !== $this->gearmanClient->returnCode()) {
-            throw new \Exception('Gearman return unsuccessful code: '.$this->gearmanClient->returnCode());
+            throw new \Exception('Gearman return unsuccessful code: ' . $this->gearmanClient->returnCode());
         }
     }
 }

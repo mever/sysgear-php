@@ -17,8 +17,8 @@ class Util
      */
     public static function executeCommand($app, $argv)
     {
-        $argv_first = explode(' ', $argv, 2);
-        $command = $app->findCommand($argv_first[0]);
+        $argvFirst = explode(' ', $argv, 2);
+        $command = $app->findCommand($argvFirst[0]);
         $input = new StringInput($argv);
         $output = new NullOutput();
         $command->run($input, $output);
@@ -49,7 +49,7 @@ class Util
         if (!is_dir($dir)) {
             $dir = dirname($dir);
         }
-        
+
         return $dir;
     }
 }
