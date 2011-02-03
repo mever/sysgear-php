@@ -1,6 +1,6 @@
 <?php
 
-namespace Sysgear\Symfony\Bundles\ServiceBundle\Adapter;
+namespace Sysgear\Symfony\Bundle\ServiceBundle\Adapter;
 
 use Zend\Json\Server\Server;
 use Zend\Json\Server\Error;

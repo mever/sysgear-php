@@ -1,6 +1,6 @@
 <?php
 
-namespace Sysgear\Symfony\Bundles\ServiceBundle\DependencyInjection;
+namespace Sysgear\Symfony\Bundle\ServiceBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * ServiceExtension.
  *
  * @package    Sysgear
- * @subpackage Symfony_Bundles_ServiceBundle
+ * @subpackage Symfony_Bundle_ServiceBundle
  * @author     Martijn Evers <martijn4evers@gmail.com>
  */
 class ServiceExtension extends Extension

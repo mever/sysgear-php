@@ -5,13 +5,13 @@
     xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-      <parameter key="service_listener.class">Sysgear\Symfony\Bundles\ServiceBundle\RequestListener</parameter>
-      <parameter key="sysgear.service_manager.class">Sysgear\Symfony\Bundles\ServiceBundle\ServiceManager</parameter>
+      <parameter key="service_listener.class">Sysgear\Symfony\Bundle\ServiceBundle\RequestListener</parameter>
+      <parameter key="sysgear.service_manager.class">Sysgear\Symfony\Bundle\ServiceBundle\ServiceManager</parameter>
       <parameter key="zend.json.server.envelope" type="constant">Zend\Json\Server\Smd::ENV_JSONRPC_2</parameter>
-      <parameter key="sysgear.service_adapter.jsonrpc.class">Sysgear\Symfony\Bundles\ServiceBundle\Adapter\Jsonrpc</parameter>
-      <parameter key="sysgear.service_protocol.jsonrpc.class">Sysgear\Symfony\Bundles\ServiceBundle\Protocol\Jsonrpc</parameter>
+      <parameter key="sysgear.service_adapter.jsonrpc.class">Sysgear\Symfony\Bundle\ServiceBundle\Adapter\Jsonrpc</parameter>
+      <parameter key="sysgear.service_protocol.jsonrpc.class">Sysgear\Symfony\Bundle\ServiceBundle\Protocol\Jsonrpc</parameter>
     </parameters>
-    
+
     <services> 
       <service id="service_listener" class="%service_listener.class%">
         <tag name="kernel.listener" event="core.request" method="handle" priority="0" />
@@ -24,12 +24,12 @@
         <argument type="service" id="service_container" />
         <argument type="service" id="logger" on-invalid="ignore" />
       </service>
-    
+
       <service id="sysgear.service_protocol.jsonrpc" class="%sysgear.service_protocol.jsonrpc.class%">
         <argument type="service" id="service_container" />
         <argument type="service" id="sysgear.service_adapter.jsonrpc" />
       </service>
-      
+
       <service id="sysgear.service_adapter.jsonrpc" class="%sysgear.service_adapter.jsonrpc.class%">
         <call method="setEnvelope"><argument>%zend.json.server.envelope%</argument></call>
       </service>

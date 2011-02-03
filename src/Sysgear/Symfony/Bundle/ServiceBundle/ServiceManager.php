@@ -1,11 +1,11 @@
 <?php
 
-namespace Sysgear\Symfony\Bundles\ServiceBundle;
+namespace Sysgear\Symfony\Bundle\ServiceBundle;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Request;
-use Sysgear\Symfony\Bundles\ServiceBundle\ProtocolInterface;
-use Sysgear\Symfony\Bundles\ServiceBundle\Service;
+use Sysgear\Symfony\Bundle\ServiceBundle\ProtocolInterface;
+use Sysgear\Symfony\Bundle\ServiceBundle\Service;
 
 class ServiceManager
 {
@@ -34,7 +34,7 @@ class ServiceManager
      * Return a protocol adapter.
      * 
      * @param string $protocolName
-     * @return \Sysgear\Symfony\Bundles\ServiceBundle\ProtocolInterface
+     * @return \Sysgear\Symfony\Bundle\ServiceBundle\ProtocolInterface
      */
     public function getProtocol($protocolName)
     {
@@ -54,7 +54,7 @@ class ServiceManager
      * Find a service class.
      * 
      * @param string $service
-     * @return \Sysgear\Symfony\Bundles\ServiceBundle\Service
+     * @return \Sysgear\Symfony\Bundle\ServiceBundle\Service
      */
     public function findService($service)
     {

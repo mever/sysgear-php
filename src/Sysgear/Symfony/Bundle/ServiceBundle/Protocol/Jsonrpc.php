@@ -1,11 +1,11 @@
 <?php
 
-namespace Sysgear\Symfony\Bundles\ServiceBundle\Protocol;
+namespace Sysgear\Symfony\Bundle\ServiceBundle\Protocol;
 
 use Zend\Json\Server\Server;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Sysgear\Symfony\Bundles\ServiceBundle\ProtocolInterface;
-use Sysgear\Symfony\Bundles\ServiceBundle\Service;
+use Sysgear\Symfony\Bundle\ServiceBundle\ProtocolInterface;
+use Sysgear\Symfony\Bundle\ServiceBundle\Service;
 use Zend\Json\Json;
 
 class Jsonrpc implements ProtocolInterface
@@ -65,9 +65,9 @@ class Jsonrpc implements ProtocolInterface
     /**
      * Add a service object.
      * 
-     * @param \Sysgear\Symfony\Bundles\ServiceBundle\Service $service
+     * @param \Sysgear\Symfony\Bundle\ServiceBundle\Service $service
      * @param boolean $default
-     * @return \Sysgear\Symfony\Bundles\ServiceBundle\ServiceAdapter\Jsonrpc
+     * @return \Sysgear\Symfony\Bundle\ServiceBundle\ServiceAdapter\Jsonrpc
      */
     public function addService(Service $service, $default = false)
     {

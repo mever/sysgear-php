@@ -1,6 +1,6 @@
 <?php
 
-namespace Sysgear\Symfony\Bundles\ServiceBundle;
+namespace Sysgear\Symfony\Bundle\ServiceBundle;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

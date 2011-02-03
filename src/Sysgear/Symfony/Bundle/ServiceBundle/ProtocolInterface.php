@@ -1,8 +1,8 @@
 <?php
 
-namespace Sysgear\Symfony\Bundles\ServiceBundle;
+namespace Sysgear\Symfony\Bundle\ServiceBundle;
 
-use Sysgear\Symfony\Bundles\ServiceBundle\Service;
+use Sysgear\Symfony\Bundle\ServiceBundle\Service;
 
 interface ProtocolInterface
 {
@@ -16,9 +16,9 @@ interface ProtocolInterface
     /**
      * Add a service object.
      * 
-     * @param \Sysgear\Symfony\Bundles\ServiceBundle\Service $service
+     * @param \Sysgear\Symfony\Bundle\ServiceBundle\Service $service
      * @param boolean $default
-     * @return \Sysgear\Symfony\Bundles\ServiceBundle\Protocol\Jsonrpc
+     * @return \Sysgear\Symfony\Bundle\ServiceBundle\Protocol\Jsonrpc
      */
     public function addService(Service $service, $default);
 }

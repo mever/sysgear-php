@@ -1,6 +1,6 @@
 <?php
 
-namespace Sysgear\Symfony\Bundles\ServiceBundle;
+namespace Sysgear\Symfony\Bundle\ServiceBundle;
 
 use Symfony\Component\HttpKernel\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -10,8 +10,8 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-use Sysgear\Symfony\Bundles\ServiceBundle\Service;
-use Sysgear\Symfony\Bundles\ServiceBundle\ServiceManager;
+use Sysgear\Symfony\Bundle\ServiceBundle\Service;
+use Sysgear\Symfony\Bundle\ServiceBundle\ServiceManager;
 
 /**
  * RequestListener listen to the core.load_controller and finds web services
