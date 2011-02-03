@@ -38,7 +38,7 @@ class Util
      */
     public static function normalizeDir($dirPath)
     {
-        $dirPath .= ('/' === substr($dirPath, - 1)) ? '' : '/';
+        $dirPath .= ('/' === substr($dirPath, -1)) ? '' : '/';
         return $dirPath;
     }
 

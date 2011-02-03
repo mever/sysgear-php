@@ -58,27 +58,22 @@ class ServiceManager
      */
     public function findService($service)
     {
-        list($bundle, $service) = explode(':', $service);
+        list($bundleName, $serviceName) = explode(':', $service);
         $class = null;
         $logs = array();
-        foreach (array_keys($this->container->getParameter('kernel.bundle_dirs')) as $namespace) {
-            $try = $namespace.'\\'.$bundle.'\\Service\\'.$service.'Service';
-            if (!class_exists($try)) {
+        foreach ($this->container->get('kernel')->getBundles() as $bundle) {
+            if ($bundleName !== $bundle->getName()) {
+                continue;
+            }
+            $ns = $bundle->getNamespace();
+            $try = $ns.'\\Service\\'.$serviceName.'Service';
+            if (! class_exists($try)) {
                 if (null !== $this->logger) {
-                    $logs[] = sprintf('Failed finding service "%s:%s" from namespace "%s" (%s)',
-                        $bundle, $service, $namespace, $try);
+                    $logs[] = sprintf('Failed finding service "%s" from namespace "%s" (%s)',
+                        $service, $ns, $try);
                 }
             } else {
-                $bundles = array_map(function ($bundle) { return get_class($bundle); },
-                    $this->container->get('kernel')->getBundles());
-                if (!in_array($namespace.'\\'.$bundle.'\\'.$bundle, $bundles)) {
-                    throw new \LogicException(sprintf('To use the "%s" service, you first need '.
-                    	'to enable the Bundle "%s" in your Kernel class.',
-                        $try, $namespace.'\\'.$bundle));
-                }
-
                 $class = $try;
-
                 break;
             }
         }

@@ -36,19 +36,10 @@ class RequestListener
     }
 
     /**
-     * Registers a core.request listener.
-     *
-     * @param \Symfony\Component\EventDispatcher\EventDispatcher $dispatcher
-     */
-    public function register(EventDispatcher $dispatcher)
-    {
-        $dispatcher->connect('core.request', array($this, 'handle'));
-    }
-
-    /**
      * Resolve request.
      * 
      * @param \Symfony\Component\EventDispatcher\Event $event
+     * @return \Symfony\Components\HttpKernel\Response
      */
     public function handle(Event $event)
     {
@@ -76,7 +67,7 @@ class RequestListener
             }
 
             $request->attributes->replace($parameters);
-            $this->resolvService($event, $request);
+            return $this->resolvService($event, $request);
         } elseif (null !== $this->logger) {
             $this->logger->err(sprintf('No route found for %s', $request->getPathInfo()));
         }
@@ -87,6 +78,7 @@ class RequestListener
      * 
      * @param \Symfony\Component\EventDispatcher\Event $event
      * @param \Symfony\Component\HttpKernel\Request $request
+     * @return \Symfony\Components\HttpKernel\Response
      */
     protected function resolvService(Event $event, Request $request)
     {
@@ -108,7 +100,7 @@ class RequestListener
             $response = $protocol->handle();
         }
 
-        $event->setReturnValue($response);
-        $event->setProcessed(true);
+        $event->setProcessed();
+        return $response;
     }
 }
