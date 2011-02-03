@@ -36,7 +36,7 @@ class Jsonrpc implements ProtocolInterface
         if ('GET' === $this->request->getMethod()) {
             $response->setContent($this->adapter->getServiceMap());
         } else {
-            $postData = Json::decode(file_get_contents('php://input'), Json::TYPE_ARRAY);
+            $postData = Json::decode($this->request->getContent(), Json::TYPE_ARRAY);
             if (empty($postData)) {
                 throw new \Exception('No POST data received.');
             }
