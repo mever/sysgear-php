@@ -24,6 +24,24 @@ class Datatype
     const EMAIL         = 14;
 
     /**
+     * Return doctrine BDAL datatype code.
+     *
+     * @param integer $datatypeCode
+     * @return string
+     */
+    public static function toDoctrineDbal($datatypeCode)
+    {
+        switch ($datatypeCode) {
+        case self::INT:
+        case self::FLOAT:
+        case self::NUMBER:
+            return 'integer';
+        default:
+            return 'string';
+        }
+    }
+
+    /**
      * Return a mysql datatype as string.
      * 
      * @param int $dt
