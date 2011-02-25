@@ -3,10 +3,12 @@
 
 <target name="build" depends="pull,phpunit,phpcs,phpmd,phpcpd,pdepend,phpdoc,place" />
 
-<!-- Pull from stable branch: "git branch -\-set-upstream master origin/stable" (Remove backslash) -->
 <target name="pull">
   <exec executable="git" dir="${basedir}">
-    <arg line="pull" />
+    <arg line="pull origin stable:stable" />
+  </exec>
+  <exec executable="git" dir="${basedir}">
+    <arg line="checkout stable" />
   </exec>
 </target>
 
