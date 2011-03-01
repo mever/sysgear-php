@@ -2,10 +2,11 @@
 
 namespace Sysgear\Symfony\Bundle\ServiceBundle\Protocol;
 
-use Zend\Json\Server\Server;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Sysgear\Symfony\Bundle\ServiceBundle\ProtocolInterface;
 use Sysgear\Symfony\Bundle\ServiceBundle\Service;
+use Zend\Json\Server\Server;
 use Zend\Json\Json;
 
 class Jsonrpc implements ProtocolInterface
@@ -27,12 +28,12 @@ class Jsonrpc implements ProtocolInterface
 
     /**
      * Handle request.
-     * 
+     *
      * @return \Symfony\Components\HttpKernel\Response
      */
     public function handle()
     {
-        $response = $this->container->get('response');
+        $response = new Response();
         if ('GET' === $this->request->getMethod()) {
             $response->setContent($this->adapter->getServiceMap());
         } else {
@@ -64,7 +65,7 @@ class Jsonrpc implements ProtocolInterface
 
     /**
      * Add a service object.
-     * 
+     *
      * @param \Sysgear\Symfony\Bundle\ServiceBundle\Service $service
      * @param boolean $default
      * @return \Sysgear\Symfony\Bundle\ServiceBundle\ServiceAdapter\Jsonrpc

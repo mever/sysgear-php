@@ -5,6 +5,7 @@ namespace Sysgear\Symfony\Bundle\ServiceBundle\DependencyInjection;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\Config\FileLocator;
 
 /**
  * ServiceExtension.
@@ -19,21 +20,10 @@ class ServiceExtension extends Extension
         'services' => 'services.xml',
     );
 
-    /**
-     *
-     * @param array                $config        A configuration array
-     * @param BuilderConfiguration $configuration A BuilderConfiguration instance
-     *
-     * @return BuilderConfiguration A BuilderConfiguration instance
-     */
-    public function configLoad($config, ContainerBuilder $configuration)
+    public function load(array $configs, ContainerBuilder $container)
     {
-        if (! $configuration->hasDefinition('sysgear.service')) {
-            $loader = new XmlFileLoader($configuration, __DIR__.'/../Resources/config');
-            $loader->load($this->resources['services']);
-        }
-
-        return $configuration;
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader->load($this->resources['services']);
     }
 
     /**
@@ -53,6 +43,6 @@ class ServiceExtension extends Extension
 
     public function getAlias()
     {
-        return 'sysgear.service';
+        return 'service';
     }
 }
