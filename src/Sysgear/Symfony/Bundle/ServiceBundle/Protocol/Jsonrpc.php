@@ -91,8 +91,9 @@ class Jsonrpc implements ProtocolInterface
      */
     public function fault($exception)
     {
-        $response = $this->container->get('response');
         $this->adapter->fault($exception->getMessage(), $exception->getCode(), $exception);
+
+        $response = new Response();
         $response->setContent($this->adapter->getResponse()->toJson());
         $response->setStatusCode(200);
         $response->headers->set('Content-Type', 'application/json');
