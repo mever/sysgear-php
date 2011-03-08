@@ -18,9 +18,9 @@ class XmlExporter extends AbstractExporter
 
     /**
      * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Exporter.ExporterInterface::toString()
+     * @see Sysgear\StructuredData\Exporter.ExporterInterface::__toString()
      */
-    public function toString()
+    public function __toString()
     {
         if (null === $this->document) {
             throw ExporterException::noDataToExport();

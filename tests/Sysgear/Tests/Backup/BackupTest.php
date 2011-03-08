@@ -29,7 +29,7 @@ class BackupTest extends TestCase
         $export = $tool->backup($comp);
 
         $this->assertEquals($this->expectedBasicCompanyXml($comp),
-            $export->formatOutput(true)->toString());
+            $export->formatOutput(true)->__toString());
     }
 
     /**
@@ -43,7 +43,7 @@ class BackupTest extends TestCase
         $export = $tool->backup($comp, array('onlyImplementor' => $onlyImplementor));
 
         $this->assertEquals($this->expectedInheritedBasicCompanyXml($comp, $onlyImplementor),
-            $export->formatOutput(true)->toString());
+            (string) $export->formatOutput(true));
     }
 
     /**
@@ -58,7 +58,7 @@ class BackupTest extends TestCase
         $export = $tool->backup($comp, array('onlyImplementor' => $onlyImplementor));
 
         $this->assertEquals($this->expectedInheritedBasicCompanyXml($comp, $onlyImplementor),
-            $export->formatOutput(true)->toString());
+            (string) $export->formatOutput(true));
     }
 
     /**
@@ -75,13 +75,13 @@ class BackupTest extends TestCase
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"utf8\"?>\n<backup><metadata/><content>" .
         	"<Company type=\"object\" class=\"Sysgear\\Tests\\Backup\\Company\" id=\"{$objHash}\">" .
         	"<functions type=\"array\"/><employees type=\"array\"/>" .
-        	"</Company></content></backup>", $export->formatOutput(false)->toString());
+        	"</Company></content></backup>", $export->formatOutput(false)->__toString());
 
         // Assert formatted XML structure.
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"utf8\"?>\n<backup>\n  <metadata/>\n  <content>" .
         	"\n    <Company type=\"object\" class=\"Sysgear\\Tests\\Backup\\Company\" id=\"{$objHash}\">" 
             ."\n      <functions type=\"array\"/>\n      <employees type=\"array\"/>\n    </Company>\n  </content>\n</backup>",
-            $export->formatOutput(true)->toString());
+            $export->formatOutput(true)->__toString());
     }
 
     /**

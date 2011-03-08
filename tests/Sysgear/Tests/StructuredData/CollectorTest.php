@@ -24,6 +24,6 @@ class CollectorTest extends TestCase
         $exporter = new XmlExporter();
         $exporter->setDom($collector->getDom());
 
-        $this->assertEquals($this->expectedBasicCompanyXml(), rtrim($exporter->formatOutput(true)->toString()));
+        $this->assertEquals($this->expectedBasicCompanyXml(), rtrim((string) $exporter->formatOutput(true)));
     }
 }
