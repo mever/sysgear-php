@@ -6,38 +6,38 @@ use Sysgear\Backup\BackupableInterface;
 
 /**
  * Collector for backup data from backupable objects.
- * 
+ *
  * @author (c) Martijn Evers <martijn4evers@gmail.com>
  */
-class BackupCollector extends AbstractCollector
+class BackupCollector extends AbstractObjectCollector
 {
     /**
      * When true only collect data from the first
      * implementor of the backupable interface, start search from parent to subclass.
-     * 
+     *
      * e.g. preventing the Doctrine2 proxy objects from being collected.
-     * 
+     *
      * @var boolean
      */
     public $onlyImplementor = false;
 
     /**
      * This object is a reference.
-     * 
+     *
      * @var boolean
      */
     protected $reference = false;
 
     /**
      * Name to use for this node.
-     * 
+     *
      * @var string
      */
     protected $name;
 
     /**
      * Set option.
-     * 
+     *
      * @param string $key
      * @param mixed $value
      */
@@ -99,7 +99,7 @@ class BackupCollector extends AbstractCollector
 
     /**
      * Add scalar property node.
-     * 
+     *
      * @param string $name
      * @param scalar $value
      */
@@ -113,7 +113,7 @@ class BackupCollector extends AbstractCollector
 
     /**
      * Add composite property node.
-     * 
+     *
      * @param string $name
      * @param mixed $value
      */
@@ -147,7 +147,7 @@ class BackupCollector extends AbstractCollector
 
     /**
      * Add child node to this collection.
-     * 
+     *
      * @param string $name
      * @param \Sysgear\Backup\BackupableInterface $backupable
      * @param \DOMNode $node
@@ -175,7 +175,7 @@ class BackupCollector extends AbstractCollector
 
     /**
      * Create a reference to an already collected object.
-     * 
+     *
      * @param \BackupableInterface $backupable
      * @param \DOMNode $node
      * @param string $name
@@ -192,7 +192,7 @@ class BackupCollector extends AbstractCollector
 
     /**
      * Return the node name which represents this $object.
-     * 
+     *
      * @param \Sysgear\Backup\BackupableInterface $backupable
      * @return string
      */
@@ -203,8 +203,9 @@ class BackupCollector extends AbstractCollector
 
     /**
      * Return the class name of $backupable
-     * 
+     *
      * @param \Sysgear\Backup\BackupableInterface $backupable
+     * @return string Fully qualified class name
      */
     protected function getClassName(BackupableInterface $backupable)
     {
@@ -225,17 +226,5 @@ class BackupCollector extends AbstractCollector
         } else {
             return get_class($backupable);
         }
-    }
-
-    /**
-     * Return true if property can be collected, else return false.
-     * 
-     * @param \ReflectionProperty $property
-     */
-    protected function filterProperty(\ReflectionProperty $property)
-    {
-        // TODO: Allow configuration of the properties to filter.
-        //       For now hard code none-underscore-prefixed properties.
-        return ('_' !== substr($property->getName(), 0, 1));
     }
 }

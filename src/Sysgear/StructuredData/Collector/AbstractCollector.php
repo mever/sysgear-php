@@ -17,24 +17,15 @@ abstract class AbstractCollector implements CollectorInterface
     protected $element;
 
     /**
-     * Each object which is collected is put on this list. That
-     * way we prevent infinit loops in recursive collections.
-     * 
-     * @var array
-     */
-    protected $excludedObjects = array();
-
-    /**
-     * In search of data to backup, do we need to recursively
-     * scan for backupables?
-     * 
+     * In search of data, do we need to recursively scan?
+     *
      * @var boolean 
      */
     protected $recursiveScan = true;
 
     /**
      * Construct data collector.
-     * 
+     *
      * @param array $options
      */
     public function __construct(array $options = array())
@@ -47,7 +38,7 @@ abstract class AbstractCollector implements CollectorInterface
 
     /**
      * Set option.
-     * 
+     *
      * @param string $key
      * @param mixed $value
      */
@@ -66,24 +57,11 @@ abstract class AbstractCollector implements CollectorInterface
 
     /**
      * Return the DOM element.
-     * 
+     *
      * @return \DOMDocument
      */
     public function getDomElement()
     {
         return $this->element;
-    }
-
-    /**
-     * Return the node name which represents this $object.
-     * 
-     * @param mixed $object May be a class name
-     * @return string
-     */
-    protected function getNodeName($object)
-    {
-        $fullClassname = is_string($object) ? $object : get_class($object);
-        $pos = strrpos($fullClassname, '\\');
-        return (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
     }
 }

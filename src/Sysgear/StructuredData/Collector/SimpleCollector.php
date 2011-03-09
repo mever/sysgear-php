@@ -4,10 +4,10 @@ namespace Sysgear\StructuredData\Collector;
 
 /**
  * Simple recursive collector.
- * 
+ *
  * @author (c) Martijn Evers <martijn4evers@gmail.com>
  */
-class SimpleCollector extends AbstractCollector
+class SimpleCollector extends AbstractObjectCollector
 {
     /**
      * (non-PHPdoc)
@@ -47,7 +47,7 @@ class SimpleCollector extends AbstractCollector
 
     /**
      * Scan scalar object property.
-     * 
+     *
      * @param \StdClass $object
      * @param string $name
      * @param scalar $value
@@ -59,7 +59,7 @@ class SimpleCollector extends AbstractCollector
 
     /**
      * Scan composite object property.
-     * 
+     *
      * @param \StdClass $object
      * @param string $name
      * @param composite $value
@@ -89,7 +89,7 @@ class SimpleCollector extends AbstractCollector
 
     /**
      * Add child node to this collection.
-     * 
+     *
      * @param object $object
      * @param \DOMNode $node
      */
@@ -114,7 +114,7 @@ class SimpleCollector extends AbstractCollector
 
     /**
      * Create a reference to an already collected object.
-     * 
+     *
      * @param object $object
      * @param \DOMNode $node
      */
@@ -124,17 +124,5 @@ class SimpleCollector extends AbstractCollector
         $collector->recursiveScan = false;
         $collector->fromObject($object);
         $node->appendChild($collector->getDomElement());
-    }
-
-    /**
-     * Return true if property can be collected, else return false.
-     * 
-     * @param \ReflectionProperty $property
-     */
-    protected function filterProperty(\ReflectionProperty $property)
-    {
-        // TODO: Allow configuration of the properties to filter.
-        //       For now hard code none-underscore-prefixed properties.
-        return ('_' !== substr($property->getName(), 0, 1));
     }
 }

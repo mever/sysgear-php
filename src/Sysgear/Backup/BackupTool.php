@@ -9,10 +9,10 @@ use Sysgear\StructuredData\Importer\ImporterInterface;
 
 /**
  * Universal tool to backup about anything.
- * 
+ *
  * * Uses a structured data collector to backup data and pass it to the exporter.
  * * Uses an importer to import a backup and restore it using a restorer.
- * 
+ *
  * @author (c) Martijn Evers <martijn4evers@gmail.com>
  */
 class BackupTool
@@ -37,28 +37,28 @@ class BackupTool
 
     /**
      * Configuration options for this backup tool.
-     * 
+     *
      * @var array
      */
     protected $options = array();
 
     /**
      * Configuration options for the collector.
-     * 
+     *
      * @var array
      */
     protected $collectorOptions = array();
 
     /**
      * Configuration options for the restorer.
-     * 
+     *
      * @var array
      */
     protected $restorerOptions = array();
 
     /**
      * Create backup utility.
-     * 
+     *
      * @param \Sysgear\StructuredData\Exporter\ExporterInterface $exporter
      * @param \Sysgear\StructuredData\Importer\ImporterInterface $importer
      * @param array $options
@@ -75,7 +75,7 @@ class BackupTool
 
     /**
      * Set configuration option.
-     * 
+     *
      * @param string $key
      * @param mixed $value
      * @return \Sysgear\Backup\BackupTool
@@ -88,7 +88,7 @@ class BackupTool
 
     /**
      * Set collector configuration option.
-     * 
+     *
      * @param string $key
      * @param mixed $value
      * @return \Sysgear\Backup\BackupTool
@@ -101,7 +101,7 @@ class BackupTool
 
     /**
      * Set restorer configuration option.
-     * 
+     *
      * @param string $key
      * @param mixed $value
      * @return \Sysgear\Backup\BackupTool
@@ -114,7 +114,7 @@ class BackupTool
 
     /**
      * Backup collection of stuctured data from $object.
-     * 
+     *
      * @param \Sysgear\Backup\BackupableInterface $object
      * @param array $collectorOptions
      * @return \Sysgear\StructuredData\Exporter\ExporterInterface
@@ -132,7 +132,7 @@ class BackupTool
 
     /**
      * Restore collection of structed data to $object.
-     * 
+     *
      * @param \Sysgear\Backup\BackupableInterface $object
      * @param array $restorerOptions
      * @return \Sysgear\Backup\BackupableInterface
@@ -151,7 +151,7 @@ class BackupTool
 
     /**
      * Read backup content.
-     * 
+     *
      * @return \DOMDocument
      */
     protected function readContent()
@@ -166,7 +166,7 @@ class BackupTool
 
     /**
      * Write backup content.
-     * 
+     *
      * @param \DOMDocument $dom
      */
     protected function writeContent(\DOMDocument $dom)
@@ -194,7 +194,7 @@ class BackupTool
 
     /**
      * Create metadata for this backup.
-     * 
+     *
      * @param \DOMNode $node
      * @param string $name
      * @param mixed $option
