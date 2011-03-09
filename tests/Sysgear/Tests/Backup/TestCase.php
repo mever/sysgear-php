@@ -169,14 +169,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         </Role>
       </functions>
       <employees type="array">
-        <User type="object" class="Sysgear\\Tests\\Backup\\User" id="'.$userHash.'">
-          <id type="integer" value="1"/>
-          <name type="string" value="piet"/>
-          <password type="string" value="bf7s83s"/>
-          <employer type="object" class="Sysgear\\Tests\\Backup\\'.$className.'" ref="'.$compHash.'"/>
-          <roles type="array"/>
-          <sessions type="array"/>
-        </User>
+        <User type="object" class="Sysgear\\Tests\\Backup\\User" ref="'.$userHash.'"/>
       </employees>
     </'.$className.'>
   </content>
@@ -218,14 +211,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         </Role>
       </functions>
       <employees type="array">
-        <User type="object" class="Sysgear\\Tests\\Backup\\User" id="'.$userHash.'">
-          <id type="integer" value="1"/>
-          <name type="string" value="piet"/>
-          <password type="string" value="bf7s83s"/>
-          <employer type="object" class="Sysgear\\Tests\\Backup\\Company" ref="'.$compHash.'"/>
-          <roles type="array"/>
-          <sessions type="array"/>
-        </User>
+        <User type="object" class="Sysgear\\Tests\\Backup\\User" ref="'.$userHash.'"/>
       </employees>
     </Company>
   </content>

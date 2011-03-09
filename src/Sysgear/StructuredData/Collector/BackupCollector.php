@@ -206,6 +206,7 @@ class BackupCollector extends AbstractObjectCollector
     {
         // Make a copy of this collector to allow recursive collecting.
         $collector = clone $this;
+        $collector->addedObjects =& $this->addedObjects;
         $collector->name = $name;
 
         // Reset collector specific settings.
