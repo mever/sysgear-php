@@ -10,7 +10,7 @@ abstract class AbstractObjectCollector extends AbstractCollector
      *
      * @var array
      */
-    protected $excludedObjects = array();
+    protected $addedObjects = array();
 
     /**
      * Return the node name which represents this $object.

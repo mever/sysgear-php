@@ -21,7 +21,7 @@ class SimpleCollector extends AbstractObjectCollector
 
         // Add this object to the list of excluded objects to
         // prevent infinite recursive collecting.
-        $this->excludedObjects[] = $object;
+        $this->addedObjects[] = $object;
 
         $name = $this->getNodeName($object);
         $this->element = $this->document->createElement($name);
@@ -100,7 +100,7 @@ class SimpleCollector extends AbstractObjectCollector
         }
 
         // Prevent infinite loops...
-        if (in_array($object, $this->excludedObjects, true)) {
+        if (in_array($object, $this->addedObjects, true)) {
 
             $this->createReference($object, $node);
         } else {

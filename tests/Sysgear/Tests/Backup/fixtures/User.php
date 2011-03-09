@@ -18,6 +18,8 @@ class User implements BackupableInterface
 
     protected $roles = array();
 
+    protected $sessions = array();
+
     protected $locale;
 
     public function __construct($id = null, $name = null, $password = null, Company $employer = null, Locale $locale = null)

@@ -32,20 +32,25 @@ class IgnorePropertiesUser extends User
     public function collectStructedData(BackupCollector $backupDataCollector)
     {
         $backupDataCollector->fromBackupable($this, array(
-        	'ignore' => array('employer', 'password')));
+            'ignore' => array('employer', 'password')));
     }
 }
 
 class DoNotScanAndIgnorePropertiesUser extends User
 {
+    public function addRole(Role $role)
+    {
+        $this->roles[] = $role;
+    }
+
     /**
      * {@inheritDoc}
      */
     public function collectStructedData(BackupCollector $backupDataCollector)
     {
         $backupDataCollector->fromBackupable($this, array(
-            'doNotFollow' => array('employer'),
-        	'ignore' => array('password')));
+            'doNotFollow' => array('employer', 'roles'),
+            'ignore' => array('password', 'sessions', 'name')));
     }
 }
 
@@ -99,6 +104,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $locale = new Locale(1, $lang);
         $company = new Company(1, 'rts', $locale);
         $user = new DoNotScanAndIgnorePropertiesUser(1, 'piet', 'bf7s83s', $company);
+        $role = new Role(1, 'admin', $company);
+        $role->members[] = $user;
+        $company->functions[] = $role;
+        $user->addRole($role);
         return $user;
     }
 
@@ -153,6 +162,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
               <password type="string" value="bf7s83s"/>
               <employer type="object" class="Sysgear\\Tests\\Backup\\'.$className.'" ref="'.$compHash.'"/>
               <roles type="array"/>
+              <sessions type="array"/>
             </User>
           </members>
           <company type="object" class="Sysgear\\Tests\\Backup\\'.$className.'" ref="'.$compHash.'"/>
@@ -165,6 +175,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
           <password type="string" value="bf7s83s"/>
           <employer type="object" class="Sysgear\\Tests\\Backup\\'.$className.'" ref="'.$compHash.'"/>
           <roles type="array"/>
+          <sessions type="array"/>
         </User>
       </employees>
     </'.$className.'>
@@ -200,6 +211,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
               <password type="string" value="bf7s83s"/>
               <employer type="object" class="Sysgear\\Tests\\Backup\\Company" ref="'.$compHash.'"/>
               <roles type="array"/>
+              <sessions type="array"/>
             </User>
           </members>
           <company type="object" class="Sysgear\\Tests\\Backup\\Company" ref="'.$compHash.'"/>
@@ -212,6 +224,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
           <password type="string" value="bf7s83s"/>
           <employer type="object" class="Sysgear\\Tests\\Backup\\Company" ref="'.$compHash.'"/>
           <roles type="array"/>
+          <sessions type="array"/>
         </User>
       </employees>
     </Company>
@@ -246,6 +259,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         </employees>
       </employer>
       <roles type="array"/>
+      <sessions type="array"/>
     </User>
   </content>
 </backup>';
@@ -261,6 +275,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     <IgnorePropertiesUser type="object" class="Sysgear\Tests\Backup\IgnorePropertiesUser" id="'.$userHash.'">
       <id type="integer" value="1"/>
       <roles type="array"/>
+      <sessions type="array"/>
     </IgnorePropertiesUser>
   </content>
 </backup>';
@@ -268,15 +283,23 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     protected function expectedDoNotScanAndIgnoreSomeUserPropertiesXml(Company $comp = null)
     {
-        list($compHash, $localeHash, $langHash, $userHash) = $this->getHashes($comp);
+        list($compHash, $localeHash, $langHash, $userHash, $roleHash) = $this->getHashes($comp);
         return '<?xml version="1.0" encoding="utf8"?>
 <backup>
   <metadata/>
   <content>
     <DoNotScanAndIgnorePropertiesUser type="object" class="Sysgear\Tests\Backup\DoNotScanAndIgnorePropertiesUser" id="'.$userHash.'">
       <id type="integer" value="1"/>
-      <employer type="object" class="Sysgear\Tests\Backup\Company" id="'.$compHash.'"/>
-      <roles type="array"/>
+      <employer type="object" class="Sysgear\Tests\Backup\Company" id="'.$compHash.'">
+        <id type="integer" value="1"/>
+        <name type="string" value="rts"/>
+      </employer>
+      <roles type="array">
+        <Role type="object" class="Sysgear\Tests\Backup\Role" id="'.$roleHash.'">
+          <id type="integer" value="1"/>
+          <name type="string" value="admin"/>
+        </Role>
+      </roles>
     </DoNotScanAndIgnorePropertiesUser>
   </content>
 </backup>';

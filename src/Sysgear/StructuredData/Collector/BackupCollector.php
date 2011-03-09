@@ -103,7 +103,7 @@ class BackupCollector extends AbstractObjectCollector
 
         // Add this object to the list of excluded objects to
         // prevent infinite recursive collecting.
-        $this->excludedObjects[] = $object;
+        $this->addedObjects[] = $object;
 
         $name = $this->name ?: $this->getNodeName($object);
         $objHash = spl_object_hash($object);
@@ -135,11 +135,6 @@ class BackupCollector extends AbstractObjectCollector
                     if (is_scalar($value)) {
                         $this->addScalarNode($name, $value);
                     } elseif ($this->recursiveScan) {
-
-                        if (in_array($name, $this->doNotFollow, true)) {
-                            $this->excludedObjects[] = $value;
-                        }
-
                         $this->addCompositeNode($name, $value);
                     }
                 }
@@ -170,9 +165,11 @@ class BackupCollector extends AbstractObjectCollector
      */
     protected function addCompositeNode($name, $value)
     {
+        $doNotFollow = in_array($name, $this->doNotFollow, true);
+
         // Scan BackupableInterface implmentation
         if ($value instanceof BackupableInterface) {
-            $this->addBackupable($name, $value);
+            $this->element->appendChild($this->createNode($name, $value, $doNotFollow));
         }
 
         // Scan sub-collection.
@@ -190,61 +187,42 @@ class BackupCollector extends AbstractObjectCollector
 
                 // Collect array element objects implementing the BackupableInterface.
                 if ($elem instanceof BackupableInterface) {
-                    $this->addBackupable($this->getNodeName($elem), $elem, $collection);
+                    $node = $this->createNode($this->getNodeName($elem), $elem, $doNotFollow);
+                    $collection->appendChild($node);
                 }
             }
         }
     }
 
     /**
-     * Add child node to this collection.
+     * Create child node from backupable.
      *
      * @param string $name
      * @param \Sysgear\Backup\BackupableInterface $backupable
-     * @param \DOMNode $node
+     * @param boolean $doNotFollow
+     * @return \DOMNode
      */
-    protected function addBackupable($name, BackupableInterface $backupable, \DOMNode $node = null)
+    protected function createNode($name, BackupableInterface $backupable, $doNotFollow)
     {
-        if (null === $node) {
-            $node = $this->element;
-        }
+        // Make a copy of this collector to allow recursive collecting.
+        $collector = clone $this;
+        $collector->name = $name;
+
+        // Reset collector specific settings.
+        $collector->ignore = array();
+        $collector->doNotFollow = array();
 
         // Prevent infinite loops...
-        if (in_array($backupable, $this->excludedObjects, true)) {
+        if (in_array($backupable, $this->addedObjects, true)) {
+            $collector->recursiveScan = false;
+            $collector->reference = true;
 
-            $this->createReference($backupable, $node, $name);
-        } else {
-
-            // Make a copy of this collector to allow recursive collecting.
-            $collector = clone $this;
-            $collector->name = $name;
-            $backupable->collectStructedData($collector);
-            $element = $collector->getDomElement();
-            $node->appendChild($element);
+        } elseif ($doNotFollow) {
+            $collector->recursiveScan = false;
         }
-    }
 
-    /**
-     * Create a reference to an already collected object.
-     *
-     * @param \BackupableInterface $backupable
-     * @param \DOMNode $node
-     * @param string $name
-     */
-    protected function createReference(BackupableInterface $backupable, \DOMNode $node, $name)
-    {
-        $collector = clone $this;
-        $collector->recursiveScan = false;
-        $collector->reference = true;
-        $collector->name = $name;
         $backupable->collectStructedData($collector);
-        
-        $element = $collector->getDomElement();
-        if (in_array($name, $this->doNotFollow, true)) {
-            $element->setAttribute('id', $element->getAttribute('ref'));
-            $element->removeAttribute('ref');
-        }
-        $node->appendChild($element);
+        return $collector->getDomElement();
     }
 
     /**
