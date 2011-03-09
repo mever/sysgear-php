@@ -26,4 +26,17 @@ class CollectorTest extends TestCase
 
         $this->assertEquals($this->expectedBasicCompanyXml(), rtrim((string) $exporter->formatOutput(true)));
     }
+
+    public function testSimpleCollectorNotRecursive()
+    {
+        $collector = new Collector\SimpleCollector(array('recursiveScan' => false));
+        $collector->fromObject($this->backupBasicCompany());
+
+        $exporter = new XmlExporter();
+        $exporter->setDom($collector->getDom());
+
+        $this->assertEquals('<?xml version="1.0" encoding="utf8"?>'.
+        	"\n" . '<Company id="1" name="rts"/>',
+            rtrim((string) $exporter->formatOutput(false)));
+    }
 }

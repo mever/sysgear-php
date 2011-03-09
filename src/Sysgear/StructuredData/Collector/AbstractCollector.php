@@ -44,6 +44,11 @@ abstract class AbstractCollector implements CollectorInterface
      */
     public function setOption($key, $value)
     {
+        switch ($key) {
+        case "recursiveScan":
+            $this->recursiveScan = (boolean) $value;
+            break;
+        }
     }
 
     /**

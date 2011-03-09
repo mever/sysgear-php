@@ -47,6 +47,10 @@ class BackupCollector extends AbstractObjectCollector
         case 'onlyImplementor':
             $this->onlyImplementor = (boolean) $value;
             break;
+
+        default:
+            parent::setOption($key, $value);
+            break;
         }
     }
 
