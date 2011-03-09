@@ -20,15 +20,55 @@ require_once 'fixtures/Company.php';
 class BackupTest extends TestCase
 {
     /**
-     * Test simple backup.
+     * Test company simple backup.
      */
-    public function testBackup()
+    public function testCompanyBackup()
     {
         $comp = $this->basicCompany();
         $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
         $export = $tool->backup($comp);
 
         $this->assertEquals($this->expectedBasicCompanyXml($comp),
+            $export->formatOutput(true)->__toString());
+    }
+
+	/**
+     * Test user simple backup.
+     */
+    public function testUserBackup()
+    {
+        $user = $this->basicUser();
+        $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
+        $export = $tool->backup($user);
+
+        $this->assertEquals($this->expectedBasicUserXml($user->getEmployer()),
+            $export->formatOutput(true)->__toString());
+    }
+
+    /**
+     * Test backup of company with users who instruct to ignore some properties.
+     */
+    public function testIgnoreSomeUserPropertiesBackup()
+    {
+        $user = $this->ignoreSomeUserPropertiesUser();
+        $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
+        $export = $tool->backup($user);
+
+        $this->assertEquals($this->expectedIgnoreSomeUserPropertiesXml($user->getEmployer()),
+            $export->formatOutput(true)->__toString());
+    }
+
+    /**
+     * Test backup of company with users who instruct to ignore
+     * and don't scan some properties.
+     */
+    public function testDoNotScanAndIgnoreSomeUserPropertiesBackup()
+    {
+        $user = $this->doNotScanAndIgnoreSomeUserPropertiesUser();
+        $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
+        $export = $tool->backup($user);
+
+        $this->assertEquals($this->expectedDoNotScanAndIgnoreSomeUserPropertiesXml($user->getEmployer()),
             $export->formatOutput(true)->__toString());
     }
 

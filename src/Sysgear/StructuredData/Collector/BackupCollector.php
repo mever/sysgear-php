@@ -36,6 +36,20 @@ class BackupCollector extends AbstractObjectCollector
     protected $name;
 
     /**
+     * Map of properties not recursively scan (follow).
+     *
+     * @var string[]
+     */
+    protected $doNotFollow = array();
+
+    /**
+     * Map of properties to ignore.
+     *
+     * @var string[]
+     */
+    protected $ignore = array();
+
+    /**
      * Set option.
      *
      * @param string $key
@@ -52,6 +66,23 @@ class BackupCollector extends AbstractObjectCollector
             parent::setOption($key, $value);
             break;
         }
+    }
+
+    public function fromBackupable(BackupableInterface $backupable, array $options = array())
+    {
+        foreach ($options as $key => $value) {
+            switch ($key) {
+            case "doNotFollow":
+                $this->doNotFollow = (array) $value;
+                break;
+
+            case "ignore":
+                $this->ignore = (array) $value;
+                break;
+            }
+        }
+
+        $this->fromObject($backupable);
     }
 
     /**
@@ -87,8 +118,8 @@ class BackupCollector extends AbstractObjectCollector
 
                     $property->setAccessible(true);
                     $name = $property->getName();
-                    if ($this->onlyImplementor
-                    && $property->getDeclaringClass()->getName() !== $this->getClassName($object)) {
+                    if (in_array($name, $this->ignore, true) || ($this->onlyImplementor
+                      && $property->getDeclaringClass()->getName() !== $this->getClassName($object))) {
                         continue;
                     }
 
@@ -98,6 +129,11 @@ class BackupCollector extends AbstractObjectCollector
                     if (is_scalar($value)) {
                         $this->addScalarNode($name, $value);
                     } elseif ($this->recursiveScan) {
+
+                        if (in_array($name, $this->doNotFollow, true)) {
+                            $this->excludedObjects[] = $value;
+                        }
+
                         $this->addCompositeNode($name, $value);
                     }
                 }
@@ -196,7 +232,13 @@ class BackupCollector extends AbstractObjectCollector
         $collector->reference = true;
         $collector->name = $name;
         $backupable->collectStructedData($collector);
-        $node->appendChild($collector->getDomElement());
+        
+        $element = $collector->getDomElement();
+        if (in_array($name, $this->doNotFollow, true)) {
+            $element->setAttribute('id', $element->getAttribute('ref'));
+            $element->removeAttribute('ref');
+        }
+        $node->appendChild($element);
     }
 
     /**

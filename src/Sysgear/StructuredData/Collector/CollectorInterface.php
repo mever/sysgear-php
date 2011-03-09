@@ -13,7 +13,7 @@ interface CollectorInterface
 {
     /**
      * Collect data from object.
-     * 
+     *
      * @param \StdClass $object
      * @return \Sysgear\StructuredData\Collector\CollectorInterface
      */
@@ -21,7 +21,7 @@ interface CollectorInterface
 
     /**
      * Get DOM from collector.
-     * 
+     *
      * @return \DOMDocument
      */
     public function getDom();

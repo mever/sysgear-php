@@ -26,12 +26,20 @@ class User implements BackupableInterface
         $this->name = $name;
         $this->password = $password;
         $this->employer = $employer;
+        if (null !== $employer) {
+            $employer->addEmployee($this);
+        }
         $this->locale = $locale;
     }
 
     public function getName()
     {
         return $this->name;
+    }
+
+    public function getEmployer()
+    {
+        return $this->employer;
     }
 
     /**
