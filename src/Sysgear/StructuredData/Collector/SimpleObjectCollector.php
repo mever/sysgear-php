@@ -3,11 +3,11 @@
 namespace Sysgear\StructuredData\Collector;
 
 /**
- * Simple recursive collector.
+ * Simple recursive object collector.
  *
  * @author (c) Martijn Evers <martijn4evers@gmail.com>
  */
-class SimpleCollector extends AbstractObjectCollector
+class SimpleObjectCollector extends AbstractObjectCollector
 {
     /**
      * (non-PHPdoc)

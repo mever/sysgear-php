@@ -18,7 +18,7 @@ class CollectorTest extends TestCase
 {
     public function testSimpleCollector()
     {
-        $collector = new Collector\SimpleCollector();
+        $collector = new Collector\SimpleObjectCollector();
         $collector->fromObject($this->backupBasicCompany());
 
         $exporter = new XmlExporter();
@@ -29,7 +29,7 @@ class CollectorTest extends TestCase
 
     public function testSimpleCollectorNotRecursive()
     {
-        $collector = new Collector\SimpleCollector(array('recursiveScan' => false));
+        $collector = new Collector\SimpleObjectCollector(array('recursiveScan' => false));
         $collector->fromObject($this->backupBasicCompany());
 
         $exporter = new XmlExporter();
