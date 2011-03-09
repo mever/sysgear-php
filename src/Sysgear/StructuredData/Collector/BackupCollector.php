@@ -68,6 +68,12 @@ class BackupCollector extends AbstractObjectCollector
         }
     }
 
+    /**
+     * Collect data from backupable object.
+     *
+     * @param \Sysgear\Backup\BackupableInterface $backupable
+     * @param array $options
+     */
     public function fromBackupable(BackupableInterface $backupable, array $options = array())
     {
         foreach ($options as $key => $value) {
