@@ -87,6 +87,11 @@ class BackupCollector extends AbstractObjectCollector
 
                     $property->setAccessible(true);
                     $name = $property->getName();
+                    if ($this->onlyImplementor
+                    && $property->getDeclaringClass()->getName() !== $this->getClassName($object)) {
+                        continue;
+                    }
+
                     $value = $property->getValue($object);
 
                     // Scan scalar or composite property.

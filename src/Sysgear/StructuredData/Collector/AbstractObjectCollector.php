@@ -15,7 +15,7 @@ abstract class AbstractObjectCollector extends AbstractCollector
     /**
      * Return the node name which represents this $object.
      *
-     * @param mixed $object May be a class name
+     * @param object|string $object May be a class name
      * @return string
      */
     protected function getNodeName($object)

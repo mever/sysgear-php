@@ -17,7 +17,11 @@ require_once 'fixtures/Company.php';
 require_once 'fixtures/Role.php';
 require_once 'fixtures/User.php';
 
-class ProxyCompany extends Company {}
+class ProxyCompany extends Company
+{
+    public $shouldBeIgnored1 = true;
+    protected $shouldBeIgnored2 = true;
+}
 
 class TestCase extends \PHPUnit_Framework_TestCase
 {
@@ -50,13 +54,20 @@ class TestCase extends \PHPUnit_Framework_TestCase
     protected function expectedInheritedBasicCompanyXml(Company $comp, $onlyImplementor)
     {
         $compHash = spl_object_hash($comp);
-        $className = ($onlyImplementor) ? 'Company' : 'ProxyCompany';
+        $className = 'ProxyCompany';
+        $extraProperties = '<shouldBeIgnored1 type="boolean" value="1"/>' .
+            "\n      <shouldBeIgnored2 type=\"boolean\" value=\"1\"/>\n      ";
+
+        if ($onlyImplementor) {
+            $className = 'Company';
+            $extraProperties = '';
+        }
         return '<?xml version="1.0" encoding="utf8"?>
 <backup>
   <metadata/>
   <content>
     <'.$className.' type="object" class="Sysgear\\Tests\\Backup\\'.$className.'" id="'.$compHash.'">
-      <id type="integer" value="1"/>
+      '.$extraProperties.'<id type="integer" value="1"/>
       <name type="string" value="rts"/>
       <locale type="object" class="Sysgear\\Tests\\Backup\\Locale" id="'.spl_object_hash($comp->locale).'">
         <id type="integer" value="1"/>
