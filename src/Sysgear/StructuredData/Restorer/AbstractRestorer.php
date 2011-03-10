@@ -12,6 +12,29 @@ abstract class AbstractRestorer implements RestorerInterface
     protected $document;
 
     /**
+     * Construct data collector.
+     *
+     * @param array $options
+     */
+    public function __construct(array $options = array())
+    {
+        $this->document = new \DOMDocument('1.0', 'utf8');
+        foreach ($options as $key => $value) {
+            $this->setOption($key, $value);
+        }
+    }
+
+    /**
+     * Set option.
+     *
+     * @param string $key
+     * @param mixed $value
+     */
+    public function setOption($key, $value)
+    {
+    }
+
+    /**
      * (non-PHPdoc)
      * @see Sysgear\StructuredData\Restorer.RestorerInterface::setDom()
      */

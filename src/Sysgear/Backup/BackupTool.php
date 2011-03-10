@@ -147,9 +147,14 @@ class BackupTool
         $document = $this->importer->getDom();
         $dom = new \DOMDocument('1.0', 'utf8');
 
+        // Create restorer.
+        if (array_key_exists("entityManager", $this->options)) {
+            $this->restorerOptions["entityManager"] = $this->options["entityManager"];
+        }
         $restorerOptions = array_merge($this->restorerOptions, $restorerOptions);
         $restorer = new BackupRestorer($restorerOptions);
 
+        // Collect content to restore.
         $content = $document->getElementsByTagName('content')->item(0);
         foreach ($content->childNodes as $child) {
 
@@ -164,7 +169,15 @@ class BackupTool
             }
         }
 
+        // Restore object.
         $object->restoreStructedData($restorer);
+
+        // Merge object with entity manager (if one given).
+        if (array_key_exists("entityManager", $this->options)) {
+            $this->options["entityManager"]->merge($object);
+            $this->options["entityManager"]->flush();
+        }
+
         return $object;
     }
 
@@ -233,7 +246,7 @@ class BackupTool
                 $dateElem->setAttribute('format', $format);
                 $dateElem->setAttribute('value', date($format));
                 $dateElem->setAttribute('description', "PHP date format. See: ". 
-                	"http://nl3.php.net/manual/en/function.date.php");
+                    "http://nl3.php.net/manual/en/function.date.php");
             }
             break;
         }

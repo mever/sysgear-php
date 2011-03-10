@@ -2,11 +2,19 @@
 
 namespace Sysgear\StructuredData\Restorer;
 
+use Sysgear\Backup\Exception;
 use Sysgear\StructuredData\Restorer\AbstractRestorer;
 use Sysgear\Backup\BackupableInterface;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\MappingException;
 
 class BackupRestorer extends AbstractRestorer
 {
+    /**
+     * @var \Doctrine\ORM\EntityManager
+     */
+    public $entityManager;
+
     /**
      * Name to use for this node.
      * 
@@ -43,6 +51,25 @@ class BackupRestorer extends AbstractRestorer
     }
 
     /**
+     * Set option.
+     *
+     * @param string $key
+     * @param mixed $value
+     */
+    public function setOption($key, $value)
+    {
+        switch ($key) {
+        case 'entityManager':
+            $this->entityManager = ($value instanceof EntityManager) ? $value : null;
+            break;
+
+        default:
+            parent::setOption($key, $value);
+            break;
+        }
+    }
+
+    /**
      * (non-PHPdoc)
      * @see Sysgear\StructuredData\Restorer.RestorerInterface::toObject()
      */
@@ -76,7 +103,7 @@ class BackupRestorer extends AbstractRestorer
 
     /**
      * Set property of this object.
-     * 
+     *
      * @param \ReflectionClass $refClass
      * @param \DOMNode $propertyNode
      * @param object $object
@@ -96,7 +123,7 @@ class BackupRestorer extends AbstractRestorer
 
     /**
      * Return the properly casted value.
-     * 
+     *
      * @param \DOMElement $propertyNode
      * @return mixed
      */
@@ -115,7 +142,7 @@ class BackupRestorer extends AbstractRestorer
 
     /**
      * Cast property to array.
-     * 
+     *
      * @param \DOMElement $propertyNode
      * @return array
      */
@@ -132,7 +159,7 @@ class BackupRestorer extends AbstractRestorer
 
     /**
      * Cast property to backupable.
-     * 
+     *
      * @param \DOMElement $propertyNode
      * @return \Sysgear\Backup\BackupableInterface
      */
@@ -143,7 +170,7 @@ class BackupRestorer extends AbstractRestorer
             return $this->referenceCandidates['object'][$propertyNode->getAttribute('ref')];
         }
 
-        // Create clone restorer for new object.
+        // Clone restorer for new object.
         $restorer = clone $this;
         $restorer->name = $propertyNode->nodeName;
         $restorer->element = $propertyNode;
@@ -155,13 +182,27 @@ class BackupRestorer extends AbstractRestorer
         if (! ($backupable instanceof BackupableInterface)) {
             throw new RestorerException("Can not restore class: '{$class}' or class does not implement backupable.");
         }
+
+        // Restore backupable object.
         $backupable->restoreStructedData($restorer);
+
+        // Persist entity (if any)
+        if (null !== $this->entityManager) {
+            if ($this->entityManager instanceof EntityManager) {
+
+                $obj = $this->entityManager->merge($backupable);
+            } else {
+                $this->entityManager = null;
+                throw Exception::noEntityManager();
+            }
+        }
+
         return $backupable;
     }
 
     /**
      * Cast property to scalar.
-     * 
+     *
      * @param \DOMNode $propertyNode
      * @param string $type
      * @return mixed
@@ -178,7 +219,7 @@ class BackupRestorer extends AbstractRestorer
 
     /**
      * Create reference.
-     * 
+     *
      * @param \DOMelement $node
      * @param object $object
      * @throws RestorerException
