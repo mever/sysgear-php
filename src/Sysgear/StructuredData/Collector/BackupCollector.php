@@ -50,6 +50,16 @@ class BackupCollector extends AbstractObjectCollector
     protected $ignore = array();
 
     /**
+     * Restore state, no remaining properties or other
+     * business that shouldn't be cloned.
+     */
+    public function __clone()
+    {
+        $this->ignore = array();
+        $this->doNotFollow = array();
+    }
+
+    /**
      * Set option.
      *
      * @param string $key
@@ -208,10 +218,6 @@ class BackupCollector extends AbstractObjectCollector
         $collector = clone $this;
         $collector->addedObjects =& $this->addedObjects;
         $collector->name = $name;
-
-        // Reset collector specific settings.
-        $collector->ignore = array();
-        $collector->doNotFollow = array();
 
         // Prevent infinite loops...
         if (in_array($backupable, $this->addedObjects, true)) {
