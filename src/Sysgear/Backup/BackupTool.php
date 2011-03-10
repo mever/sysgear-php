@@ -31,11 +31,6 @@ class BackupTool
     protected $importer;
 
     /**
-     * @var \DOMDocument
-     */
-    protected $document;
-
-    /**
      * Configuration options for this backup tool.
      *
      * @var array
@@ -113,6 +108,16 @@ class BackupTool
     }
 
     /**
+     * Read restore data from file.
+     *
+     * @param string $path
+     */
+    public function readFile($path)
+    {
+        $this->importer->fromString(file_get_contents($path));
+    }
+
+    /**
      * Backup collection of stuctured data from $object.
      *
      * @param \Sysgear\Backup\BackupableInterface $object
@@ -125,8 +130,8 @@ class BackupTool
         $collector = new BackupCollector($collectorOptions);
         $object->collectStructedData($collector);
 
-        $this->writeContent($collector->getDom());
-        $this->exporter->setDom($this->document);
+        $dom = $this->writeContent($collector->getDom());
+        $this->exporter->setDom($dom);
         return $this->exporter;
     }
 
@@ -137,69 +142,83 @@ class BackupTool
      * @param array $restorerOptions
      * @return \Sysgear\Backup\BackupableInterface
      */
-    public function restore(BackupableInterface $object, array $restorerOptions = array())
+    public function restore(BackupableInterface $object = null, array $restorerOptions = array())
     {
-        $this->document = $this->importer->getDom();
+        $document = $this->importer->getDom();
+        $dom = new \DOMDocument('1.0', 'utf8');
 
         $restorerOptions = array_merge($this->restorerOptions, $restorerOptions);
         $restorer = new BackupRestorer($restorerOptions);
-        $restorer->setDom($this->readContent());
+
+        $content = $document->getElementsByTagName('content')->item(0);
+        foreach ($content->childNodes as $child) {
+
+            if (XML_ELEMENT_NODE === $child->nodeType) {
+                $dom->appendChild($dom->importNode($child, true));
+                $restorer->setDom($dom);
+
+                if (null === $object) {
+                    $object = $this->createRootObject($child);
+                }
+                break;
+            }
+        }
 
         $object->restoreStructedData($restorer);
         return $object;
     }
 
     /**
-     * Read backup content.
+     * Create root object to restore from.
      *
-     * @return \DOMDocument
+     * @param \DOMElement $element
+     * @return \Sysgear\Backup\BackupableInterface
      */
-    protected function readContent()
+    protected function createRootObject(\DOMElement $element)
     {
-        $doc = new \DOMDocument('1.0', 'utf8');
-        $content = $this->document->getElementsByTagName('content')->item(0);
-        foreach ($content->childNodes as $child) {
-            $doc->appendChild($doc->importNode($child, true));
-        }
-        return $doc;
+        $class = trim($element->attributes->getNamedItem('class')->textContent);
+        return new $class();
     }
 
     /**
      * Write backup content.
      *
-     * @param \DOMDocument $dom
+     * @param \DOMDocument $document
+     * @return \DOMDocument
      */
-    protected function writeContent(\DOMDocument $dom)
+    protected function writeContent(\DOMDocument $document)
     {
         // Create backup
-        $doc = $this->document = new \DOMDocument('1.0', 'utf8');
-        $backupElem = $doc->createElement('backup');
+        $dom = new \DOMDocument('1.0', 'utf8');
+        $backupElem = $dom->createElement('backup');
 
         // Create metadata
-        $metadataElem = $doc->createElement('metadata');
+        $metadataElem = $dom->createElement('metadata');
         $backupElem->appendChild($metadataElem);
         foreach ($this->options as $name => $option) {
-            $this->setMetadata($metadataElem, $name, $option);
+            $this->setMetadata($dom, $metadataElem, $name, $option);
         }
 
         // Create backup content
-        $content = $doc->createElement('content');
+        $content = $dom->createElement('content');
         $backupElem->appendChild($content);
-        foreach ($dom->childNodes as $child) {
-            $content->appendChild($doc->importNode($child, true));
+        foreach ($document->childNodes as $child) {
+            $content->appendChild($dom->importNode($child, true));
         }
 
-        $doc->appendChild($backupElem);
+        $dom->appendChild($backupElem);
+        return $dom;
     }
 
     /**
      * Create metadata for this backup.
      *
+     * @param \DOMDocument $document
      * @param \DOMNode $node
      * @param string $name
      * @param mixed $option
      */
-    protected function setMetadata(\DOMNode $node, $name, $option)
+    protected function setMetadata(\DOMDocument $document, \DOMNode $node, $name, $option)
     {
         switch ($name) {
         case self::META_DATETIME:
@@ -209,7 +228,7 @@ class BackupTool
                 $option = true;
             }
             if ((boolean) $option) {
-                $dateElem = $this->document->createElement('datetime');
+                $dateElem = $document->createElement('datetime');
                 $node->appendChild($dateElem);
                 $dateElem->setAttribute('format', $format);
                 $dateElem->setAttribute('value', date($format));
