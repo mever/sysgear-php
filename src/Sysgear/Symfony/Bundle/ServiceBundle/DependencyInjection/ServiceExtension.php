@@ -16,14 +16,34 @@ use Symfony\Component\Config\FileLocator;
  */
 class ServiceExtension extends Extension
 {
-    protected $resources = array(
-        'services' => 'services.xml',
-    );
-
     public function load(array $configs, ContainerBuilder $container)
     {
+        foreach ($configs as $config) {
+            $this->doConfigLoad($config, $container);
+        }
+    }
+
+    /**
+     * Loads the service configuration.
+     *
+     * @param array            $config    An array of configuration settings
+     * @param ContainerBuilder $container A ContainerBuilder instance
+     */
+    protected function doConfigLoad(array $config, ContainerBuilder $container)
+    {
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        $loader->load($this->resources['services']);
+
+        if (! $container->hasDefinition('pdf')) {
+            $loader->load('config.xml');
+        }
+
+        foreach ($config as $key => $value) {
+            switch ($key) {
+                case 'debug':
+                    $container->setParameter('sysgear.service.debug', (boolean) $value);
+                    break;
+            }
+        }
     }
 
     /**

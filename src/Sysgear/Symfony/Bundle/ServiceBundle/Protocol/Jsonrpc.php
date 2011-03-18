@@ -27,6 +27,15 @@ class Jsonrpc implements ProtocolInterface
     }
 
     /**
+     * (non-PHPdoc)
+     * @see Sysgear\Symfony\Bundle\ServiceBundle.ProtocolInterface::enableDebugging()
+     */
+    public function enableDebugging($flag)
+    {
+        $this->adapter->enableDebugging($flag);
+    }
+
+    /**
      * Handle request.
      *
      * @return \Symfony\Components\HttpKernel\Response

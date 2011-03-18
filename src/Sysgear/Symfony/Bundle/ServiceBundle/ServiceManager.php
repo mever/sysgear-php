@@ -20,7 +20,7 @@ class ServiceManager
     protected $logger;
 
     /**
-     * 
+     *
      * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
      * @param \Symfony\Component\HttpKernel\Log\LoggerInterface $logger
      */
@@ -32,7 +32,7 @@ class ServiceManager
 
     /**
      * Return a protocol adapter.
-     * 
+     *
      * @param string $protocolName
      * @return \Sysgear\Symfony\Bundle\ServiceBundle\ProtocolInterface
      */
@@ -47,12 +47,13 @@ class ServiceManager
             $this->logger->info(sprintf('Using protocol "%s"', $protocolName));
         }
 
+        $protocol->enableDebugging($this->container->getParameter('sysgear.service.debug'));
         return $protocol;
     }
 
     /**
      * Find a service class.
-     * 
+     *
      * @param string $service
      * @return \Sysgear\Symfony\Bundle\ServiceBundle\Service
      */

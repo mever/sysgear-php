@@ -10,9 +10,10 @@
       <parameter key="zend.json.server.envelope" type="constant">Zend\Json\Server\Smd::ENV_JSONRPC_2</parameter>
       <parameter key="sysgear.service_adapter.jsonrpc.class">Sysgear\Symfony\Bundle\ServiceBundle\Adapter\Jsonrpc</parameter>
       <parameter key="sysgear.service_protocol.jsonrpc.class">Sysgear\Symfony\Bundle\ServiceBundle\Protocol\Jsonrpc</parameter>
+      <parameter key="sysgear.service.debug">0</parameter>
     </parameters>
 
-    <services> 
+    <services>
       <service id="service_listener" class="%service_listener.class%">
         <tag name="kernel.listener" event="core.request" method="handle" priority="0" />
         <argument type="service" id="sysgear.service_manager" />
