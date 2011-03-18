@@ -19,7 +19,7 @@ abstract class AbstractCollector implements CollectorInterface
     /**
      * In search of data, do we need to recursively scan?
      *
-     * @var boolean 
+     * @var boolean
      */
     protected $recursiveScan = true;
 
@@ -30,7 +30,7 @@ abstract class AbstractCollector implements CollectorInterface
      */
     public function __construct(array $options = array())
     {
-        $this->document = new \DOMDocument('1.0', 'utf8');
+        $this->document = new \DOMDocument('1.0', 'UTF-8');
         foreach ($options as $key => $value) {
             $this->setOption($key, $value);
         }

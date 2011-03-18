@@ -145,7 +145,7 @@ class BackupTool
     public function restore(BackupableInterface $object = null, array $restorerOptions = array())
     {
         $document = $this->importer->getDom();
-        $dom = new \DOMDocument('1.0', 'utf8');
+        $dom = new \DOMDocument('1.0', 'UTF-8');
 
         // Create restorer.
         if (array_key_exists("merger", $this->options)) {
@@ -203,7 +203,7 @@ class BackupTool
     protected function writeContent(\DOMDocument $document)
     {
         // Create backup
-        $dom = new \DOMDocument('1.0', 'utf8');
+        $dom = new \DOMDocument('1.0', 'UTF-8');
         $backupElem = $dom->createElement('backup');
 
         // Create metadata
@@ -246,7 +246,7 @@ class BackupTool
                 $node->appendChild($dateElem);
                 $dateElem->setAttribute('format', $format);
                 $dateElem->setAttribute('value', date($format));
-                $dateElem->setAttribute('description', "PHP date format. See: ". 
+                $dateElem->setAttribute('description', "PHP date format. See: ".
                     "http://nl3.php.net/manual/en/function.date.php");
             }
             break;

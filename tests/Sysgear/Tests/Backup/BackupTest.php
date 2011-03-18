@@ -32,7 +32,7 @@ class BackupTest extends TestCase
             $export->formatOutput(true)->__toString());
     }
 
-	/**
+    /**
      * Test user simple backup.
      */
     public function testUserBackup()
@@ -73,7 +73,7 @@ class BackupTest extends TestCase
     }
 
     /**
-     * Test backup with company object wrapped by a proxy. 
+     * Test backup with company object wrapped by a proxy.
      */
     public function testProxyCompanyBackup()
     {
@@ -112,15 +112,15 @@ class BackupTest extends TestCase
         $export = $tool->backup($company);
 
         // Assert that the company to restore is empty.
-        $this->assertEquals("<?xml version=\"1.0\" encoding=\"utf8\"?>\n<backup><metadata/><content>" .
-        	"<Company type=\"object\" class=\"Sysgear\\Tests\\Backup\\Company\" id=\"{$objHash}\">" .
-        	"<functions type=\"array\"/><employees type=\"array\"/>" .
-        	"</Company></content></backup>", $export->formatOutput(false)->__toString());
+        $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<backup><metadata/><content>" .
+            "<Company type=\"object\" class=\"Sysgear\\Tests\\Backup\\Company\" id=\"{$objHash}\">" .
+            "<functions type=\"array\"/><employees type=\"array\"/>" .
+            "</Company></content></backup>", $export->formatOutput(false)->__toString());
 
         // Assert formatted XML structure.
-        $this->assertEquals("<?xml version=\"1.0\" encoding=\"utf8\"?>\n<backup>\n  <metadata/>\n  <content>" .
-        	"\n    <Company type=\"object\" class=\"Sysgear\\Tests\\Backup\\Company\" id=\"{$objHash}\">" 
-            ."\n      <functions type=\"array\"/>\n      <employees type=\"array\"/>\n    </Company>\n  </content>\n</backup>",
+        $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<backup>\n  <metadata/>\n  <content>" .
+            "\n    <Company type=\"object\" class=\"Sysgear\\Tests\\Backup\\Company\" id=\"{$objHash}\">".
+            "\n      <functions type=\"array\"/>\n      <employees type=\"array\"/>\n    </Company>\n  </content>\n</backup>",
             $export->formatOutput(true)->__toString());
     }
 

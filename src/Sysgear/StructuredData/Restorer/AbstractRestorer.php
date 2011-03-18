@@ -18,7 +18,7 @@ abstract class AbstractRestorer implements RestorerInterface
      */
     public function __construct(array $options = array())
     {
-        $this->document = new \DOMDocument('1.0', 'utf8');
+        $this->document = new \DOMDocument('1.0', 'UTF-8');
         foreach ($options as $key => $value) {
             $this->setOption($key, $value);
         }
@@ -46,7 +46,7 @@ abstract class AbstractRestorer implements RestorerInterface
 
     /**
      * Return the node name which represents this $object.
-     * 
+     *
      * @param object $object
      * @return string
      */

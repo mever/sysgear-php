@@ -137,7 +137,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
             $extraProperties = '';
         }
 
-        return '<?xml version="1.0" encoding="utf8"?>
+        return '<?xml version="1.0" encoding="UTF-8"?>
 <backup>
   <metadata/>
   <content>
@@ -179,7 +179,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     protected function expectedBasicCompanyXml(Company $comp = null)
     {
         list($compHash, $localeHash, $langHash, $userHash, $roleHash) = $this->getHashes($comp);
-        return '<?xml version="1.0" encoding="utf8"?>
+        return '<?xml version="1.0" encoding="UTF-8"?>
 <backup>
   <metadata/>
   <content>
@@ -221,7 +221,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     protected function expectedBasicUserXml(Company $comp = null)
     {
         list($compHash, $localeHash, $langHash, $userHash) = $this->getHashes($comp);
-        return '<?xml version="1.0" encoding="utf8"?>
+        return '<?xml version="1.0" encoding="UTF-8"?>
 <backup>
   <metadata/>
   <content>
@@ -254,7 +254,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     protected function expectedIgnoreSomeUserPropertiesXml(Company $comp = null)
     {
         list($compHash, $localeHash, $langHash, $userHash) = $this->getHashes($comp);
-        return '<?xml version="1.0" encoding="utf8"?>
+        return '<?xml version="1.0" encoding="UTF-8"?>
 <backup>
   <metadata/>
   <content>
@@ -270,7 +270,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     protected function expectedDoNotScanAndIgnoreSomeUserPropertiesXml(Company $comp = null)
     {
         list($compHash, $localeHash, $langHash, $userHash, $roleHash) = $this->getHashes($comp);
-        return '<?xml version="1.0" encoding="utf8"?>
+        return '<?xml version="1.0" encoding="UTF-8"?>
 <backup>
   <metadata/>
   <content>

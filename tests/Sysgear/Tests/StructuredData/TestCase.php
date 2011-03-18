@@ -35,7 +35,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     protected function expectedBasicCompanyXml()
     {
-        return '<?xml version="1.0" encoding="utf8"?>
+        return '<?xml version="1.0" encoding="UTF-8"?>
 <Company id="1" name="rts">
   <Locale id="1">
     <Language id="1" iso639="en_EN"/>

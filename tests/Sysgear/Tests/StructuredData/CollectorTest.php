@@ -35,7 +35,7 @@ class CollectorTest extends TestCase
         $exporter = new XmlExporter();
         $exporter->setDom($collector->getDom());
 
-        $this->assertEquals('<?xml version="1.0" encoding="utf8"?>'.
+        $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>'.
         	"\n" . '<Company id="1" name="rts"/>',
             rtrim((string) $exporter->formatOutput(false)));
     }
