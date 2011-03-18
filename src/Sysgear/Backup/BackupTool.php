@@ -148,8 +148,9 @@ class BackupTool
         $dom = new \DOMDocument('1.0', 'utf8');
 
         // Create restorer.
-        if (array_key_exists("entityManager", $this->options)) {
-            $this->restorerOptions["entityManager"] = $this->options["entityManager"];
+        if (array_key_exists("merger", $this->options)) {
+            $this->restorerOptions["merger"] = $this->options["merger"];
+            $this->restorerOptions["mergeMode"] = BackupRestorer::MERGE_ASSUME_COMPLETE;
         }
         $restorerOptions = array_merge($this->restorerOptions, $restorerOptions);
         $restorer = new BackupRestorer($restorerOptions);
@@ -173,9 +174,9 @@ class BackupTool
         $object->restoreStructedData($restorer);
 
         // Merge object with entity manager (if one given).
-        if (array_key_exists("entityManager", $this->options)) {
-            $this->options["entityManager"]->merge($object);
-            $this->options["entityManager"]->flush();
+        if (array_key_exists("merger", $this->options)) {
+            $this->options["merger"]->merge($object);
+            $this->options["merger"]->flush();
         }
 
         return $object;

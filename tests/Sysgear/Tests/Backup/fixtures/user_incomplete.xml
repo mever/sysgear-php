@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<backup>
+  <metadata>
+    <datetime format="Y-m-d\TH:i:sP" value="2011-03-10T16:31:53+01:00" description="PHP date format. See: http://nl3.php.net/manual/en/function.date.php"/>
+  </metadata>
+  <content>
+    <User type="object" class="Sysgear\Tests\Backup\User" id="0000000041dd6cde0000000070b0fab6">
+      <id type="integer" value="1"/>
+      <name type="string" value="test"/>
+      <password type="string" value="$1$irVZosm9$eYSZynm/kUm1e6ja3YIya1"/>
+      <roles type="array" class="Doctrine\ORM\PersistentCollection" id="0000000041dd6c670000000070b0fab6">
+        <Role type="object" class="Sysgear\Tests\Backup\Role" id="0000000041dd6dff0000000070b0fab6">
+          <id type="integer" value="1"/>
+          <name type="string" value="superAdmin123"/>
+        </Role>
+      </roles>
+    </User>
+  </content>
+</backup>

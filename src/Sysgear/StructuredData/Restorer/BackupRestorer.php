@@ -3,21 +3,57 @@
 namespace Sysgear\StructuredData\Restorer;
 
 use Sysgear\Backup\Exception;
-use Sysgear\StructuredData\Restorer\AbstractRestorer;
 use Sysgear\Backup\BackupableInterface;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Mapping\MappingException;
+use Sysgear\Merger\MergerException;
+use Sysgear\Merger\MergerInterface;
 
+/**
+ * Concrete restorer for the Sysgear backup tool.
+ *
+ * @author (c) Martijn Evers <martijn4evers@gmail.com>
+ */
 class BackupRestorer extends AbstractRestorer
 {
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * Assume nodes as complete. If the merger notifies a merge
+     * error (by returning null) try to fetch the corresponding node
+     * and add the corresponding fields, overwriting the old ones.
+     *
+     * @var integer
      */
-    public $entityManager;
+    const MERGE_ASSUME_COMPLETE = 0;
+
+    /**
+     * Assume nodes as incomplete. First check if all mandatory fields
+     * are available. Merge if complete or find an existing node in the system
+     * to change.
+     *
+     * @var integer
+     */
+    const MERGE_ASSUME_INCOMPLETE = 1;
+
+    /**
+     * Expect nodes as complete.
+     *
+     * @var integer
+     */
+    const MERGE_EXPECT_COMPLETE = 2;
+
+    /**
+     * How to merge nodes if a merger instance is given.
+     *
+     * @var integer
+     */
+    protected $mergeMode = self::MERGE_ASSUME_COMPLETE;
+
+    /**
+     * @var \Sysgear\StructuredData\Restorer\Backup\MergerInterface
+     */
+    protected $merger;
 
     /**
      * Name to use for this node.
-     * 
+     *
      * @var string
      */
     protected $name;
@@ -29,14 +65,14 @@ class BackupRestorer extends AbstractRestorer
 
     /**
      * Keep track of all posible reference candidates.
-     * 
+     *
      * @var array
      */
     protected $referenceCandidates = array('array' => array(), 'object' => array());
 
     /**
      * Keep track of all properties which can not be restored.
-     * 
+     *
      * @var array
      */
     protected $remainingProperties = array();
@@ -59,13 +95,16 @@ class BackupRestorer extends AbstractRestorer
     public function setOption($key, $value)
     {
         switch ($key) {
-        case 'entityManager':
-            $this->entityManager = ($value instanceof EntityManager) ? $value : null;
+        case 'merger':
+            $this->merger = ($value instanceof MergerInterface) ? $value : null;
+            break;
+
+        case 'mergeMode':
+            $this->mergeMode = (int) $value;
             break;
 
         default:
             parent::setOption($key, $value);
-            break;
         }
     }
 
@@ -76,18 +115,19 @@ class BackupRestorer extends AbstractRestorer
     public function toObject($object)
     {
         if (! ($object instanceof BackupableInterface)) {
-            throw new RestorerException("Given object does not implement BackupableInterface.");
+            throw Exception::classIsNotABackable($object);
         }
 
         if (null === $this->element) {
             foreach ($this->document->childNodes as $node) {
-                if (XML_ELEMENT_NODE === $node->nodeType) {
+                if ($node instanceof \DOMElement) {
                     $this->element = $node;
                     break;
                 }
             }
         }
 
+        // Add this object as reference and restore properties.
         $this->createReferenceCandidate($object);
         $refClass = new \ReflectionClass($object);
         foreach ($this->element->childNodes as $propertyNode) {
@@ -97,7 +137,7 @@ class BackupRestorer extends AbstractRestorer
             }
         }
 
-        // Return remaining properties.
+        // Return properties which could not be set here (ie. private).
         return $this->remainingProperties;
     }
 
@@ -158,49 +198,6 @@ class BackupRestorer extends AbstractRestorer
     }
 
     /**
-     * Cast property to backupable.
-     *
-     * @param \DOMElement $propertyNode
-     * @return \Sysgear\Backup\BackupableInterface
-     */
-    protected function castObject(\DOMElement $propertyNode)
-    {
-        // Found reference, so return it.
-        if ($propertyNode->hasAttribute('ref')) {
-            return $this->referenceCandidates['object'][$propertyNode->getAttribute('ref')];
-        }
-
-        // Clone restorer for new object.
-        $restorer = clone $this;
-        $restorer->name = $propertyNode->nodeName;
-        $restorer->element = $propertyNode;
-        $restorer->referenceCandidates =& $this->referenceCandidates;
-
-        // Create object, restore and return it.
-        $class = $propertyNode->getAttribute('class');
-        $backupable = new $class();
-        if (! ($backupable instanceof BackupableInterface)) {
-            throw new RestorerException("Can not restore class: '{$class}' or class does not implement backupable.");
-        }
-
-        // Restore backupable object.
-        $backupable->restoreStructedData($restorer);
-
-        // Persist entity (if any)
-        if (null !== $this->entityManager) {
-            if ($this->entityManager instanceof EntityManager) {
-
-                $obj = $this->entityManager->merge($backupable);
-            } else {
-                $this->entityManager = null;
-                throw Exception::noEntityManager();
-            }
-        }
-
-        return $backupable;
-    }
-
-    /**
      * Cast property to scalar.
      *
      * @param \DOMNode $propertyNode
@@ -215,6 +212,139 @@ class BackupRestorer extends AbstractRestorer
             settype($value, $type);
         }
         return $value;
+    }
+
+    /**
+     * Cast property to backupable.
+     *
+     * @param \DOMElement $propertyNode
+     * @return \stdClass
+     */
+    protected function castObject(\DOMElement $propertyNode)
+    {
+        // Found reference, so return it.
+        if ($propertyNode->hasAttribute('ref')) {
+            return $this->referenceCandidates['object'][$propertyNode->getAttribute('ref')];
+        }
+
+        // Create new object to restore.
+        $class = $propertyNode->getAttribute('class');
+        $object = new $class();
+
+        // Merge entity with 3rd-party system.
+        if (null !== $this->merger) {
+
+            $object = $this->dispatchMerge($object, $propertyNode);
+        } else {
+
+            // Check if object is backupable.
+            if ($object instanceof BackupableInterface) {
+                $object->restoreStructedData($this->createRestorer($propertyNode));
+            } else {
+                throw Exception::classIsNotABackable($class);
+            }
+        }
+
+        return $object;
+    }
+
+    /**
+     * Dispatch merge operation.
+     *
+     * @param object $object
+     * @param \DOMElement $propertyNode
+     * @return object Merged object.
+     */
+    protected function dispatchMerge($object, $propertyNode)
+    {
+        switch ($this->mergeMode) {
+        case self::MERGE_ASSUME_COMPLETE:
+            return $this->_mergeAssumeComplete($object, $propertyNode);
+
+        case self::MERGE_ASSUME_INCOMPLETE:
+            return $this->_mergeAssumeIncomplete($object, $propertyNode);
+        }
+    }
+
+    /**
+     * Assume nodes as incomplete. First check if all mandatory fields
+     * are available. Merge if complete or find an existing node in the system
+     * to change.
+     *
+     * @param \stdClass $object
+     * @param \DOMElement $thisNode
+     * @return object
+     */
+    protected function _mergeAssumeIncomplete($object, \DOMElement $thisNode)
+    {
+        // If possible, begin by descending into the tree.
+        if ($object instanceof BackupableInterface) {
+            $object->restoreStructedData($this->createRestorer($thisNode));
+        }
+
+        // Check fields.
+
+
+        $mergedObject = $this->merger->merge($object);
+        if (null === $mergedObject) {
+
+            // Pick a complete object and fill it with changes.
+            $mergedObject = $this->merger->find($object);
+            if ($mergedObject instanceof BackupableInterface) {
+                $mergedObject->restoreStructedData($this->createRestorer($thisNode));
+            }
+        }
+
+        return $mergedObject;
+    }
+
+    /**
+     * Assume nodes as complete. If the merger notifies a merge
+     * error (by returning null) try to fetch the corresponding node
+     * and add the corresponding fields, overwriting the old ones.
+     *
+     * @param \stdClass $object
+     * @param \DOMElement $thisNode
+     * @return object
+     */
+    protected function _mergeAssumeComplete($object, \DOMElement $thisNode)
+    {
+        // If possible, begin by descending into the tree.
+        if ($object instanceof BackupableInterface) {
+            $object->restoreStructedData($this->createRestorer($thisNode));
+        }
+
+        // Try to merge the object.
+        $mergedObject = $this->merger->merge($object);
+        if (null === $mergedObject) {
+
+            // Pick an object from the system and overwrite fields.
+            $mergedObject = $this->merger->find($object);
+            if (null === $mergedObject) {
+                throw new RestorerException("Couldn't find an object in the system to overwrite.");
+            }
+
+            if ($mergedObject instanceof BackupableInterface) {
+                $mergedObject->restoreStructedData($this->createRestorer($thisNode));
+            }
+        }
+
+        return $mergedObject;
+    }
+
+    /**
+     * Clone restorer for new object to restore.
+     *
+     * @param \DOMElement $propertyNode
+     * @return \Sysgear\StructuredData\Restorer\BackupRestorer
+     */
+    protected function createRestorer(\DOMElement $propertyNode)
+    {
+        $restorer = clone $this;
+        $restorer->name = $propertyNode->nodeName;
+        $restorer->element = $propertyNode;
+        $restorer->referenceCandidates =& $this->referenceCandidates;
+        return $restorer;
     }
 
     /**

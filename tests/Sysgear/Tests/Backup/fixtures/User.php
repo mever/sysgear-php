@@ -44,6 +44,11 @@ class User implements BackupableInterface
         return $this->employer;
     }
 
+    public function getRoles()
+    {
+        return $this->roles;
+    }
+
     /**
      * {@inheritDoc}
      */
