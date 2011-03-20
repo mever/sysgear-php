@@ -67,7 +67,7 @@ class RestoreTest extends TestCase
     /**
      * Test merging incomplete nodes, assume these as complete (backup tool default).
      * Causing the restorer to request the merger to find similar notes to complete
-     * the to be merged node with.
+     * the merged node.
      */
     public function testMergeIncompleteAsComplete()
     {
@@ -75,6 +75,8 @@ class RestoreTest extends TestCase
         	'merge', 'find', 'flush', 'getMandatoryProperties'), array(), 'TestMerger3');
 
         $merge = function($obj) {
+            // Merge User and Role. Where User is complete
+            // but Role not. So only User gets merged.
             if ($obj instanceof User) {
                 return $obj;
             } else {
@@ -83,6 +85,7 @@ class RestoreTest extends TestCase
         };
 
         $find = function($role) {
+            // Complete searched entity.
             $role->company = new Company(4, 'testComp');
             return $role;
         };

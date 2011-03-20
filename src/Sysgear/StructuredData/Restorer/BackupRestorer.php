@@ -271,6 +271,8 @@ class BackupRestorer extends AbstractRestorer
      * are available. Merge if complete or find an existing node in the system
      * to change.
      *
+     * TODO: IMPLEMENT THIS MERGE MODE.
+     *
      * @param \stdClass $object
      * @param \DOMElement $thisNode
      * @return object
@@ -283,7 +285,6 @@ class BackupRestorer extends AbstractRestorer
         }
 
         // Check fields.
-
 
         $mergedObject = $this->merger->merge($object);
         if (null === $mergedObject) {
