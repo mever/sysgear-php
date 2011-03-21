@@ -12,7 +12,7 @@ class Service
     protected $container;
 
     /**
-     * 
+     *
      * @param \Symfony\Components\DependencyInjection\ContainerInterface $container
      */
     public function __construct(ContainerInterface $container)
@@ -40,7 +40,7 @@ class Service
      *
      * @param string $name Optional entity manager service name
      *
-     * @return object
+     * @return \Doctrine\ORM\EntityManager
      */
     protected function getEntityManager($name = null)
     {
