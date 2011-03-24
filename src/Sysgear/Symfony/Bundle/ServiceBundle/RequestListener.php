@@ -5,7 +5,7 @@ namespace Sysgear\Symfony\Bundle\ServiceBundle;
 use Symfony\Component\HttpKernel\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,15 +37,15 @@ class RequestListener
 
     /**
      * Resolve request.
-     * 
-     * @param \Symfony\Component\EventDispatcher\Event $event
+     *
+     * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
      * @return \Symfony\Components\HttpKernel\Response
      */
-    public function handle(Event $event)
+    public function onCoreRequest(GetResponseEvent $event)
     {
-        $request = $event->get('request');
+        $request = $event->getRequest();
 
-        if (HttpKernelInterface::MASTER_REQUEST === $event->get('request_type')) {
+        if (HttpKernelInterface::MASTER_REQUEST === $event->getRequestType()) {
             // set the context even if the parsing does not need to be done
             // to have correct link generation
             $this->router->setContext(array(
@@ -67,7 +67,7 @@ class RequestListener
             }
 
             $request->attributes->replace($parameters);
-            return $this->resolvService($event, $request);
+            $this->resolvService($event, $request);
         } elseif (null !== $this->logger) {
             $this->logger->err(sprintf('No route found for %s', $request->getPathInfo()));
         }
@@ -75,12 +75,12 @@ class RequestListener
 
     /**
      * Resolve service request.
-     * 
-     * @param \Symfony\Component\EventDispatcher\Event $event
+     *
+     * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
      * @param \Symfony\Component\HttpKernel\Request $request
      * @return \Symfony\Components\HttpKernel\Response
      */
-    protected function resolvService(Event $event, Request $request)
+    protected function resolvService(GetResponseEvent $event, Request $request)
     {
         // TODO: Implement optional checks to see if it is a service request.
         if (! $serviceName = $request->attributes->get('_service')) {
@@ -100,7 +100,6 @@ class RequestListener
             $response = $protocol->handle();
         }
 
-        $event->setProcessed();
-        return $response;
+        $event->setResponse($response);
     }
 }

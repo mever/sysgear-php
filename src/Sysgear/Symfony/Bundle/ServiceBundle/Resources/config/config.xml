@@ -15,7 +15,7 @@
 
     <services>
       <service id="service_listener" class="%service_listener.class%">
-        <tag name="kernel.listener" event="core.request" method="handle" priority="0" />
+        <tag name="kernel.listener" event="onCoreRequest" priority="0" />
         <argument type="service" id="sysgear.service_manager" />
         <argument type="service" id="router" />
         <argument type="service" id="logger" on-invalid="ignore" />
