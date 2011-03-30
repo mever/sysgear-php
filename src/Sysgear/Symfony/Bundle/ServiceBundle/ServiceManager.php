@@ -86,7 +86,7 @@ class ServiceManager
                 }
             }
 
-            throw new \InvalidArgumentException(sprintf('Unable to find service "%s:%s".', $bundle, $service));
+            throw new \InvalidArgumentException(sprintf('Unable to find service "%s".', $service));
         }
 
         if (null !== $this->logger) {
@@ -96,7 +96,7 @@ class ServiceManager
         $serviceClass = new $class($this->container);
 
         if (! $serviceClass instanceof Service) {
-            throw new \InvalidArgumentException(sprintf('Service "%s:%s" is not type service.', $bundle, $service));
+            throw new \InvalidArgumentException(sprintf('Service "%s" is not type service.', $service));
         }
 
         return $serviceClass;
