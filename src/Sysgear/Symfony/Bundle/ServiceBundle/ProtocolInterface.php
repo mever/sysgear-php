@@ -3,15 +3,18 @@
 namespace Sysgear\Symfony\Bundle\ServiceBundle;
 
 use Sysgear\Symfony\Bundle\ServiceBundle\Service;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 interface ProtocolInterface
 {
     /**
      * Handle request.
      *
-     * @return \Symfony\Components\HttpKernel\Response
+     * @param Request $request
+     * @return Response
      */
-    public function handle();
+    public function handle(Request $request);
 
     /**
      * Add a service object.

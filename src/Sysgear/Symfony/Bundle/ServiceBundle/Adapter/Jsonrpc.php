@@ -9,12 +9,7 @@ use Zend\Server\Method;
 
 class Jsonrpc extends Server
 {
-    protected $enableDebugging = false;
-
-    public function enableDebugging($flag)
-    {
-        $this->enableDebugging = (boolean) $flag;
-    }
+    public $errorCallback;
 
     /**
      * Indicate fault response
@@ -25,19 +20,12 @@ class Jsonrpc extends Server
      */
     public function fault($fault = null, $code = 404, $data = null)
     {
-        if ($data instanceof \Exception) {
-
-            $res = array('code'  => $data->getCode());
-            if ($this->enableDebugging) {
-                $res['file'] = $data->getFile();
-                $res['line'] = $data->getLine();
-                $res['trace'] = $data->getTrace();
-            }
-
-            $data = $res;
+        if (is_callable($this->errorCallback)) {
+            $error = call_user_func($this->errorCallback, $fault, $code, $data);
+        } else {
+            $error = new Error($fault, $code, $data);
         }
 
-        $error = new Error($fault, $code, $data);
         $this->getResponse()->setError($error);
         return $error;
     }

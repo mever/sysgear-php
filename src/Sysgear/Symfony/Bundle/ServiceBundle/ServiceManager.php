@@ -4,6 +4,7 @@ namespace Sysgear\Symfony\Bundle\ServiceBundle;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Request;
+use Symfony\Component\HttpKernel\Log\LoggerInterface;
 use Sysgear\Symfony\Bundle\ServiceBundle\ProtocolInterface;
 use Sysgear\Symfony\Bundle\ServiceBundle\Service;
 
@@ -20,32 +21,40 @@ class ServiceManager
     protected $logger;
 
     /**
-     *
-     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
-     * @param \Symfony\Component\HttpKernel\Log\LoggerInterface $logger
+     * @var ProtocolInterface[]
      */
-    public function __construct(ContainerInterface $container, $logger = null)
+    protected $protocols = array();
+
+    /**
+     * @param ContainerInterface $container
+     * @param LoggerInterface $logger
+     */
+    public function __construct(ContainerInterface $container, LoggerInterface $logger = null)
     {
         $this->container = $container;
         $this->logger = $logger;
     }
 
     /**
+     * Add protocol.
+     *
+     * @param ProtocolInterface $protocol
+     */
+    public function addProtocol(ProtocolInterface $protocol)
+    {
+        $this->protocols[] = $protocol;
+    }
+
+    /**
      * Return a protocol adapter.
      *
-     * @param string $protocolName
-     * @return \Sysgear\Symfony\Bundle\ServiceBundle\ProtocolInterface
+     * TODO: Support mutiple protocols and select by HTTP context.
+     *
+     * @return ProtocolInterface
      */
-    public function getProtocol($protocolName)
+    public function getProtocol()
     {
-        $protocol = $this->container->get('sysgear.service_protocol.' . $protocolName);
-        if (! $protocol instanceof ProtocolInterface) {
-            throw new \InvalidArgumentException(sprintf('Unable to find protocol "%s".', $protocolName));
-        }
-
-        if (null !== $this->logger) {
-            $this->logger->info(sprintf('Using protocol "%s"', $protocolName));
-        }
+        $protocol = reset($this->protocols);
 
         $protocol->enableDebugging($this->container->getParameter('sysgear.service.debug'));
         return $protocol;

@@ -87,17 +87,17 @@ class RequestListener
             return;
         }
 
-        $sm = $this->serviceManager;
         $service = null;
-        $protocol = $sm->getProtocol('jsonrpc');
+        $protocol = $this->serviceManager->getProtocol();
         try {
-            $service = $sm->findService($serviceName);
+            $service = $this->serviceManager->findService($serviceName);
         } catch (\Exception $e) {
             $response = $protocol->fault($e);
         }
+
         if (null !== $service) {
             $protocol->addService($service, true);
-            $response = $protocol->handle();
+            $response = $protocol->handle($request);
         }
 
         $event->setResponse($response);
