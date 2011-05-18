@@ -47,7 +47,7 @@ class ErrorTest extends \PHPUnit_Framework_TestCase
             $codes = $error->getCodes();
             $this->fail("Should throw exception.");
         } catch (\Exception $e) {
-            $this->assertEquals("Your error object has a none-integer ".
+            $this->assertEquals("Your error object has a non-integer ".
             	"code 'SECOND_ERROR'.", $e->getMessage());
         }
     }
@@ -60,7 +60,7 @@ class ErrorTest extends \PHPUnit_Framework_TestCase
             $this->fail("Should throw exception.");
         } catch (\Exception $e) {
             $this->assertEquals("Error code 'SECOND_ERROR' has to ".
-            	"be an integer higher than zero.", $e->getMessage());
+            	"be an integer greater than zero.", $e->getMessage());
         }
     }
 }

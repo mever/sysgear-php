@@ -19,11 +19,11 @@ abstract class Error implements ErrorInterface
         // Collect and check error codes.
         foreach ($constants as $name => $code) {
             if (! is_integer($code)) {
-                throw new \Exception("Your error object has a none-integer code '{$name}'.");
+                throw new \Exception("Your error object has a non-integer code '{$name}'.");
             }
 
             if ($code <= 0) {
-                throw new \Exception("Error code '{$name}' has to be an integer higher than zero.");
+                throw new \Exception("Error code '{$name}' has to be an integer greater than zero.");
             }
             $codes[$code] = $name;
         }
