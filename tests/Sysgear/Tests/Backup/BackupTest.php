@@ -134,7 +134,7 @@ class BackupTest extends TestCase
         $importer = new XmlImporter();
         $importer->fromString($this->expectedBasicCompanyXml($dummyHashes));
         $tool = new BackupTool(new XmlExporter(), $importer);
-        $company = $tool->restore(new Company());
+        $company = $tool->restore(array(), new Company());
 
         // Assert relations.
         $hash1 = spl_object_hash($company);

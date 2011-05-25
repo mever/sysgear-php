@@ -109,6 +109,51 @@ class BackupRestorer extends AbstractRestorer
     }
 
     /**
+     * Restore a backupable object from DOMElement.
+     *
+     * @param \DOMElement $element The element representing the object to restore.
+     * @return BackupableInterface
+     */
+    public function restore(\DOMElement $element)
+    {
+        $this->element = $element;
+
+        // Create new object to restore.
+        $class = $element->getAttribute('class');
+        if (empty($class)) {
+            Exception::invalidElement(array('class'));
+        }
+        $object = new $class();
+
+        // Add this object as reference and restore properties.
+        $this->createReferenceCandidate($object);
+        $refClass = new \ReflectionClass($object);
+        foreach ($element->childNodes as $propertyNode) {
+
+            if ($propertyNode instanceof \DOMElement) {
+                $this->setProperty($refClass, $propertyNode, $object);
+            }
+        }
+
+        // Merge object
+        if (null !== $this->merger) {
+
+            $object = $this->dispatchMerge($object, $element);
+            $this->merger->flush();
+        } else {
+
+            // Check if object is backupable.
+            if ($object instanceof BackupableInterface) {
+                $object->restoreStructedData($this->cloneRestorer($element));
+            } else {
+                throw Exception::classIsNotABackable($class);
+            }
+        }
+
+        return $object;
+    }
+
+    /**
      * (non-PHPdoc)
      * @see Sysgear\StructuredData\Restorer.RestorerInterface::toObject()
      */
@@ -208,6 +253,7 @@ class BackupRestorer extends AbstractRestorer
     {
         $value = $propertyNode->getAttribute('value');
         switch ($type) {
+        case "": break;    // skip type-casting if no type is given
         default:
             settype($value, $type);
         }
@@ -239,7 +285,7 @@ class BackupRestorer extends AbstractRestorer
 
             // Check if object is backupable.
             if ($object instanceof BackupableInterface) {
-                $object->restoreStructedData($this->createRestorer($propertyNode));
+                $object->restoreStructedData($this->cloneRestorer($propertyNode));
             } else {
                 throw Exception::classIsNotABackable($class);
             }
@@ -281,19 +327,26 @@ class BackupRestorer extends AbstractRestorer
     {
         // If possible, begin by descending into the tree.
         if ($object instanceof BackupableInterface) {
-            $object->restoreStructedData($this->createRestorer($thisNode));
+            $object->restoreStructedData($this->cloneRestorer($thisNode));
         }
 
-        // Check fields.
+        // Check if fields are missing.
+        $props = array();
+        foreach ($thisNode->childNodes as $node) {
+            $props[] = $node->nodeName;
+        }
+        $diff = array_diff($this->merger->getMandatoryProperties($object), $props);
+        if (count($diff) > 0) {
 
-        $mergedObject = $this->merger->merge($object);
-        if (null === $mergedObject) {
-
-            // Pick a complete object and fill it with changes.
+            // Fetch missing fields.
             $mergedObject = $this->merger->find($object);
             if ($mergedObject instanceof BackupableInterface) {
-                $mergedObject->restoreStructedData($this->createRestorer($thisNode));
+                $mergedObject->restoreStructedData($this->cloneRestorer($thisNode));
+            } else {
+                throw new RestorerException("Couldn't find an object in the system to overwrite.");
             }
+        } else {
+            $mergedObject = $this->merger->merge($object);
         }
 
         return $mergedObject;
@@ -312,7 +365,7 @@ class BackupRestorer extends AbstractRestorer
     {
         // If possible, begin by descending into the tree.
         if ($object instanceof BackupableInterface) {
-            $object->restoreStructedData($this->createRestorer($thisNode));
+            $object->restoreStructedData($this->cloneRestorer($thisNode));
         }
 
         // Try to merge the object.
@@ -326,7 +379,7 @@ class BackupRestorer extends AbstractRestorer
             }
 
             if ($mergedObject instanceof BackupableInterface) {
-                $mergedObject->restoreStructedData($this->createRestorer($thisNode));
+                $mergedObject->restoreStructedData($this->cloneRestorer($thisNode));
             }
         }
 
@@ -339,7 +392,7 @@ class BackupRestorer extends AbstractRestorer
      * @param \DOMElement $propertyNode
      * @return \Sysgear\StructuredData\Restorer\BackupRestorer
      */
-    protected function createRestorer(\DOMElement $propertyNode)
+    protected function cloneRestorer(\DOMElement $propertyNode)
     {
         $restorer = clone $this;
         $restorer->name = $propertyNode->nodeName;
@@ -357,6 +410,9 @@ class BackupRestorer extends AbstractRestorer
      */
     protected function createReferenceCandidate($object)
     {
-        $this->referenceCandidates['object'][$this->element->getAttribute('id')] = $object;
+        $id = $this->element->getAttribute('id');
+        if (! empty($id)) {
+            $this->referenceCandidates['object'][$id] = $object;
+        }
     }
 }

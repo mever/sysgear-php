@@ -138,11 +138,11 @@ class BackupTool
     /**
      * Restore collection of structed data to $object.
      *
-     * @param \Sysgear\Backup\BackupableInterface $object
      * @param array $restorerOptions
-     * @return \Sysgear\Backup\BackupableInterface
+     * @param BackupableInterface $object
+     * @return BackupableInterface
      */
-    public function restore(BackupableInterface $object = null, array $restorerOptions = array())
+    public function restore(array $restorerOptions = array(), BackupableInterface $object = null)
     {
         $document = $this->importer->getDom();
         $dom = new \DOMDocument('1.0', 'UTF-8');
@@ -150,7 +150,6 @@ class BackupTool
         // Create restorer.
         if (array_key_exists("merger", $this->options)) {
             $this->restorerOptions["merger"] = $this->options["merger"];
-            $this->restorerOptions["mergeMode"] = BackupRestorer::MERGE_ASSUME_COMPLETE;
         }
         $restorerOptions = array_merge($this->restorerOptions, $restorerOptions);
         $restorer = new BackupRestorer($restorerOptions);
@@ -177,6 +176,36 @@ class BackupTool
         if (array_key_exists("merger", $this->options)) {
             $this->options["merger"]->merge($object);
             $this->options["merger"]->flush();
+        }
+
+        return $object;
+    }
+
+    /**
+     * Restore collection from DOM to $object.
+     *
+     * @param \DOMDocument $dom
+     * @param array $restorerOptions
+     * @param BackupableInterface $object
+     * @return BackupableInterface
+     */
+    public function restoreFromDom(\DOMDocument $dom, array $restorerOptions = array())
+    {
+        // Create restorer.
+        if (array_key_exists("merger", $this->options)) {
+            $this->restorerOptions["merger"] = $this->options["merger"];
+        }
+        $restorerOptions = array_merge($this->restorerOptions, $restorerOptions);
+        $restorer = new BackupRestorer($restorerOptions);
+        $restorer->setDom($dom);
+
+        // Collect content to restore.
+        foreach ($dom->childNodes as $child) {
+
+            if (XML_ELEMENT_NODE === $child->nodeType) {
+                $object = $restorer->restore($child);
+                break;
+            }
         }
 
         return $object;

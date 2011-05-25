@@ -17,4 +17,10 @@ class Exception extends \Exception
 
         return new self("Class '{$class}' does not implement Sysgear\Backup\BackupableInterface.");
     }
+
+    public static function invalidElement(array $missingFields)
+    {
+        return new self("The given element is not valid and can't be used. It ".
+        	"is missing these field(s): '" . join(", '", $missingFields) . "'");
+    }
 }

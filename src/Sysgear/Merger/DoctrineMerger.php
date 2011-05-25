@@ -95,10 +95,16 @@ class DoctrineMerger implements MergerInterface
     public function getMandatoryProperties($object)
     {
         $props = array();
-        $mappings = $this->entityManager
-            ->getClassMetadata(get_class($object))->getAssociationMappings();
+        $metadata = $this->entityManager->getClassMetadata(get_class($object));
 
-        foreach ($mappings as $map) {
+        foreach ($metadata->getColumnNames() as $columnName) {
+            $fieldName = $metadata->getFieldName($columnName);
+            if (! $metadata->isNullable($fieldName)) {
+                $props[] = $fieldName;
+            }
+        }
+
+        foreach ($metadata->getAssociationMappings() as $map) {
             if ($this->isAssociationMandatory($map)) {
                 $props[] = $map['fieldName'];
             }
