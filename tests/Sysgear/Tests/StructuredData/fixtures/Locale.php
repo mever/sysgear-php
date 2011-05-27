@@ -2,7 +2,7 @@
 
 namespace Sysgear\Tests\StructuredData;
 
-class Locale
+class Locale extends BackupableEntity
 {
 	public $id;
 

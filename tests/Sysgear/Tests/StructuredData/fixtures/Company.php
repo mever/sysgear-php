@@ -2,10 +2,10 @@
 
 namespace Sysgear\Tests\StructuredData;
 
-class Company
+class Company extends BackupableEntity
 {
     public $id;
- 
+
     public $name;
 
     public $locale;

@@ -163,19 +163,10 @@ class BackupTool
                 $restorer->setDom($dom);
 
                 if (null === $object) {
-                    $object = $this->createRootObject($child);
+                    $object = $restorer->restore($child);
                 }
                 break;
             }
-        }
-
-        // Restore object.
-        $object->restoreStructedData($restorer);
-
-        // Merge object with entity manager (if one given).
-        if (array_key_exists("merger", $this->options)) {
-            $this->options["merger"]->merge($object);
-            $this->options["merger"]->flush();
         }
 
         return $object;
@@ -209,18 +200,6 @@ class BackupTool
         }
 
         return $object;
-    }
-
-    /**
-     * Create root object to restore from.
-     *
-     * @param \DOMElement $element
-     * @return \Sysgear\Backup\BackupableInterface
-     */
-    protected function createRootObject(\DOMElement $element)
-    {
-        $class = trim($element->attributes->getNamedItem('class')->textContent);
-        return new $class();
     }
 
     /**

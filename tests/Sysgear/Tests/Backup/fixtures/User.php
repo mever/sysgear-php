@@ -10,6 +10,11 @@ class User implements BackupableInterface
 {
     protected $id;
 
+    /**
+     * Test private field.
+     *
+     * @var string
+     */
     private $name;
 
     protected $password;

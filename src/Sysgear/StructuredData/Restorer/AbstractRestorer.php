@@ -25,16 +25,6 @@ abstract class AbstractRestorer implements RestorerInterface
     }
 
     /**
-     * Set option.
-     *
-     * @param string $key
-     * @param mixed $value
-     */
-    public function setOption($key, $value)
-    {
-    }
-
-    /**
      * (non-PHPdoc)
      * @see Sysgear\StructuredData\Restorer.RestorerInterface::setDom()
      */

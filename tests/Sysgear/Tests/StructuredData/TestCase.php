@@ -19,6 +19,21 @@ require_once 'fixtures/User.php';
 
 class TestCase extends \PHPUnit_Framework_TestCase
 {
+    protected function getIncompleteUser()
+    {
+        $role1 = new Role();
+        $role1->id = 234;
+        $role1->name = "guest";
+
+        $user = new User();
+        $user->id = 123;
+        $user->name = "test";
+        $user->password = '$1$irVZosm9$eYSZynm/kUm1e6ja3YIya1';
+        $user->roles[] = $role1;
+
+        return $user;
+    }
+
     protected function backupBasicCompany()
     {
         $lang = new Language(1, 'en_EN');
@@ -31,32 +46,5 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $company->functions[] = $role;
 
         return $company;
-    }
-
-    protected function expectedBasicCompanyXml()
-    {
-        return '<?xml version="1.0" encoding="UTF-8"?>
-<Company id="1" name="rts">
-  <Locale id="1">
-    <Language id="1" iso639="en_EN"/>
-  </Locale>
-  <functions>
-    <Role id="1" name="admin">
-      <members>
-        <User id="1" name="piet" password="bf7s83s">
-          <Company id="1" name="rts"/>
-          <roles/>
-        </User>
-      </members>
-      <Company id="1" name="rts"/>
-    </Role>
-  </functions>
-  <employees>
-    <User id="1" name="piet" password="bf7s83s">
-      <Company id="1" name="rts"/>
-      <roles/>
-    </User>
-  </employees>
-</Company>';
     }
 }

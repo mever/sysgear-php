@@ -9,10 +9,10 @@ use Sysgear\Backup\BackupableInterface;
 class Company implements BackupableInterface
 {
     public $id;
- 
+
     /**
-     * Test protected value.
-     * 
+     * Test protected field.
+     *
      * @var string
      */
     protected $name;

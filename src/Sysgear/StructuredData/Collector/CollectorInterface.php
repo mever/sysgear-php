@@ -6,11 +6,18 @@ use Sysgear\StructuredData\Exporter\ExporterInterface;
 
 /**
  * Responsible for collecting data.
- * 
+ *
  * @author (c) Martijn Evers <martijn4evers@gmail.com>
  */
 interface CollectorInterface
 {
+    /**
+     * Construct data collector.
+     *
+     * @param array $options
+     */
+    public function __construct(array $options = array());
+
     /**
      * Collect data from object.
      *

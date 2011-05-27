@@ -2,7 +2,7 @@
 
 namespace Sysgear\Tests\StructuredData;
 
-class Language
+class Language extends BackupableEntity
 {
 	public $id;
 

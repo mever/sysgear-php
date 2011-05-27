@@ -2,7 +2,7 @@
 
 namespace Sysgear\Tests\StructuredData;
 
-class Role
+class Role extends BackupableEntity
 {
     public $id;
 
@@ -12,7 +12,7 @@ class Role
 
     public $company;
 
-    public function __construct($id, $name, Company $company)
+    public function __construct($id = null, $name = null, Company $company = null)
     {
         $this->id = $id;
         $this->name = $name;

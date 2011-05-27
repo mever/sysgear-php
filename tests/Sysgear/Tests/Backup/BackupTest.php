@@ -124,37 +124,37 @@ class BackupTest extends TestCase
             $export->formatOutput(true)->__toString());
     }
 
-    /**
-     * Test restoring the object from XML.
-     */
-    public function testRestoreFromXml()
-    {
-        // Restore company.
-        $dummyHashes = $this->basicCompany();
-        $importer = new XmlImporter();
-        $importer->fromString($this->expectedBasicCompanyXml($dummyHashes));
-        $tool = new BackupTool(new XmlExporter(), $importer);
-        $company = $tool->restore(array(), new Company());
-
-        // Assert relations.
-        $hash1 = spl_object_hash($company);
-        $hash2 = spl_object_hash($company->functions[0]->company);
-        $this->assertEquals($hash1, $hash2);
-
-        // Assert protected & private properties.
-        $this->assertEquals('rts', $company->getName());
-        $this->assertEquals('piet', $company->getEmployee(0)->getName());
-
-        // Assert properties.
-        $this->assertFalse(isset($company->locale->language->name));
-    }
+//    /**
+//     * Test restoring the object from XML.
+//     */
+//    public function testRestoreFromXml()
+//    {
+//        // Restore company.
+//        $companyForHashValues = $this->basicCompany();
+//        $importer = new XmlImporter();
+//        $importer->fromString($this->expectedBasicCompanyXml($companyForHashValues));
+//        $tool = new BackupTool(new XmlExporter(), $importer);
+//        $company = $tool->restore(array(), new Company());
+////var_dump($company);
+//        // Assert relations.
+//        $hash1 = spl_object_hash($company);
+//        $hash2 = spl_object_hash($company->functions[0]->company);
+//        $this->assertEquals($hash1, $hash2);
+//
+//        // Assert protected & private properties.
+//        $this->assertEquals('rts', $company->getName());
+//        $this->assertEquals('piet', $company->getEmployee(0)->getName());
+//
+//        // Assert properties.
+//        $this->assertFalse(isset($company->locale->language->name));
+//    }
 
     public function testRestoreWithoutTarget()
     {
         // Restore company.
-        $dummyHashes = $this->basicCompany();
+        $companyForHashValues = $this->basicCompany();
         $importer = new XmlImporter();
-        $importer->fromString($this->expectedBasicCompanyXml($dummyHashes));
+        $importer->fromString($this->expectedBasicCompanyXml($companyForHashValues));
         $tool = new BackupTool(new XmlExporter(), $importer);
         $company = $tool->restore();
 

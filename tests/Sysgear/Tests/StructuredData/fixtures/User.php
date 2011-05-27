@@ -2,21 +2,22 @@
 
 namespace Sysgear\Tests\StructuredData;
 
-class User
+class User extends BackupableEntity
 {
-    protected $id;
+    public $id;
 
-    protected $name;
+    public $name;
 
-    protected $password;
+    public $password;
 
-    protected $employer;
+    public $employer;
 
-    protected $roles = array();
+    public $roles = array();
 
-    protected $locale;
+    public $locale;
 
-    public function __construct($id, $name, $password, Company $employer, Locale $locale = null)
+    public function __construct($id = null, $name = null, $password = null,
+        Company $employer = null, Locale $locale = null)
     {
         $this->id = $id;
         $this->name = $name;
