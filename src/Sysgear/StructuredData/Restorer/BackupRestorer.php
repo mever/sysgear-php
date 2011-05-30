@@ -2,6 +2,7 @@
 
 namespace Sysgear\StructuredData\Restorer;
 
+use Sysgear\StructuredData\Collector\BackupCollector;
 use Sysgear\Backup\Exception;
 use Sysgear\Backup\BackupableInterface;
 use Sysgear\Merger\MergerException;
@@ -132,16 +133,6 @@ class BackupRestorer extends AbstractRestorer
             Exception::invalidElement(array('class'));
         }
         $object = new $class();
-
-        // Add this object as reference and restore properties.
-//        $this->createReferenceCandidate($object);
-//        $refClass = new \ReflectionClass($object);
-//        foreach ($element->childNodes as $propertyNode) {
-//
-//            if ($propertyNode instanceof \DOMElement) {
-//                $this->setProperty($refClass, $propertyNode, $object);
-//            }
-//        }
 
         // Merge object
         if (null !== $this->merger) {
@@ -278,7 +269,6 @@ class BackupRestorer extends AbstractRestorer
     {
         // Found reference, so return it.
         if ($propertyNode->hasAttribute('ref')) {
-            var_dump('REF! ' . $propertyNode->getAttribute('ref'));
             return $this->referenceCandidates['object'][$propertyNode->getAttribute('ref')];
         }
 
@@ -335,12 +325,14 @@ class BackupRestorer extends AbstractRestorer
         // Check if properties are missing.
         $props = array();
         foreach ($thisNode->childNodes as $node) {
-            $props[] = $node->nodeName;
+            if ($node instanceof \DOMElement) {
+                $props[] = $node->nodeName;
+            }
         }
         $diff = array_diff($this->merger->getMandatoryProperties($object), $props);
         if (count($diff) > 0) {
 
-            // Find an existing object as base,
+            // Find an existing object as base.
             $mergedObject = $this->merger->find($object);
             if ($mergedObject instanceof BackupableInterface) {
 
@@ -359,6 +351,9 @@ class BackupRestorer extends AbstractRestorer
             if (null === $mergedObject) {
                 throw new RestorerException("Merging complete object failed.");
             }
+
+            // create reference to merged object.
+            $this->createReferenceCandidate($mergedObject, $thisNode);
         }
 
         return $mergedObject;
@@ -367,7 +362,7 @@ class BackupRestorer extends AbstractRestorer
     /**
      * Assume nodes as complete. If the merger notifies a merge
      * error (by returning null) try to fetch the corresponding node
-     * and add the corresponding fields, overwriting the old ones.
+     * and set the corresponding fields.
      *
      * @param \stdClass $object
      * @param \DOMElement $thisNode
@@ -384,15 +379,29 @@ class BackupRestorer extends AbstractRestorer
         $mergedObject = $this->merger->merge($object);
         if (null === $mergedObject) {
 
-            // Pick an object from the system and overwrite fields.
-            $mergedObject = $this->merger->find($object);
-            if (null === $mergedObject) {
-                throw new RestorerException("Couldn't find an object in the system to overwrite.");
+            // step 1. get ignore list
+            $props = array();
+            foreach ($thisNode->childNodes as $node) {
+                if ($node instanceof \DOMElement) {
+                    $props[] = $node->nodeName;
+                }
             }
 
-            if ($mergedObject instanceof BackupableInterface) {
-                $mergedObject->restoreStructedData($this->cloneRestorer($thisNode));
-            }
+            // step 2. find "complete" object
+            $mergedObject = $this->merger->find($object);
+
+            // step 3. collect missing property nodes
+            $backupCollector = new BackupCollector();
+            $backupCollector->fromBackupable($mergedObject, array('ignore' => $props));
+            $elem = $backupCollector->getDomElement();
+
+            // step 4. restore
+            $object->restoreStructedData($this->cloneRestorer($elem));
+            $mergedObject = $object;
+            $mergedObject = $this->merger->merge($mergedObject);
+
+            // create reference to merged object.
+            $this->createReferenceCandidate($mergedObject, $thisNode);
         }
 
         return $mergedObject;
@@ -416,14 +425,13 @@ class BackupRestorer extends AbstractRestorer
     /**
      * Create reference.
      *
-     * @param \DOMelement $node
      * @param object $object
+     * @param \DOMelement $element
      * @throws RestorerException
      */
-    protected function createReferenceCandidate($object)
+    protected function createReferenceCandidate($object, \DOMElement $element = null)
     {
-        $id = $this->element->getAttribute('id');
-        var_dump("Make ref [{$id}]: " . get_class($object));
+        $id = (null === $element) ? $this->element->getAttribute('id') : $element->getAttribute('id');
         if (! empty($id)) {
             $this->referenceCandidates['object'][$id] = $object;
         }

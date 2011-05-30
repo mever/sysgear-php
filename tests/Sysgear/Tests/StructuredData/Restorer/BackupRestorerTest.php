@@ -19,7 +19,7 @@ use Sysgear\Tests\StructuredData;
 
 class BackupRestorerTest extends TestCase
 {
-    public static $debug = true;
+    public static $debug = false;
 
     public function testDefaultMergeMode()
     {
@@ -189,6 +189,7 @@ class BackupRestorerTest extends TestCase
 
         // assert company from file
         $this->assertEquals(14, $user->roles[0]->company->id);
+        $this->assertTrue($storedUserCompany !== $user->employer);
     }
 
     /**
@@ -236,7 +237,7 @@ class BackupRestorerTest extends TestCase
         // mock merger
         $merger = $this->getMock('Sysgear\\Merger\\MergerInterface', array(
         	'merge', 'find', 'flush', 'getMandatoryProperties'), array(), 'TestMerger3');
-        $merger->expects($this->exactly(3))->method('merge')->will($this->returnCallback($merge));
+        $merger->expects($this->exactly(4))->method('merge')->will($this->returnCallback($merge));
         $merger->expects($this->exactly(1))->method('find')->will($this->returnCallback($find));
         $merger->expects($this->exactly(1))->method('flush');
         $merger->expects($this->exactly(0))->method('getMandatoryProperties');
@@ -249,7 +250,8 @@ class BackupRestorerTest extends TestCase
         $user = $restorer->restore($dom->getElementsByTagName('User')->item(0));
 
         // assert restored user
-        $this->assertTrue($storedUserCompany === $user->employer);
+        $this->assertEquals(135673, $user->employer->id);
+        $this->assertEquals('userCompany', $user->employer->name);
         $this->assertEquals(2, $user->roles[0]->id);
     }
 
@@ -376,7 +378,7 @@ class BackupRestorerTest extends TestCase
         }
 
         // emulate storage
-        $storedUserCompany = new StructuredData\Company(222, 'userCompany');
+        $storedUserCompany = new StructuredData\Company(null, 'userCompany-abc');
 
         // emulate merger: methods
         $state1 = 0;
@@ -427,9 +429,9 @@ class BackupRestorerTest extends TestCase
         $restorer->setOption('merger', $merger);
         $user = $restorer->restore($dom->getElementsByTagName('User')->item(0));
 
-        var_dump($user);
         // assert restored user
-//        $this->assertTrue($storedUserCompany === $user->employer);
-//        $this->assertEquals(2, $user->roles[0]->id);
+        $this->assertTrue($storedUserCompany !== $user->employer);
+        $this->assertTrue($user->employer === $user->roles[0]->company);
+        $this->assertEquals(23, $user->roles[0]->id);
     }
 }
