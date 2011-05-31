@@ -76,7 +76,7 @@ class DoctrineMerger implements MergerInterface
         $this->entityManager->clear(); // This one is very important, remove it and expect hours of debug fun.
         $id = $this->entityManager->getClassMetadata($class)->getIdentifierValues($object);
 
-        return $this->entityManager->find($class, $id);
+        return (0 === count($id)) ? null : $this->entityManager->find($class, $id);
     }
 
     /**
