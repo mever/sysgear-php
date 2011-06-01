@@ -11,6 +11,8 @@
 
 namespace Sysgear\Tests\StructuredData\Restorer;
 
+use Symfony\Component\Validator\Constraints\Language;
+
 use Zend\Pdf\PdfParser\StructureParser;
 
 use Sysgear\StructuredData\Restorer\BackupRestorer;
@@ -37,8 +39,12 @@ class BackupRestorerTest extends TestCase
         }
 
         // emulate storage
+        $storedRole = new StructuredData\Role();
         $storedRoleCompany = new StructuredData\Company(444257, 'roleCompany');
+        $storedRole->company = $storedRoleCompany;
         $storedUserCompany = new StructuredData\Company(135673, 'userCompany');
+        $storedUser = new StructuredData\User();
+        $storedUser->employer = $storedUserCompany;
 
         // emulate merger: methods
         $state1 = 0;
@@ -48,25 +54,24 @@ class BackupRestorerTest extends TestCase
                 echo 'getMandatoryProperties: ' . get_class($obj) . " ($state1)\n";
             }
             switch ($state1++) {
-            case 0:    return array('company');   // $obj = Role
-            case 1:    return array();            // $obj = Company (for Role)
-            case 2:    return array('employer');  // $obj = User
-            default:   return array();            // $obj = Company (for User)
+            case 0:  return array('company');   // $obj = Role
+            case 1:  return array('employer');  // $obj = User
+            default: return array();
             }
         };
 
         $state2 = 0;
-        $find = function($obj) use (&$state2, $storedRoleCompany, $storedUserCompany, $that) {
+        $find = function($obj) use (&$state2, $storedRole, $storedRoleCompany, $storedUser, $that) {
             if (BackupRestorerTest::$debug) {echo 'find: ' . get_class($obj) . " ($state2)\n";}
             switch ($state2++) {
             case 0:    // $obj = Role
                 $that->assertEquals(2, $obj->id);
-                $obj->company = $storedRoleCompany;
+                $obj = $storedRole;
                 break;
 
             case 1:    // $obj = User
                 $that->assertEquals(1, $obj->id);
-                $obj->employer = $storedUserCompany;
+                $obj = $storedUser;
                 break;
             }
 
@@ -85,10 +90,10 @@ class BackupRestorerTest extends TestCase
         // mock merger
         $merger = $this->getMock('Sysgear\\Merger\\MergerInterface', array(
         	'merge', 'find', 'flush', 'getMandatoryProperties'), array(), 'TestMerger1');
-        $merger->expects($this->exactly(4))->method('merge')->will($this->returnCallback($merge));
+        $merger->expects($this->exactly(2))->method('merge')->will($this->returnCallback($merge));
         $merger->expects($this->exactly(2))->method('find')->will($this->returnCallback($find));
         $merger->expects($this->exactly(1))->method('flush');
-        $merger->expects($this->exactly(4))->method('getMandatoryProperties')
+        $merger->expects($this->exactly(2))->method('getMandatoryProperties')
             ->will($this->returnCallback($getMandatoryProperties));
 
         // run restorer
@@ -118,27 +123,35 @@ class BackupRestorerTest extends TestCase
         }
 
         // emulate storage
-        $storedUserCompany = new StructuredData\Company(135673, 'userCompany');
+        $storedCompany = new StructuredData\Company(135673, 'userCompany');
+        $storedCompany->locale = new StructuredData\Locale(234782);
 
         // emulate merger: methods
+        $that = $this;
         $state1 = 0;
         $getMandatoryProperties = function($obj) use (&$state1) {
             if (BackupRestorerTest::$debug) {
                 echo 'getMandatoryProperties: ' . get_class($obj) . " ($state1)\n";
             }
             switch ($state1++) {
-            case 0:    return array();       // $obj = Company (from User)
-            case 1:    return array('name'); // $obj = Company (from Role, missing "name" field)
+            case 0:    return array('locale');  // $obj = Company (from User)
+            case 1:    return array('name');    // $obj = Company (from Role, missing "name" field)
             default:   return array();
             }
         };
 
         $state2 = 0;
-        $find = function($obj) use (&$state2, $storedUserCompany) {
+        $find = function($obj) use (&$state2, $that, $storedCompany) {
             if (BackupRestorerTest::$debug) {echo 'find: ' . get_class($obj) . " ($state2)\n";}
             switch ($state2++) {
-            case 0:    // $obj = Company (from Role)
-                $obj->name = 'found name';
+            case 0:    // $obj = Company (from User)
+                $that->assertEquals(12, $obj->id);
+                $obj = $storedCompany;
+                break;
+
+            case 1:    // $obj = Company (from Role)
+                $that->assertEquals(14, $obj->id);
+                $obj = $storedCompany;
                 break;
             }
 
@@ -147,12 +160,12 @@ class BackupRestorerTest extends TestCase
 
         // check for successfull merge
         $state3 = 0;
-        $that = $this;
         $merge = function($obj) use (&$state3, $that) {
             if (BackupRestorerTest::$debug) {echo 'merge: ' . get_class($obj) . " ($state3)\n";}
             switch ($state3++) {
             case 0: $that->assertEquals(12, $obj->id); break; // $obj = Company (from User)
-            case 1: $that->assertEquals(14, $obj->id); break; // $obj = Company (from Role)
+            case 1: $that->assertEquals(14, $obj->id);
+                $that->assertEquals('userCompany', $obj->name); break; // $obj = Company (from Role)
             case 2: $that->assertEquals(13, $obj->id); break; // $obj = Role 13
             case 3: $that->assertEquals(11, $obj->id); break; // $obj = User 11
             }
@@ -164,7 +177,7 @@ class BackupRestorerTest extends TestCase
         $merger = $this->getMock('Sysgear\\Merger\\MergerInterface', array(
         	'merge', 'find', 'flush', 'getMandatoryProperties'), array(), 'TestMerger2');
         $merger->expects($this->exactly(4))->method('merge')->will($this->returnCallback($merge));
-        $merger->expects($this->exactly(1))->method('find')->will($this->returnCallback($find));
+        $merger->expects($this->exactly(4))->method('find')->will($this->returnCallback($find));
         $merger->expects($this->exactly(1))->method('flush');
         $merger->expects($this->exactly(4))->method('getMandatoryProperties')
             ->will($this->returnCallback($getMandatoryProperties));
@@ -180,7 +193,9 @@ class BackupRestorerTest extends TestCase
 
         // assert company from file
         $this->assertEquals(14, $user->roles[0]->company->id);
-        $this->assertTrue($storedUserCompany !== $user->employer);
+        $this->assertTrue($storedCompany !== $user->employer);
+        $this->assertTrue($storedCompany->locale !== $user->employer->locale);
+        $this->assertEquals($storedCompany->locale->id, $user->employer->locale->id);
     }
 
     /**
@@ -197,9 +212,20 @@ class BackupRestorerTest extends TestCase
 
         // emulate merger: methods
         $state1 = 0;
-        $find = function($obj) use (&$state1, $storedUserCompany) {
-            if (BackupRestorerTest::$debug) {echo 'find: ' . get_class($obj) . " ($state1)\n";}
+        $getMandatoryProperties = function($obj) use (&$state1) {
+            if (BackupRestorerTest::$debug) {
+                echo 'getMandatoryProperties: ' . get_class($obj) . " ($state1)\n";
+            }
             switch ($state1++) {
+            case 0:    return array('employer');  // $obj = User
+            default:   return array();
+            }
+        };
+
+        $state2 = 0;
+        $find = function($obj) use (&$state2, $storedUserCompany) {
+            if (BackupRestorerTest::$debug) {echo 'find: ' . get_class($obj) . " ($state2)\n";}
+            switch ($state2++) {
             case 0:    // $obj = User
                 $obj->employer = $storedUserCompany;
                 break;
@@ -209,16 +235,14 @@ class BackupRestorerTest extends TestCase
         };
 
         // check for successfull merge
-        $state2 = 0;
+        $state3 = 0;
         $that = $this;
-        $merge = function($obj) use (&$state2, $that) {
-            if (BackupRestorerTest::$debug) {echo 'merge: ' . get_class($obj) . " ($state2)\n";}
-            switch ($state2++) {
+        $merge = function($obj) use (&$state3, $that) {
+            if (BackupRestorerTest::$debug) {echo 'merge: ' . get_class($obj) . " ($state3)\n";}
+            switch ($state3++) {
             case 0: $that->assertEquals(2, $obj->id); break; // $obj = Role 2
 
             // $obj = User; this fails because the User has a mandatory employer field.
-            // Extra note: Role is missing company too, but we pretend in this test if
-            // it is not mandatory by not returning null.
             case 1: return null;
             }
             return $obj;
@@ -228,10 +252,11 @@ class BackupRestorerTest extends TestCase
         // mock merger
         $merger = $this->getMock('Sysgear\\Merger\\MergerInterface', array(
         	'merge', 'find', 'flush', 'getMandatoryProperties'), array(), 'TestMerger3');
-        $merger->expects($this->exactly(4))->method('merge')->will($this->returnCallback($merge));
+        $merger->expects($this->exactly(3))->method('merge')->will($this->returnCallback($merge));
         $merger->expects($this->exactly(1))->method('find')->will($this->returnCallback($find));
         $merger->expects($this->exactly(1))->method('flush');
-        $merger->expects($this->exactly(0))->method('getMandatoryProperties');
+        $merger->expects($this->exactly(1))->method('getMandatoryProperties')
+            ->will($this->returnCallback($getMandatoryProperties));
 
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $dom->loadXML(file_get_contents(__DIR__ . '/../fixtures/user_incomplete.xml'));
@@ -295,7 +320,7 @@ class BackupRestorerTest extends TestCase
         }
 
         // emulate storage
-        $storedUserCompany = new StructuredData\Company(22, 'userCompany');
+        $storedUserCompany = new StructuredData\Company(22222222, 'userCompany');
 
         // emulate merger: methods
         $state1 = 0;
@@ -340,7 +365,7 @@ class BackupRestorerTest extends TestCase
         $merger = $this->getMock('Sysgear\\Merger\\MergerInterface', array(
         	'merge', 'find', 'flush', 'getMandatoryProperties'), array(), 'TestMerger5');
         $merger->expects($this->exactly(3))->method('merge')->will($this->returnCallback($merge));
-        $merger->expects($this->exactly(1))->method('find')->will($this->returnCallback($find));
+        $merger->expects($this->exactly(3))->method('find')->will($this->returnCallback($find));
         $merger->expects($this->exactly(1))->method('flush');
         $merger->expects($this->exactly(3))->method('getMandatoryProperties')
             ->will($this->returnCallback($getMandatoryProperties));
@@ -374,9 +399,22 @@ class BackupRestorerTest extends TestCase
 
         // emulate merger: methods
         $state1 = 0;
-        $find = function($obj) use (&$state1, $storedUserCompany) {
-            if (BackupRestorerTest::$debug) {echo 'find: ' . get_class($obj) . " ($state1)\n";}
+        $getMandatoryProperties = function($obj) use (&$state1) {
+            if (BackupRestorerTest::$debug) {
+                echo 'getMandatoryProperties: ' . get_class($obj) . " ($state1)\n";
+            }
             switch ($state1++) {
+            case 0:    return array('name');      // $obj = Company (from User)
+            case 1:    return array('company');   // $obj = Role
+            case 2:    return array('employer');  // $obj = User
+            default:   return array();
+            }
+        };
+
+        $state2 = 0;
+        $find = function($obj) use (&$state2, $storedUserCompany) {
+            if (BackupRestorerTest::$debug) {echo 'find: ' . get_class($obj) . " ($state2)\n";}
+            switch ($state2++) {
             case 0:    // $obj = Company
                 $obj = $storedUserCompany;
                 break;
@@ -390,11 +428,11 @@ class BackupRestorerTest extends TestCase
         };
 
         // check for successfull merge
-        $state2 = 0;
+        $state3 = 0;
         $that = $this;
-        $merge = function($obj) use (&$state2, $that) {
-            if (BackupRestorerTest::$debug) {echo 'merge: ' . get_class($obj) . " ($state2)\n";}
-            switch ($state2++) {
+        $merge = function($obj) use (&$state3, $that) {
+            if (BackupRestorerTest::$debug) {echo 'merge: ' . get_class($obj) . " ($state3)\n";}
+            switch ($state3++) {
 
             // $obj = Company; this fails because the Company has a mandatory name field.
             case 0: return null;
@@ -412,7 +450,8 @@ class BackupRestorerTest extends TestCase
         $merger->expects($this->exactly(5))->method('merge')->will($this->returnCallback($merge));
         $merger->expects($this->exactly(2))->method('find')->will($this->returnCallback($find));
         $merger->expects($this->exactly(1))->method('flush');
-        $merger->expects($this->exactly(0))->method('getMandatoryProperties');
+        $merger->expects($this->exactly(2))->method('getMandatoryProperties')
+            ->will($this->returnCallback($getMandatoryProperties));
 
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $dom->loadXML(file_get_contents(__DIR__ . '/../fixtures/user_referenced.xml'));
@@ -422,8 +461,10 @@ class BackupRestorerTest extends TestCase
         $user = $restorer->restore($dom->getElementsByTagName('User')->item(0));
 
         // assert restored user
-        $this->assertTrue($storedUserCompany !== $user->employer);
+        $this->assertEquals(22, $user->roles[0]->company->id);
+        $this->assertEquals('userCompany-abc', $user->roles[0]->company->name);
         $this->assertTrue($user->employer === $user->roles[0]->company);
+        $this->assertTrue($storedUserCompany !== $user->employer);
         $this->assertEquals(23, $user->roles[0]->id);
     }
 }

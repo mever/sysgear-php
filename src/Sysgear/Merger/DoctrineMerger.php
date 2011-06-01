@@ -3,6 +3,7 @@
 namespace Sysgear\Merger;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 
 /**
  * Merge object with doctrine.
@@ -50,7 +51,10 @@ class DoctrineMerger implements MergerInterface
      */
     public function merge($object)
     {
+        // This one is very important, remove it and expect hours of debug fun.
+        // Search Doctrine docs for the "merge" operation.
         $this->entityManager->clear();
+
         try {
             return $this->entityManager->merge($object);
 
@@ -73,7 +77,7 @@ class DoctrineMerger implements MergerInterface
     {
         $class = get_class($object);
 
-        $this->entityManager->clear(); // This one is very important, remove it and expect hours of debug fun.
+        $this->entityManager->clear();
         $id = $this->entityManager->getClassMetadata($class)->getIdentifierValues($object);
 
         return (0 === count($id)) ? null : $this->entityManager->find($class, $id);
@@ -113,7 +117,7 @@ class DoctrineMerger implements MergerInterface
         return $props;
     }
 
-     /**
+    /**
      * Return if an association is mandatory. Or null if not decided.
      *
      * TODO: Handle case in which there are more "joinColumns" (or is this not relevant?)
@@ -125,7 +129,7 @@ class DoctrineMerger implements MergerInterface
     {
         $joinColumn = array();
 
-        if (array_key_exists("joinTable", $map)) {
+        if (array_key_exists("joinTable", $map) && array_key_exists("joinColumns", $map["joinTable"])) {
             $joinColumn = $map["joinTable"]["joinColumns"][0];
         }
 
@@ -136,6 +140,7 @@ class DoctrineMerger implements MergerInterface
         if (array_key_exists("nullable", $joinColumn)) {
             return ! $joinColumn["nullable"];
         }
+
         return null;
     }
 }

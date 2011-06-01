@@ -13,6 +13,13 @@ abstract class AbstractObjectCollector extends AbstractCollector
     protected $addedObjects = array();
 
     /**
+     * In search of data, do we need to follow composite nodes?
+     *
+     * @var boolean
+     */
+    protected $followCompositeNodes = true;
+
+    /**
      * Return the node name which represents this $object.
      *
      * @param object|string $object May be a class name

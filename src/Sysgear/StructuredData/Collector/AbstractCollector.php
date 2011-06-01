@@ -17,11 +17,15 @@ abstract class AbstractCollector implements CollectorInterface
     protected $element;
 
     /**
-     * In search of data, do we need to recursively scan?
+     * The descent level of the object graph.
      *
-     * @var boolean
+     * 0 is infinite descending
+     * 1 is only properties
+     * n is descending into the graph for n nodes
+     *
+     * @var integer
      */
-    protected $recursiveScan = true;
+    protected $descentLevel = 0;
 
     /**
      * Construct data collector.
@@ -45,8 +49,8 @@ abstract class AbstractCollector implements CollectorInterface
     public function setOption($key, $value)
     {
         switch ($key) {
-        case "recursiveScan":
-            $this->recursiveScan = (boolean) $value;
+        case "descentLevel":
+            $this->descentLevel = (integer) $value;
             break;
         }
     }

@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Sysgear\Tests\StructuredData;
+namespace Sysgear\Tests\Backup;
 
 use Sysgear\Backup\BackupableInterface;
 use Sysgear\StructuredData\Collector\BackupCollector;
@@ -20,9 +20,10 @@ class BackupableEntity implements BackupableInterface
     /**
      * {@inheritDoc}
      */
-    public function collectStructedData(BackupCollector $backupDataCollector)
+    public function collectStructedData(BackupCollector $backupDataCollector, array $options = array())
     {
-        $backupDataCollector->fromObject($this);
+        $options['className'] = get_class($this);
+        $backupDataCollector->fromObject($this, $options);
     }
 
     /**
@@ -30,6 +31,9 @@ class BackupableEntity implements BackupableInterface
      */
     public function restoreStructedData(BackupRestorer $backupDataRestorer)
     {
-        $backupDataRestorer->toObject($this);
+        $remaining = $backupDataRestorer->toObject($this);
+        foreach ($remaining as $name => $value) {
+            $this->{$name} = $value;
+        }
     }
 }

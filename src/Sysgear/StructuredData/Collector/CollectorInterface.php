@@ -14,7 +14,7 @@ interface CollectorInterface
     /**
      * Construct data collector.
      *
-     * @param array $options
+     * @param mixed[] $options Map of global options.
      */
     public function __construct(array $options = array());
 
@@ -22,9 +22,10 @@ interface CollectorInterface
      * Collect data from object.
      *
      * @param \StdClass $object
+     * @param mixed[] $options Map of instance options
      * @return \Sysgear\StructuredData\Collector\CollectorInterface
      */
-    public function fromObject($object);
+    public function fromObject($object, array $options = array());
 
     /**
      * Get DOM from collector.

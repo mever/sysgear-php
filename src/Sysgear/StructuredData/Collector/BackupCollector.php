@@ -15,11 +15,16 @@ class BackupCollector extends AbstractObjectCollector
      * When true only collect data from the first
      * implementor of the backupable interface, start search from parent to subclass.
      *
-     * e.g. preventing the Doctrine2 proxy objects from being collected.
-     *
      * @var boolean
      */
     public $onlyImplementor = false;
+
+    /**
+     * Preventing the Doctrine2 proxy objects from being collected.
+     *
+     * @var boolean
+     */
+    public $ignoreDoctrineProxies = true;
 
     /**
      * This object is a reference.
@@ -43,11 +48,26 @@ class BackupCollector extends AbstractObjectCollector
     protected $doNotFollow = array();
 
     /**
-     * Map of properties to ignore.
+     * Array of properties to ignore.
      *
      * @var string[]
      */
     protected $ignore = array();
+
+    /**
+     * Array of properties. When set
+     * only those properties will be collected.
+     *
+     * @var string[] | null
+     */
+    protected $onlyInclude;
+
+    /**
+     * Name of class to collect.
+     *
+     * @var string
+     */
+    protected $className;
 
     /**
      * Restore state, no remaining properties or other
@@ -57,6 +77,8 @@ class BackupCollector extends AbstractObjectCollector
     {
         $this->ignore = array();
         $this->doNotFollow = array();
+        $this->onlyInclude = null;
+        $this->className = null;
     }
 
     /**
@@ -79,13 +101,17 @@ class BackupCollector extends AbstractObjectCollector
     }
 
     /**
-     * Collect data from backupable object.
-     *
-     * @param \Sysgear\Backup\BackupableInterface $backupable
-     * @param array $options
+     * (non-PHPdoc)
+     * @see Sysgear\StructuredData\Collector.CollectorInterface::fromObject()
      */
-    public function fromBackupable(BackupableInterface $backupable, array $options = array())
+    public function fromObject($object, array $options = array())
     {
+        if (! ($object instanceof BackupableInterface)) {
+            throw new CollectorException("Given object does not implement BackupableInterface.");
+        }
+
+        // apply instance options. These apply only
+        // to this instance of the collector.
         foreach ($options as $key => $value) {
             switch ($key) {
             case "doNotFollow":
@@ -95,31 +121,27 @@ class BackupCollector extends AbstractObjectCollector
             case "ignore":
                 $this->ignore = (array) $value;
                 break;
+
+            case "onlyInclude":
+                $this->onlyInclude = (null === $value) ? null : (array) $value;
+                break;
+
+            case "className":
+                $this->className = (string) $value;
+                break;
             }
-        }
-
-        $this->fromObject($backupable);
-    }
-
-    /**
-     * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Collector.CollectorInterface::fromObject()
-     */
-    public function fromObject($object)
-    {
-        if (! ($object instanceof BackupableInterface)) {
-            throw new CollectorException("Given object does not implement BackupableInterface.");
         }
 
         // Add this object to the list of excluded objects to
         // prevent infinite recursive collecting.
         $this->addedObjects[] = $object;
 
+        $className = $this->className ?: $this->getClassName($object);
         $name = $this->name ?: $this->getNodeName($object);
         $objHash = spl_object_hash($object);
         $this->element = $this->document->createElement($name);
         $this->element->setAttribute('type', 'object');
-        $this->element->setAttribute('class', $this->getClassName($object));
+        $this->element->setAttribute('class', $className);
         $refClass = new \ReflectionClass($object);
         if ($this->reference) {
 
@@ -129,22 +151,26 @@ class BackupCollector extends AbstractObjectCollector
             $this->element->setAttribute('id', $objHash);
             foreach ($refClass->getProperties() as $property) {
 
-                // Exclude properties. 
+                // Exclude properties.
                 if ($this->filterProperty($property)) {
 
                     $property->setAccessible(true);
                     $name = $property->getName();
-                    if (in_array($name, $this->ignore, true) || ($this->onlyImplementor
-                      && $property->getDeclaringClass()->getName() !== $this->getClassName($object))) {
+
+                    if (null !== $this->onlyInclude && (! in_array($name, $this->onlyInclude, true))) {
                         continue;
                     }
 
-                    $value = $property->getValue($object);
+                    if (in_array($name, $this->ignore, true) || ($this->onlyImplementor
+                      && $property->getDeclaringClass()->getName() !== $className)) {
+                        continue;
+                    }
 
                     // Scan scalar or composite property.
+                    $value = $property->getValue($object);
                     if (is_scalar($value)) {
                         $this->addScalarNode($name, $value);
-                    } elseif ($this->recursiveScan) {
+                    } elseif ($this->followCompositeNodes) {
                         $this->addCompositeNode($name, $value);
                     }
                 }
@@ -175,7 +201,12 @@ class BackupCollector extends AbstractObjectCollector
      */
     protected function addCompositeNode($name, $value)
     {
-        $doNotFollow = in_array($name, $this->doNotFollow, true);
+        if (1 === $this->descentLevel) {
+            $doNotFollow = true;
+        } else {
+            $doNotFollow = in_array($name, $this->doNotFollow, true);
+            $this->descentLevel -= 1;
+        }
 
         // Scan BackupableInterface implmentation
         if ($value instanceof BackupableInterface) {
@@ -221,11 +252,11 @@ class BackupCollector extends AbstractObjectCollector
 
         // Prevent infinite loops...
         if (in_array($backupable, $this->addedObjects, true)) {
-            $collector->recursiveScan = false;
+            $collector->followCompositeNodes = false;
             $collector->reference = true;
 
         } elseif ($doNotFollow) {
-            $collector->recursiveScan = false;
+            $collector->followCompositeNodes = false;
         }
 
         $backupable->collectStructedData($collector);
@@ -251,6 +282,10 @@ class BackupCollector extends AbstractObjectCollector
      */
     protected function getClassName(BackupableInterface $backupable)
     {
+        if (null !== $this->className) {
+            return $this->className;
+        }
+
         if ($this->onlyImplementor) {
 
             // Fetches the oldest parent name which implements the backupable interface.

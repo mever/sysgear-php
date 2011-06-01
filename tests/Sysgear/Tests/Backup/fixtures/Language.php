@@ -21,7 +21,7 @@ class Language implements BackupableInterface
     /**
      * {@inheritDoc}
      */
-    public function collectStructedData(BackupCollector $backupDataCollector)
+    public function collectStructedData(BackupCollector $backupDataCollector, array $options = array())
     {
         $backupDataCollector->fromObject($this);
     }

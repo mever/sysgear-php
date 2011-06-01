@@ -13,7 +13,7 @@ class SimpleObjectCollector extends AbstractObjectCollector
      * (non-PHPdoc)
      * @see Sysgear\StructuredData\Collector.CollectorInterface::fromObject()
      */
-    public function fromObject($object)
+    public function fromObject($object, array $options = array())
     {
         if (! is_object($object)) {
             throw new CollectorException("Given parameter is not an object.");
@@ -37,7 +37,7 @@ class SimpleObjectCollector extends AbstractObjectCollector
                 // Scan scalar or composite property.
                 if (is_scalar($value)) {
                     $this->scanScalarProperty($object, $name, $value);
-                } elseif ($this->recursiveScan) {
+                } elseif ($this->followCompositeNodes) {
                     $this->scanCompositeProperty($object, $name, $value);
                 }
             }
@@ -121,7 +121,7 @@ class SimpleObjectCollector extends AbstractObjectCollector
     protected function createReference($object, \DOMNode $node)
     {
         $collector = clone $this;
-        $collector->recursiveScan = false;
+        $collector->followCompositeNodes = false;
         $collector->fromObject($object);
         $node->appendChild($collector->getDomElement());
     }

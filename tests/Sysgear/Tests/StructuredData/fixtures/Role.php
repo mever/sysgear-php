@@ -2,6 +2,8 @@
 
 namespace Sysgear\Tests\StructuredData;
 
+use Sysgear\Tests\Backup\BackupableEntity;
+
 class Role extends BackupableEntity
 {
     public $id;
