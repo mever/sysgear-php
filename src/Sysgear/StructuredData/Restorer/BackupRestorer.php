@@ -369,7 +369,19 @@ class BackupRestorer extends AbstractRestorer
         return $mergedObject;
     }
 
-    protected function merge($completeObject, $incompleteObject, \DOMElement $thisNode)
+    /**
+     * Restore a incomplete object with data from a complete object and
+     * merge the now completed object.
+     *
+     * TODO: Find out if the "onlyImplementor" option can cause trouble! This is
+     *       needed to prevent the collector from collecting Doctrine proxy objects.
+     *
+     * @param BackupableInterface $completeObject
+     * @param BackupableInterface $incompleteObject
+     * @param \DOMElement $thisNode
+     */
+    protected function merge(BackupableInterface $completeObject,
+        BackupableInterface $incompleteObject, \DOMElement $thisNode)
     {
         // get include list
         $props = array();
@@ -383,7 +395,7 @@ class BackupRestorer extends AbstractRestorer
         if (count($incl) > 0) {
 
             // collect missing property nodes from complete object
-            $backupCollector = new BackupCollector(array('descentLevel' => 1));
+            $backupCollector = new BackupCollector(array('descentLevel' => 1, 'onlyImplementor' => true));
             $completeObject->collectStructedData($backupCollector, array('onlyInclude' => $incl));
 
             // restore incomplete object
