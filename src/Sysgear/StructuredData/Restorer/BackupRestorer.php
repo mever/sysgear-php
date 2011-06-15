@@ -213,6 +213,12 @@ class BackupRestorer extends AbstractRestorer
      */
     protected function getPropertyValue(\DOMElement $propertyNode)
     {
+        // Found reference, so return it.
+        if ($propertyNode->hasAttribute('ref')) {
+            return $this->referenceCandidates['object'][$propertyNode->getAttribute('ref')];
+        }
+
+        // Restore property.
         $type = $propertyNode->getAttribute('type');
         switch ($type) {
         case 'array':
@@ -267,11 +273,6 @@ class BackupRestorer extends AbstractRestorer
      */
     protected function castObject(\DOMElement $propertyNode)
     {
-        // Found reference, so return it.
-        if ($propertyNode->hasAttribute('ref')) {
-            return $this->referenceCandidates['object'][$propertyNode->getAttribute('ref')];
-        }
-
         // Create new object to restore.
         $class = $propertyNode->getAttribute('class');
         $object = new $class();

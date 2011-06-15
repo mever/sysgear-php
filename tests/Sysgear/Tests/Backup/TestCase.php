@@ -160,16 +160,16 @@ class TestCase extends \PHPUnit_Framework_TestCase
               <id type="integer" value="1"/>
               <name type="string" value="piet"/>
               <password type="string" value="bf7s83s"/>
-              <employer type="object" class="Sysgear\\Tests\\Backup\\'.$className.'" ref="'.$compHash.'"/>
+              <employer ref="'.$compHash.'"/>
               <roles type="array"/>
               <sessions type="array"/>
             </User>
           </members>
-          <company type="object" class="Sysgear\\Tests\\Backup\\'.$className.'" ref="'.$compHash.'"/>
+          <company ref="'.$compHash.'"/>
         </Role>
       </functions>
       <employees type="array">
-        <User type="object" class="Sysgear\\Tests\\Backup\\User" ref="'.$userHash.'"/>
+        <User ref="'.$userHash.'"/>
       </employees>
     </'.$className.'>
   </content>
@@ -202,16 +202,16 @@ class TestCase extends \PHPUnit_Framework_TestCase
               <id type="integer" value="1"/>
               <name type="string" value="piet"/>
               <password type="string" value="bf7s83s"/>
-              <employer type="object" class="Sysgear\\Tests\\Backup\\Company" ref="'.$compHash.'"/>
+              <employer ref="'.$compHash.'"/>
               <roles type="array"/>
               <sessions type="array"/>
             </User>
           </members>
-          <company type="object" class="Sysgear\\Tests\\Backup\\Company" ref="'.$compHash.'"/>
+          <company ref="'.$compHash.'"/>
         </Role>
       </functions>
       <employees type="array">
-        <User type="object" class="Sysgear\\Tests\\Backup\\User" ref="'.$userHash.'"/>
+        <User ref="'.$userHash.'"/>
       </employees>
     </Company>
   </content>
@@ -241,7 +241,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         </locale>
         <functions type="array"/>
         <employees type="array">
-          <User type="object" class="Sysgear\Tests\Backup\User" ref="'.$userHash.'"/>
+          <User ref="'.$userHash.'"/>
         </employees>
       </employer>
       <roles type="array"/>

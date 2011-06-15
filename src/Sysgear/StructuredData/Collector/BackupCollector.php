@@ -140,14 +140,15 @@ class BackupCollector extends AbstractObjectCollector
         $name = $this->name ?: $this->getNodeName($object);
         $objHash = spl_object_hash($object);
         $this->element = $this->document->createElement($name);
-        $this->element->setAttribute('type', 'object');
-        $this->element->setAttribute('class', $className);
         $refClass = new \ReflectionClass($object);
         if ($this->reference) {
 
             // Create reference.
             $this->element->setAttribute('ref', $objHash);
         } else {
+
+            $this->element->setAttribute('type', 'object');
+            $this->element->setAttribute('class', $className);
             $this->element->setAttribute('id', $objHash);
             foreach ($refClass->getProperties() as $property) {
 
