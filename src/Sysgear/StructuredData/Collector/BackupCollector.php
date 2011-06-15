@@ -41,11 +41,11 @@ class BackupCollector extends AbstractObjectCollector
     protected $name;
 
     /**
-     * Map of properties not recursively scan (follow).
+     * Do not descent into the properties of these relations.
      *
      * @var string[]
      */
-    protected $doNotFollow = array();
+    protected $doNotDescent = array();
 
     /**
      * Array of properties to ignore.
@@ -76,7 +76,7 @@ class BackupCollector extends AbstractObjectCollector
     public function __clone()
     {
         $this->ignore = array();
-        $this->doNotFollow = array();
+        $this->doNotDescent = array();
         $this->onlyInclude = null;
         $this->className = null;
     }
@@ -114,8 +114,8 @@ class BackupCollector extends AbstractObjectCollector
         // to this instance of the collector.
         foreach ($options as $key => $value) {
             switch ($key) {
-            case "doNotFollow":
-                $this->doNotFollow = (array) $value;
+            case "doNotDescent":
+                $this->doNotDescent = (array) $value;
                 break;
 
             case "ignore":
@@ -202,15 +202,15 @@ class BackupCollector extends AbstractObjectCollector
     protected function addCompositeNode($name, $value)
     {
         if (1 === $this->descentLevel) {
-            $doNotFollow = true;
+            $doNotDescent = true;
         } else {
-            $doNotFollow = in_array($name, $this->doNotFollow, true);
+            $doNotDescent = in_array($name, $this->doNotDescent, true);
             $this->descentLevel -= 1;
         }
 
         // Scan BackupableInterface implmentation
         if ($value instanceof BackupableInterface) {
-            $this->element->appendChild($this->createNode($name, $value, $doNotFollow));
+            $this->element->appendChild($this->createNode($name, $value, $doNotDescent));
         }
 
         // Scan sub-collection.
@@ -228,7 +228,7 @@ class BackupCollector extends AbstractObjectCollector
 
                 // Collect array element objects implementing the BackupableInterface.
                 if ($elem instanceof BackupableInterface) {
-                    $node = $this->createNode($this->getNodeName($elem), $elem, $doNotFollow);
+                    $node = $this->createNode($this->getNodeName($elem), $elem, $doNotDescent);
                     $collection->appendChild($node);
                 }
             }
@@ -240,10 +240,10 @@ class BackupCollector extends AbstractObjectCollector
      *
      * @param string $name
      * @param \Sysgear\Backup\BackupableInterface $backupable
-     * @param boolean $doNotFollow
+     * @param boolean $doNotDescent
      * @return \DOMNode
      */
-    protected function createNode($name, BackupableInterface $backupable, $doNotFollow)
+    protected function createNode($name, BackupableInterface $backupable, $doNotDescent)
     {
         // Make a copy of this collector to allow recursive collecting.
         $collector = clone $this;
@@ -255,7 +255,7 @@ class BackupCollector extends AbstractObjectCollector
             $collector->followCompositeNodes = false;
             $collector->reference = true;
 
-        } elseif ($doNotFollow) {
+        } elseif ($doNotDescent) {
             $collector->followCompositeNodes = false;
         }
 

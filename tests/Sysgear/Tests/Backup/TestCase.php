@@ -49,7 +49,7 @@ class DoNotScanAndIgnorePropertiesUser extends User
     public function collectStructedData(BackupCollector $backupDataCollector, array $options = array())
     {
         $backupDataCollector->fromObject($this, array(
-            'doNotFollow' => array('employer', 'roles'),
+            'doNotDescent' => array('employer', 'roles'),
             'ignore' => array('password', 'sessions', 'name')));
     }
 }
