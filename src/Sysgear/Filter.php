@@ -13,21 +13,6 @@ class Filter implements \Serializable
     protected $filter;
 
     /**
-     * Build filter from string.
-     *
-     * @param unknown_type $filter
-     * @throws \Exception
-     */
-    public static function fromString($filter)
-    {
-        if (! is_string($filter)) {
-            throw new \Exception("Given parameter is not a string type.");
-        }
-
-        // TODO: Convert.
-    }
-
-    /**
      * Create new filter.
      *
      * @param array $filter
@@ -143,14 +128,15 @@ class Filter implements \Serializable
     protected function getCollection($path = null)
     {
         $f = $this->filter;
-        if (! $this->isCol($f)) {
+        if ($this->isCol($f)) {
+
+            $col = $f;
+        } else {
 
             $col = array('C' => array());
             if (array_key_exists('F', $f)) {
-                $col['C'] = $f;
+                $col['C'][] = $f;
             }
-        } else {
-            $col = $f;
         }
 
         return $col;
