@@ -53,7 +53,7 @@
 
 <target name="place">
   <exec executable="rsync" dir="${basedir}">
-    <arg line="--delay-updates -r . '../RPC-Server/src/vendor/sysgear'" />
+    <arg line="--delay-updates -r . '../RPC-Server/vendor/sysgear'" />
   </exec>
 </target>
 
