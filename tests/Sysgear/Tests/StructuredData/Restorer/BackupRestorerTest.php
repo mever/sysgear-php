@@ -89,7 +89,7 @@ class BackupRestorerTest extends TestCase
 
         // mock merger
         $merger = $this->getMock('Sysgear\\Merger\\MergerInterface', array(
-        	'merge', 'find', 'flush', 'getMandatoryProperties'), array(), 'TestMerger1');
+        	'merge', 'find', 'flush', 'getMandatoryProperties'));
         $merger->expects($this->exactly(2))->method('merge')->will($this->returnCallback($merge));
         $merger->expects($this->exactly(2))->method('find')->will($this->returnCallback($find));
         $merger->expects($this->exactly(1))->method('flush');
@@ -175,7 +175,7 @@ class BackupRestorerTest extends TestCase
 
         // mock merger
         $merger = $this->getMock('Sysgear\\Merger\\MergerInterface', array(
-        	'merge', 'find', 'flush', 'getMandatoryProperties'), array(), 'TestMerger2');
+        	'merge', 'find', 'flush', 'getMandatoryProperties'));
         $merger->expects($this->exactly(4))->method('merge')->will($this->returnCallback($merge));
         $merger->expects($this->exactly(4))->method('find')->will($this->returnCallback($find));
         $merger->expects($this->exactly(1))->method('flush');
@@ -251,7 +251,7 @@ class BackupRestorerTest extends TestCase
 
         // mock merger
         $merger = $this->getMock('Sysgear\\Merger\\MergerInterface', array(
-        	'merge', 'find', 'flush', 'getMandatoryProperties'), array(), 'TestMerger3');
+        	'merge', 'find', 'flush', 'getMandatoryProperties'));
         $merger->expects($this->exactly(3))->method('merge')->will($this->returnCallback($merge));
         $merger->expects($this->exactly(1))->method('find')->will($this->returnCallback($find));
         $merger->expects($this->exactly(1))->method('flush');
@@ -281,7 +281,7 @@ class BackupRestorerTest extends TestCase
         }
 
         $merger = $this->getMock('Sysgear\\Merger\\MergerInterface', array(
-        	'merge', 'find', 'flush', 'getMandatoryProperties'), array(), 'TestMerger4');
+        	'merge', 'find', 'flush', 'getMandatoryProperties'));
 
         // check for successfull merge
         $state1 = 0;
@@ -363,7 +363,7 @@ class BackupRestorerTest extends TestCase
 
         // mock merger
         $merger = $this->getMock('Sysgear\\Merger\\MergerInterface', array(
-        	'merge', 'find', 'flush', 'getMandatoryProperties'), array(), 'TestMerger5');
+        	'merge', 'find', 'flush', 'getMandatoryProperties'));
         $merger->expects($this->exactly(3))->method('merge')->will($this->returnCallback($merge));
         $merger->expects($this->exactly(3))->method('find')->will($this->returnCallback($find));
         $merger->expects($this->exactly(1))->method('flush');
@@ -446,7 +446,7 @@ class BackupRestorerTest extends TestCase
 
         // mock merger
         $merger = $this->getMock('Sysgear\\Merger\\MergerInterface', array(
-        	'merge', 'find', 'flush', 'getMandatoryProperties'), array(), 'TestMerger6');
+        	'merge', 'find', 'flush', 'getMandatoryProperties'));
         $merger->expects($this->exactly(5))->method('merge')->will($this->returnCallback($merge));
         $merger->expects($this->exactly(2))->method('find')->will($this->returnCallback($find));
         $merger->expects($this->exactly(1))->method('flush');
