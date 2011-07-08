@@ -43,7 +43,7 @@ class Datatype
 
     /**
      * Return a mysql datatype as string.
-     * 
+     *
      * @param int $dt
      * @param int $length
      * @return string
@@ -63,7 +63,7 @@ class Datatype
 
     /**
      * Return a oracle bind type (int constant).
-     * 
+     *
      * @param int $dt
      * @return int
      */
@@ -90,23 +90,26 @@ class Datatype
 
     /**
      * Typecast value to string for storage.
-     * 
+     *
      * @param int $datatype
      * @param mixed $value
+     * @param boolean $human When true try to format the output readable for humans.
      * @return string
      */
-    public static function typecastSet($datatype, $value)
+    public static function typecastSet($datatype, $value, $human = false)
     {
         switch($datatype) {
             case self::JSON:    return (is_array($value)) ? Json::encode($value) : $value;
             case self::MAP:     return (is_array($value)) ? Json::encode($value) : $value;
+            case self::BOOL:    return ('false' === $value) ? 0 : (int) (boolean) $value;
+            case self::STRING:  return ($human) ? self::_castToReadableString($value) : $value;
             default:            return $value;
         }
     }
 
     /**
      * Typecast value from storage.
-     * 
+     *
      * @param int $datatype
      * @param string $value
      * @return mixed
@@ -119,8 +122,25 @@ class Datatype
             case self::INT:     return (int) $value;
             case self::FLOAT:   return (float) $value;
             case self::NUMBER:  return (float) $value;
-            case self::BOOL:    return (bool) $value;
+            case self::BOOL:    return (boolean) $value;
             default:            return $value;
         }
+    }
+
+    /**
+     * Cast any value to string.
+     *
+     * @param mixed $value
+     * @return string
+     */
+    protected static function _castToReadableString($value)
+    {
+        $str = print_r($value, true);
+        if ('' === $str) {
+            if (is_bool($value)) { return (int) $value; }
+            if (is_null($value)) { return 'NULL'; }
+        }
+
+        return $str;
     }
 }
