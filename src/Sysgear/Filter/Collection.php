@@ -3,6 +3,7 @@
 namespace Sysgear\Filter;
 
 use Closure, Countable, IteratorAggregate, ArrayAccess;
+use Doctrine\DBAL\Connection;
 
 class Collection extends Filter implements Countable, IteratorAggregate, ArrayAccess
 {
@@ -16,6 +17,48 @@ class Collection extends Filter implements Countable, IteratorAggregate, ArrayAc
     {
         $this->collection = $collection;
         $this->setType($type);
+    }
+
+    /**
+     * Build SQL WHERE clause to filter dataset.
+     *
+     * @param Connection $connection
+     * @return string
+     */
+    public function toWhereClause(Connection $connection)
+    {
+        if ($this->isEmpty()) {
+            return '';
+        }
+
+        $filter = $this;
+        $compiler = function($type, $filter) use ($connection) {
+
+            if ($type === self::COMPILE_COL) {
+
+                // return left, operator and right parts
+                $type = strtoupper($filter->getType());
+                return array('(', " {$type} ", ')');
+            } else {
+
+                $operator = $filter->getOperator();
+                $value = $filter->getValue();
+
+                // build left comparison expression
+                switch ($operator) {
+                case \Sysgear\Operator::STR_START_WITH: $right = $connection->quote($value . '%'); break;
+                case \Sysgear\Operator::STR_END_WITH: $right = $connection->quote('%' . $value); break;
+                case \Sysgear\Operator::LIKE: $right = $connection->quote('%' . $value . '%'); break;
+                default: $right = $connection->quote($value);
+                }
+
+                // build complete comparison expresssion
+                $left = $connection->quoteIdentifier($filter->getField()) . ' ';
+                return $left . \Sysgear\Operator::toSqlComparison($operator) . ' ' . $right;
+            }
+        };
+
+        return 'WHERE ' . $this->compileString($compiler);
     }
 
     /**
