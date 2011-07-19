@@ -89,6 +89,21 @@ class Datatype
     }
 
     /**
+     * Convert Oracle datatype to sysgear datatype.
+     *
+     * @param string $oracleType
+     * @return integer
+     */
+    public static function fromOracle($oracleType)
+    {
+        switch ($oracleType) {
+        case 'NUMBER':  return self::NUMBER;
+        case 'DATE':    return self::DATETIME;
+        default:        return self::STRING;
+        }
+    }
+
+    /**
      * Typecast value to string for storage.
      *
      * @param int $datatype
