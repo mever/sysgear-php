@@ -78,16 +78,6 @@ class DataSource implements \Serializable
     }
 
     /**
-     * Return the data unit.
-     *
-     * @return string
-     */
-    public function getDataUnit()
-    {
-        return $this->dataUnit;
-    }
-
-    /**
      * Return the protocol portion of the datasource.
      *
      * @return string
@@ -95,6 +85,26 @@ class DataSource implements \Serializable
     public function getProtocol()
     {
         return $this->protocol;
+    }
+
+    /**
+     * Set the data unit (or data domain).
+     *
+     * @param string $dataUnit
+     */
+    public function setDataUnit($dataUnit)
+    {
+        $this->dataUnit = $dataUnit;
+    }
+
+    /**
+     * Return the data unit.
+     *
+     * @return string
+     */
+    public function getDataUnit()
+    {
+        return $this->dataUnit;
     }
 
     /**
