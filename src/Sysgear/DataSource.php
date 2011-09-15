@@ -45,6 +45,11 @@ class DataSource implements \Serializable
     protected $filters;
 
     /**
+     * @var \Sysgear\Filter\Collection
+     */
+    protected $fixedFilters;
+
+    /**
      * Construct a new datasource.
      *
      * @param string $id
@@ -72,7 +77,7 @@ class DataSource implements \Serializable
         if (! @empty($sections[1])) {
             $filterArray = json_decode($sections[1], true);
             if (is_array($filterArray)) {
-                $this->filters = Filter::fromArray($filterArray);
+                $this->fixedFilters = Filter::fromArray($filterArray);
             }
         }
     }
@@ -115,6 +120,9 @@ class DataSource implements \Serializable
     public function setFilters(Collection $filters)
     {
         $this->filters = $filters;
+        if (null !== $this->fixedFilters) {
+            $this->filters->merge($this->fixedFilters);
+        }
     }
 
     /**
@@ -153,6 +161,7 @@ class DataSource implements \Serializable
             'protocol' => $this->protocol,
             'dataUnit' => $this->dataUnit,
             'filters' => $this->filters,
+            'fixedFilters' => $this->fixedFilters,
             'context' => $this->context));
     }
 
@@ -162,6 +171,7 @@ class DataSource implements \Serializable
         $this->protocol = $data['protocol'];
         $this->dataUnit = $data['dataUnit'];
         $this->filters = $data['filters'];
+        $this->fixedFilters = $data['fixedFilters'];
         $this->context = $data['context'];
     }
 }
