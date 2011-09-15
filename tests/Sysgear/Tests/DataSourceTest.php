@@ -25,6 +25,24 @@ class DataSourceTest extends \PHPUnit_Framework_TestCase
             $ds->getFilters()->toArray());
     }
 
+    public function testConstructor_withFilterExp()
+    {
+        $ds = new DataSource('test://ABC/{"F":"FIELD1","V":123,"O":1}');
+        $this->assertNotNull($ds->getFilters());
+        $this->assertEquals(array('C' => array(
+            array('F' => 'FIELD1', 'V' => 123, 'O' => 1)), 'T' => 'and'),
+            $ds->getFilters()->toArray());
+    }
+
+    public function testConstructor_withFilterCol()
+    {
+        $ds = new DataSource('test://ABC/{"T":"and","C":[{"F":"FIELD1","V":123,"O":1}]}');
+        $this->assertNotNull($ds->getFilters());
+        $this->assertEquals(array('C' => array(
+            array('F' => 'FIELD1', 'V' => 123, 'O' => 1)), 'T' => 'and'),
+            $ds->getFilters()->toArray());
+    }
+
     public function testFilters()
     {
         $ds = new DataSource('test://ABC/not a filter');

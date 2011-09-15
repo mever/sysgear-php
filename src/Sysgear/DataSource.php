@@ -2,6 +2,7 @@
 
 namespace Sysgear;
 
+use Sysgear\Filter\Expression;
 use Sysgear\Filter\Collection;
 use Sysgear\Filter\Filter;
 
@@ -77,7 +78,13 @@ class DataSource implements \Serializable
         if (! @empty($sections[1])) {
             $filterArray = json_decode($sections[1], true);
             if (is_array($filterArray)) {
-                $this->fixedFilters = Filter::fromArray($filterArray);
+
+                $filter = Filter::fromArray($filterArray);
+                if ($filter instanceof Expression) {
+                    $filter = new Collection(array($filter));
+                }
+
+                $this->filters = $this->fixedFilters = $filter;
             }
         }
     }
