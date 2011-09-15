@@ -3,7 +3,6 @@
 namespace Sysgear\Filter;
 
 use Closure, Countable, IteratorAggregate, ArrayAccess;
-use Doctrine\DBAL\Connection;
 
 class Collection extends Filter implements Countable, IteratorAggregate, ArrayAccess
 {
@@ -23,9 +22,13 @@ class Collection extends Filter implements Countable, IteratorAggregate, ArrayAc
      * Build SQL WHERE clause to filter dataset.
      *
      * @param Connection $connection
+     *   The connection object must support the methods:
+     *   - "quote" For value escaping.
+     *   - "quoteIdentifier" For identifier escaping.
+     *
      * @return string
      */
-    public function toWhereClause(Connection $connection)
+    public function toWhereClause($connection)
     {
         if ($this->isEmpty()) {
             return '';
