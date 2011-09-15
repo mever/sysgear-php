@@ -19,6 +19,34 @@ class Collection extends Filter implements Countable, IteratorAggregate, ArrayAc
     }
 
     /**
+     * Merge filter into this collection.
+     *
+     * @param Filter $filter
+     */
+    public function merge(Filter $filter)
+    {
+        if ($filter instanceof Expression) {
+            $filter = new self(array($filter));
+        }
+
+        foreach ($filter->getExpressions() as $exp1) {
+
+            // search if filter already exists
+            foreach ($this->getExpressions() as $exp2) {
+                if (($exp1->getField() === $exp2->getField())
+                && ($exp1->getOperator() === $exp2->getOperator())) {
+
+                    // replace
+                    $exp2->setValue($exp1->getValue());
+                    continue 2;
+                }
+            }
+
+            $this->add($exp1);
+        }
+    }
+
+    /**
      * Build SQL WHERE clause to filter dataset.
      *
      * @param Connection $connection

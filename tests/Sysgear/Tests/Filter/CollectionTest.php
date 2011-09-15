@@ -102,4 +102,15 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
             }
         };
     }
+
+    public function testMerge_replaceExpression()
+    {
+        $filter = new Collection(array(
+            new Expression('FIELD1', 'abc'),
+            new Expression('FIELD2', 123)
+        ));
+
+        $filter->merge(new Expression('FIELD2', 321));
+        $this->assertEquals(321, $filter->get(1)->getValue());
+    }
 }
