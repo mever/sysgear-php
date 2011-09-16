@@ -46,9 +46,9 @@ class DataSource implements \Serializable
     protected $filters;
 
     /**
-     * @var \Sysgear\Filter\Collection
+     * @var array
      */
-    protected $fixedFilters;
+    protected $options = array();
 
     /**
      * Construct a new datasource.
@@ -76,15 +76,9 @@ class DataSource implements \Serializable
         }
 
         if (! @empty($sections[1])) {
-            $filterArray = json_decode($sections[1], true);
-            if (is_array($filterArray)) {
-
-                $filter = Filter::fromArray($filterArray);
-                if ($filter instanceof Expression) {
-                    $filter = new Collection(array($filter));
-                }
-
-                $this->filters = $this->fixedFilters = $filter;
+            $options = json_decode($sections[1], true);
+            if (is_array($options)) {
+                $this->options = $options;
             }
         }
     }
@@ -97,6 +91,16 @@ class DataSource implements \Serializable
     public function getProtocol()
     {
         return $this->protocol;
+    }
+
+    /**
+     * Get datasource options.
+     *
+     * @return array
+     */
+    public function getOptions()
+    {
+        return $this->options;
     }
 
     /**
@@ -127,9 +131,6 @@ class DataSource implements \Serializable
     public function setFilters(Collection $filters)
     {
         $this->filters = $filters;
-        if (null !== $this->fixedFilters) {
-            $this->filters->merge($this->fixedFilters);
-        }
     }
 
     /**
@@ -168,7 +169,7 @@ class DataSource implements \Serializable
             'protocol' => $this->protocol,
             'dataUnit' => $this->dataUnit,
             'filters' => $this->filters,
-            'fixedFilters' => $this->fixedFilters,
+            'options' => $this->options,
             'context' => $this->context));
     }
 
@@ -178,7 +179,7 @@ class DataSource implements \Serializable
         $this->protocol = $data['protocol'];
         $this->dataUnit = $data['dataUnit'];
         $this->filters = $data['filters'];
-        $this->fixedFilters = $data['fixedFilters'];
+        $this->options = $data['options'];
         $this->context = $data['context'];
     }
 }
