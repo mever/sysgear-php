@@ -60,6 +60,20 @@ abstract class Filter implements \Serializable
             list($left, $oper, $right) = $compiler(Collection::COMPILE_COL, $filter);
             return $left . implode($oper, $parts) . $right;
         } else {
+
+            // if an expression contains an array value, treat it if
+            // it is a OR collection of those values.
+            $arrValue = $filter->getValue();
+            if (is_array($arrValue)) {
+
+                $values = array();
+                foreach ($arrValue as $val) {
+                    $values[] = new Expression($filter->getField(), $val);
+                }
+                $col = new Collection($values, 'or');
+                return $this->stringBuilder($col, $compiler);
+            }
+
             return $compiler(Collection::COMPILE_EXP, $filter);
         }
     }

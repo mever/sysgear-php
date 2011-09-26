@@ -17,21 +17,21 @@ use Sysgear\Filter\Expression;
 
 class CollectionTest extends \PHPUnit_Framework_TestCase
 {
-    public function testCompileStringExp()
+    public function testCompileString_exp()
     {
         $filter = new Expression('FIELD1', 1234);
         $res = $filter->compileString($this->getCompiler());
         $this->assertEquals("'FIELD1' = 1234", $res);
     }
 
-    public function testCompileStringExpWithOper()
+    public function testCompileString_expWithOper()
     {
         $filter = new Expression('FIELD1', 1234, Operator::STR_END_WITH);
         $res = $filter->compileString($this->getCompiler());
         $this->assertEquals("'FIELD1' ".Operator::STR_END_WITH." 1234", $res);
     }
 
-    public function testCompileStringCollection()
+    public function testCompileString_collection()
     {
         $filter = new Collection(array(
             new Expression('FIELD1', 'abc'),
@@ -45,12 +45,12 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
      * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage First argument must be "and" or "or"
      */
-    public function testCompileStringCollectionException()
+    public function testCompileString_collectionException()
     {
         $filter = new Collection(array(), 'unknown');
     }
 
-    public function testCompileStringCollectionAnd()
+    public function testCompileString_collectionAnd()
     {
         $filter = new Collection(array(
             new Expression('FIELD1', 'abc'),
@@ -60,7 +60,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("('FIELD1' = abc and 'FIELD2' = 123)", $res);
     }
 
-    public function testCompileStringCollectionOr()
+    public function testCompileString_collectionOr()
     {
         $filter = new Collection(array(
             new Expression('FIELD1', 'abc'),
@@ -70,7 +70,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("('FIELD1' = abc or 'FIELD2' = 123)", $res);
     }
 
-    public function testCompileStringColNested()
+    public function testCompileString_colNested()
     {
         $filter = new Collection(array(
             new Expression('FIELD1', 'abc'),
@@ -85,6 +85,25 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $lessThan = Operator::NUM_LESS_THAN;
         $endWith = Operator::STR_END_WITH;
         $this->assertEquals("('FIELD1' = abc and 'FIELD2' = 123 and ('FIELD3' {$lessThan}".
+          " 6789 or 'FIELD4' {$endWith} test123))", $res);
+    }
+
+    public function testCompileString_arrayValue()
+    {
+        $filter = new Collection(array(
+            new Expression('FIELD1', array(1, 2, 3)),
+            new Expression('FIELD2', 123),
+            new Collection(array(
+                new Expression('FIELD3', 6789, Operator::NUM_LESS_THAN),
+                new Expression('FIELD4', 'test123', Operator::STR_END_WITH)
+            ), 'or')
+        ));
+        $res = $filter->compileString($this->getCompiler());
+
+        $lessThan = Operator::NUM_LESS_THAN;
+        $endWith = Operator::STR_END_WITH;
+        $this->assertEquals("(('FIELD1' = 1 or 'FIELD1' = 2 or 'FIELD1' = 3) ".
+          "and 'FIELD2' = 123 and ('FIELD3' {$lessThan}".
           " 6789 or 'FIELD4' {$endWith} test123))", $res);
     }
 
