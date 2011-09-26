@@ -12,6 +12,7 @@
 namespace Sysgear\Tests\Filter;
 
 use Sysgear\Operator;
+use Sysgear\Filter\Filter;
 use Sysgear\Filter\Collection;
 use Sysgear\Filter\Expression;
 
@@ -102,24 +103,28 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
 
         $lessThan = Operator::NUM_LESS_THAN;
         $endWith = Operator::STR_END_WITH;
-        $this->assertEquals("(('FIELD1' = 1 or 'FIELD1' = 2 or 'FIELD1' = 3) ".
+        $this->assertEquals("('FIELD1' IN (1, 2, 3) ".
           "and 'FIELD2' = 123 and ('FIELD3' {$lessThan}".
           " 6789 or 'FIELD4' {$endWith} test123))", $res);
     }
 
-    public function getCompiler()
+    public function testCompileString_arrayValueMode()
     {
-        return function($type, $filter) {
-            if ($type === Collection::COMPILE_COL) {
-                return array('(', " {$filter->getType()} ", ')');
-            } else {
-                $oper = $filter->getOperator();
-                if (Operator::EQUAL === $oper) {
-                    $oper = '=';
-                }
-                return "'{$filter->getField()}' {$oper} {$filter->getValue()}";
-            }
-        };
+        $filter = new Collection(array(
+            new Expression('FIELD1', array(1, 2, 3)),
+            new Expression('FIELD2', 123),
+            new Collection(array(
+                new Expression('FIELD3', 6789, Operator::NUM_LESS_THAN),
+                new Expression('FIELD4', 'test123', Operator::STR_END_WITH)
+            ), 'or')
+        ));
+        $res = $filter->compileString($this->getCompiler(), Filter::COMPLILE_CAST_ARRAY_EXPRESSION_VALUES);
+
+        $lessThan = Operator::NUM_LESS_THAN;
+        $endWith = Operator::STR_END_WITH;
+        $this->assertEquals("(('FIELD1' = 1 or 'FIELD1' = 2 or 'FIELD1' = 3) ".
+          "and 'FIELD2' = 123 and ('FIELD3' {$lessThan}".
+          " 6789 or 'FIELD4' {$endWith} test123))", $res);
     }
 
     public function testMerge_replaceExpression()
@@ -131,5 +136,26 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
 
         $filter->merge(new Expression('FIELD2', 321));
         $this->assertEquals(321, $filter->get(1)->getValue());
+    }
+
+    protected function getCompiler()
+    {
+        return function($type, $filter) {
+            if ($type === Collection::COMPILE_COL) {
+                return array('(', " {$filter->getType()} ", ')');
+            } else {
+                $oper = $filter->getOperator();
+                if (Operator::EQUAL === $oper) {
+                    $oper = '=';
+                }
+                $value = $filter->getValue();
+                if (is_array($value)) {
+                    $oper = 'IN';
+                    $value = '(' . join(', ', $value) . ')';
+                }
+
+                return "'{$filter->getField()}' {$oper} {$value}";
+            }
+        };
     }
 }

@@ -4,6 +4,8 @@ namespace Sysgear\Filter;
 
 abstract class Filter implements \Serializable
 {
+    const COMPLILE_CAST_ARRAY_EXPRESSION_VALUES = 1;
+
     /**
      * Return filter given an array as input.
      *
@@ -36,11 +38,13 @@ abstract class Filter implements \Serializable
      * evaluated, \Sysgear\Filter\Collection or \Sysgear\Filter\Expression respectively.
      *
      * @param Closure $compiler
+     * @param integer $mode Compilation mode.
+     *
      * @return string
      */
-    public function compileString(\Closure $compiler)
+    public function compileString(\Closure $compiler, $mode = null)
     {
-        return $this->stringBuilder($this, $compiler);
+        return $this->stringBuilder($this, $compiler, $mode);
     }
 
     /**
@@ -48,14 +52,15 @@ abstract class Filter implements \Serializable
      *
      * @param \Sysgear\Filter\Filter $filter
      * @param Closure $compiler
+     * @param integer $mode Compilation mode.
      * @return string
      */
-    public function stringBuilder(self $filter, \Closure $compiler)
+    public function stringBuilder(self $filter, \Closure $compiler, $mode)
     {
         if ($filter instanceof Collection) {
             $parts = array();
             foreach ($filter as $filterElem) {
-                $parts[] = $this->stringBuilder($filterElem, $compiler);
+                $parts[] = $this->stringBuilder($filterElem, $compiler, $mode);
             }
             list($left, $oper, $right) = $compiler(Collection::COMPILE_COL, $filter);
             return $left . implode($oper, $parts) . $right;
@@ -63,15 +68,17 @@ abstract class Filter implements \Serializable
 
             // if an expression contains an array value, treat it if
             // it is a OR collection of those values.
-            $arrValue = $filter->getValue();
-            if (is_array($arrValue)) {
+            if (self::COMPLILE_CAST_ARRAY_EXPRESSION_VALUES === $mode) {
+                $arrValue = $filter->getValue();
+                if (is_array($arrValue)) {
 
-                $values = array();
-                foreach ($arrValue as $val) {
-                    $values[] = new Expression($filter->getField(), $val);
+                    $values = array();
+                    foreach ($arrValue as $val) {
+                        $values[] = new Expression($filter->getField(), $val);
+                    }
+                    $col = new Collection($values, 'or');
+                    return $this->stringBuilder($col, $compiler, $mode);
                 }
-                $col = new Collection($values, 'or');
-                return $this->stringBuilder($col, $compiler);
             }
 
             return $compiler(Collection::COMPILE_EXP, $filter);
