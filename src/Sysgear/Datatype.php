@@ -3,7 +3,6 @@
 namespace Sysgear;
 
 use Doctrine\ORM\EntityManager;
-use Zend\Json\Json;
 
 class Datatype
 {
@@ -24,6 +23,21 @@ class Datatype
     const EMAIL         = 14;
 
     /**
+     * Show datatype as human readable string.
+     *
+     * @param integer $dt
+     */
+    public static function toDesc($dt)
+    {
+        $refClass = new \ReflectionClass(__CLASS__);
+        foreach ($refClass->getConstants() as $name => $code) {
+            if ($dt === $code) {
+                return $name;
+            }
+        }
+    }
+
+    /**
      * Return doctrine BDAL datatype code.
      *
      * @param integer $datatypeCode
@@ -32,12 +46,17 @@ class Datatype
     public static function toDoctrineDbal($datatypeCode)
     {
         switch ($datatypeCode) {
-        case self::INT:
-        case self::FLOAT:
-        case self::NUMBER:
-            return 'integer';
-        default:
-            return 'string';
+            case self::INT:
+            case self::FLOAT:
+            case self::NUMBER:
+                return 'integer';
+
+            case self::DATE: return 'date';
+            case self::TIME: return 'time';
+            case self::DATETIME: return 'datetime';
+
+            default:
+                return 'string';
         }
     }
 
@@ -50,9 +69,6 @@ class Datatype
      */
     public static function toMysql($dt, $length = 255)
     {
-        if (null === $dt) {
-            $dt = self::STRING;
-        }
         switch($dt) {
             case self::INT:    return 'INT';
             case self::NUMBER: return 'BIGINT';
@@ -104,21 +120,51 @@ class Datatype
     }
 
     /**
+     * Return a printable string.
+     *
+     * @param integer $datatype
+     * @param mixed $value
+     * @return string Printable string
+     */
+    public static function getPrintableString($datatype, $value)
+    {
+        switch($datatype) {
+            case self::JSON:
+            case self::MAP:
+                return (is_array($value) || is_object($value)) ?
+                    \json_encode($value) : $value;
+
+            case self::BOOL:
+                return (('false' === $value) ? 0 : (boolean) $value) ? 'true' : 'false';
+
+            default:
+                if (is_bool($value)) { return $value ? 'true' : 'false'; }
+                if (is_null($value)) { return 'null'; }
+                if (is_numeric($value)) { return $value; }
+
+                $str = print_r($value, true);
+                return "\"{$str}\"";
+        }
+    }
+
+    /**
      * Typecast value to string for storage.
      *
      * @param int $datatype
      * @param mixed $value
-     * @param boolean $human When true try to format the output readable for humans.
      * @return string
      */
-    public static function typecastSet($datatype, $value, $human = false)
+    public static function typecastSet($datatype, $value)
     {
         switch($datatype) {
-            case self::JSON:    return (is_array($value)) ? Json::encode($value) : $value;
-            case self::MAP:     return (is_array($value)) ? Json::encode($value) : $value;
+            case self::JSON:
+                return (is_array($value) || is_object($value)) ? \json_encode($value) : $value;
+
+            case self::MAP:
+                return (is_array($value) || is_object($value)) ? \json_encode($value) : $value;
+
             case self::BOOL:    return ('false' === $value) ? 0 : (int) (boolean) $value;
-            case self::STRING:  return ($human) ? self::_castToReadableString($value) : $value;
-            default:            return $value;
+            default:            return (string) $value;
         }
     }
 
@@ -131,32 +177,98 @@ class Datatype
      */
     public static function typecastGet($datatype, $value)
     {
+        if (! is_string($value)) {
+            throw new \Exception('Second argument need to be of type string.');
+        }
+
         switch($datatype) {
-            case self::JSON:    return (is_string($value)) ? Json::decode($value) : $value;
-            case self::MAP:     return (is_string($value)) ? Json::decode($value, Json::TYPE_ARRAY) : $value;
-            case self::ARR:     return (is_string($value)) ? Json::decode($value, Json::TYPE_ARRAY) : $value;
+            case self::JSON:    return \json_decode($value);
+            case self::MAP:     return (array) \json_decode($value);
+            case self::ARR:     return (array) \json_decode($value);
             case self::INT:     return (int) $value;
             case self::FLOAT:   return (float) $value;
             case self::NUMBER:  return (float) $value;
-            case self::BOOL:    return (boolean) $value;
-            default:            return $value;
+            case self::BOOL:
+                return ('n' === strtolower($value) ||
+                	'false' === strtolower($value)) ? false : (boolean) $value;
+
+            default:
+                return $value;
         }
     }
 
     /**
-     * Cast any value to string.
+     * Cast date, time and datetime fields in $records to
+     * UTC date, time and datetime values.
      *
-     * @param mixed $value
-     * @return string
+     * @param string $timezone Any timezone specified in the latest timezone
+     * 	 database for the given date, time or datetimes. See: http://nl3.php.net/manual/en/timezones.php
+     *
+     * @param array $records Two dimensional array of rows and cells
+     * @param array $datatypes Date types to cast indexed by column index
      */
-    protected static function _castToReadableString($value)
+    public static function castDatesInRecords($timezone, array &$records, array $datatypes)
     {
-        $str = print_r($value, true);
-        if ('' === $str) {
-            if (is_bool($value)) { return (int) $value; }
-            if (is_null($value)) { return 'NULL'; }
+        $cast = function($cellValue, $dt) use ($timezone) {
+            switch ($dt) {
+                case Datatype::DATE:
+                    $date = new \DateTime($cellValue, new \DateTimeZone('Zulu'));
+                    return $date->format(\DATE_W3C);
+
+                case Datatype::DATETIME:
+                    $date = new \DateTime($cellValue, new \DateTimeZone($timezone));
+                    $date->setTimezone(new \DateTimeZone('Zulu'));    // set datetime to UTC (aka Zulu)
+                    return $date->format(\DATE_W3C);
+
+                case Datatype::TIME:
+                    $date = new \DateTime($cellValue, new \DateTimeZone($timezone));
+                    $date->setTimezone(new \DateTimeZone('Zulu'));    // set datetime to UTC (aka Zulu)
+                    return $date->format(\DATE_W3C);
+
+                default:
+                    throw new \Exception("Can not cast (date, time or datetime) to UTC.");
+            }
+        };
+
+        foreach ($records as &$record) {
+            foreach ($datatypes as $idx => $dt) {
+                $record[$idx] = $cast($record[$idx], $dt);
+            }
         }
 
-        return $str;
+        unset($record);
+    }
+
+    /**
+     * Cast a date, time or datetime to UTC date, time or datetime value.
+     *
+     * @param string $timezone Any timezone specified in the latest timezone
+     * 	 database for the given date, time or datetime. See: http://nl3.php.net/manual/en/timezones.php
+     *
+     * @param string $datatype One of the datatype constants of this class
+     * @param string $value One of the values confirm the datatype given
+     *
+     * @throws \Exception
+     * @return \DateTime Datetime object in Zulu timzone (UTC).
+     */
+    public static function castDate($timezone, $datatype, $value)
+    {
+        switch ($datatype) {
+            case Datatype::DATE:
+                return new \DateTime($value, new \DateTimeZone('Zulu'));
+
+            case Datatype::DATETIME:
+                $date = new \DateTime($value, new \DateTimeZone($timezone));
+                $date->setTimezone(new \DateTimeZone('Zulu'));    // set datetime to UTC (aka Zulu)
+                return $date;
+
+            case Datatype::TIME:
+                $date = new \DateTime($value, new \DateTimeZone($timezone));
+                $date->setTimezone(new \DateTimeZone('Zulu'));    // set datetime to UTC (aka Zulu)
+                return $date;
+
+            default:
+                throw new \Exception("Can not cast (date, time or datetime) to UTC datetime.");
+        }
     }
 }
