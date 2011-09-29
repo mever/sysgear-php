@@ -177,10 +177,6 @@ class Datatype
      */
     public static function typecastGet($datatype, $value)
     {
-        if (! is_string($value)) {
-            throw new \Exception('Second argument need to be of type string.');
-        }
-
         switch($datatype) {
             case self::JSON:    return \json_decode($value);
             case self::MAP:     return (array) \json_decode($value);

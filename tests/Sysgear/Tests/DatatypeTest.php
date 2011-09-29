@@ -238,13 +238,6 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
      * Test static method: typecastGet
      */
 
-    /**
-     * @expectedException Exception
-     */
-    public function testTypecastGet_invalidValueType() {
-        Datatype::typecastGet(-1, null);
-    }
-
     public function testTypecastGet_json()
     {
         $obj2 = new \stdClass();
