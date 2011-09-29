@@ -182,4 +182,9 @@ class DataSource implements \Serializable
         $this->options = $data['options'];
         $this->context = $data['context'];
     }
+
+    public function __toString()
+    {
+        return $this->protocol . '://' . $this->dataUnit;
+    }
 }
