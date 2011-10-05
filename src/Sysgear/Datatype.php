@@ -31,8 +31,8 @@ class Datatype
     {
         $refClass = new \ReflectionClass(__CLASS__);
         foreach ($refClass->getConstants() as $name => $code) {
-            if ($dt === $code) {
-                return $name;
+            if ($dt == $code) {
+                return strtolower($name);
             }
         }
     }

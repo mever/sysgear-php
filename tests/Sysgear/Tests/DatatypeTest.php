@@ -21,8 +21,8 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
 
     public function testToDesc()
     {
-        $names = array('INT', 'STRING', 'DATE', 'TIME', 'DATETIME', 'FLOAT', 'JSON', 'BOOL',
-            'NUMBER', 'ARR', 'XML', 'MAP', 'ENTITY', 'PASSWORD', 'EMAIL');
+        $names = array('int', 'string', 'date', 'time', 'datetime', 'float', 'json', 'bool',
+            'number', 'arr', 'xml', 'map', 'entity', 'password', 'email');
 
         for ($i=0; $i<count($names); $i++) {
             $this->assertEquals($names[$i], Datatype::toDesc($i));
@@ -330,7 +330,7 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
 
         Datatype::castDatesInRecords('Europe/Amsterdam', $records, array(1 => Datatype::TIME));
         $now = date('Y-m-d');
-        $yesterday = date('Y-m-') . (substr($now, -2) - 1);
+        $yesterday = date('Y-m-') . str_pad(substr($now, -2) - 1, 2, '0', \STR_PAD_LEFT);
         $dst = ('1' === date('I'));
 
         if ($dst) {
