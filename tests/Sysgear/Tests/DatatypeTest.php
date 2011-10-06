@@ -312,11 +312,11 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
         );
 
         // timzone data is not used for date
-        Datatype::castDatesInRecords(-1, $records, array(1 => Datatype::DATE));
+        Datatype::castDatesInRecords('Europe/Amsterdam', $records, array(1 => Datatype::DATE));
         $this->assertEquals(array(
-            array('abc', '0001-02-03T00:00:00+00:00', 123, null),
-            array('d7a', '2011-09-29T00:00:00+00:00', 489, null),
-            array('3d7', '2011-09-29T00:00:00+00:00', null, 3246)
+            array('abc', '0001-02-03', 123, null),
+            array('d7a', '2011-09-29', 489, null),
+            array('3d7', '2011-09-29', null, 3246)
         ), $records);
     }
 
@@ -329,21 +329,19 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
         );
 
         Datatype::castDatesInRecords('Europe/Amsterdam', $records, array(1 => Datatype::TIME));
-        $now = date('Y-m-d');
-        $yesterday = date('Y-m-') . str_pad(substr($now, -2) - 1, 2, '0', \STR_PAD_LEFT);
         $dst = ('1' === date('I'));
 
         if ($dst) {
             $this->assertEquals(array(
-                array('abc', $now . 'T14:13:00+00:00', 123, null),
-                array('d7a', $now . 'T14:02:00+00:00', 489, null),
-                array('3d7', $yesterday . 'T22:12:13+00:00', null, 3246)
+                array('abc', '14:13:00', 123, null),
+                array('d7a', '14:02:00', 489, null),
+                array('3d7', '22:12:13', null, 3246)
             ), $records);
         } else {
             $this->assertEquals(array(
-                array('abc', $now . 'T15:13:00+00:00', 123, null),
-                array('d7a', $now . 'T15:02:00+00:00', 489, null),
-                array('3d7', $yesterday . 'T23:12:13+00:00', null, 3246)
+                array('abc', '15:13:00', 123, null),
+                array('d7a', '15:02:00', 489, null),
+                array('3d7', '23:12:13', null, 3246)
             ), $records);
         }
     }
@@ -356,12 +354,22 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
             array('3d7', '2011-9-01 0:12:13', null, 3246)
         );
 
-        Datatype::castDatesInRecords('Europe/Amsterdam', $records, array(1 => Datatype::TIME));
-        $this->assertEquals(array(
-            array('abc', '2011-01-01T15:13:00+00:00', 123, null),
-            array('d7a', '2011-09-29T14:02:00+00:00', 489, null),
-            array('3d7', '2011-08-31T22:12:13+00:00', null, 3246)
-        ), $records);
+        Datatype::castDatesInRecords('Europe/Amsterdam', $records, array(1 => Datatype::DATETIME));
+        $dst = ('1' === date('I'));
+
+        if ($dst) {
+            $this->assertEquals(array(
+                array('abc', '2011-01-01T15:13:00+00:00', 123, null),
+                array('d7a', '2011-09-29T14:02:00+00:00', 489, null),
+                array('3d7', '2011-08-31T22:12:13+00:00', null, 3246)
+            ), $records);
+        } else {
+            $this->assertEquals(array(
+                array('abc', '2011-01-01T16:13:00+00:00', 123, null),
+                array('d7a', '2011-09-29T16:02:00+00:00', 489, null),
+                array('3d7', '2011-08-31T23:12:13+00:00', null, 3246)
+            ), $records);
+        }
     }
 
 
@@ -395,5 +403,27 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
 
         $date = Datatype::castDate('Europe/Amsterdam', Datatype::DATETIME, '2011-09-01 16:13:00');
         $this->assertEquals('14:13:00', $date->format('H:i:s'));
+    }
+
+
+
+    /*
+     * Test static method: isDate
+     */
+
+    public function testIsDate()
+    {
+        $refClass = new \ReflectionClass('Sysgear\Datatype');
+        $constants = $refClass->getConstants();
+        $asserts = array_fill(0, count($constants), false);
+
+        $asserts[Datatype::DATE] = true;
+        $asserts[Datatype::TIME] = true;
+        $asserts[Datatype::DATETIME] = true;
+
+        $idx = 0;
+        foreach ($constants as $code) {
+            $this->assertEquals($asserts[$idx++], Datatype::isDate($code));
+        }
     }
 }

@@ -194,11 +194,11 @@ class Datatype
     }
 
     /**
-     * Cast date, time and datetime fields in $records to
-     * UTC date, time and datetime values.
+     * Cast time and datetime fields in $records to
+     * UTC time and datetime values.
      *
      * @param string $timezone Any timezone specified in the latest timezone
-     * 	 database for the given date, time or datetimes. See: http://nl3.php.net/manual/en/timezones.php
+     * 	 database for the given time or datetimes. See: http://nl3.php.net/manual/en/timezones.php
      *
      * @param array $records Two dimensional array of rows and cells
      * @param array $datatypes Date types to cast indexed by column index
@@ -208,8 +208,8 @@ class Datatype
         $cast = function($cellValue, $dt) use ($timezone) {
             switch ($dt) {
                 case Datatype::DATE:
-                    $date = new \DateTime($cellValue, new \DateTimeZone('Zulu'));
-                    return $date->format(\DATE_W3C);
+                    $date = new \DateTime($cellValue, new \DateTimeZone($timezone));
+                    return $date->format('Y-m-d');
 
                 case Datatype::DATETIME:
                     $date = new \DateTime($cellValue, new \DateTimeZone($timezone));
@@ -219,10 +219,10 @@ class Datatype
                 case Datatype::TIME:
                     $date = new \DateTime($cellValue, new \DateTimeZone($timezone));
                     $date->setTimezone(new \DateTimeZone('Zulu'));    // set datetime to UTC (aka Zulu)
-                    return $date->format(\DATE_W3C);
+                    return $date->format('H:i:s');
 
                 default:
-                    throw new \Exception("Can not cast (date, time or datetime) to UTC.");
+                    throw new \Exception("Can not cast (time or datetime) to UTC.");
             }
         };
 
@@ -266,5 +266,16 @@ class Datatype
             default:
                 throw new \Exception("Can not cast (date, time or datetime) to UTC datetime.");
         }
+    }
+
+    /**
+     * Return true if a given datatype is a date, time or datetime.
+     *
+     * @param $datatype integer Any datatype constant
+     * @return boolean
+     */
+    public static function isDate($datatype)
+    {
+        return ($datatype > 1 && $datatype < 5);
     }
 }
