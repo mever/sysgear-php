@@ -47,9 +47,11 @@ class Datatype
     {
         switch ($datatypeCode) {
             case self::INT:
+                return 'integer';
+
             case self::FLOAT:
             case self::NUMBER:
-                return 'integer';
+                return 'float';
 
             case self::DATE: return 'date';
             case self::TIME: return 'time';

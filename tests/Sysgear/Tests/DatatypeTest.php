@@ -40,11 +40,11 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testToDoctrineDbal_float() {
-        $this->assertEquals('integer', Datatype::toDoctrineDbal(Datatype::FLOAT));
+        $this->assertEquals('float', Datatype::toDoctrineDbal(Datatype::FLOAT));
     }
 
     public function testToDoctrineDbal_number() {
-        $this->assertEquals('integer', Datatype::toDoctrineDbal(Datatype::NUMBER));
+        $this->assertEquals('float', Datatype::toDoctrineDbal(Datatype::NUMBER));
     }
 
     public function testToDoctrineDbal_date() {
