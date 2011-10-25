@@ -104,6 +104,18 @@ class DataSource implements \Serializable
     }
 
     /**
+     * Return option.
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public function getOption($key, $default = null)
+    {
+        return array_key_exists($key, $this->options) ? $this->options[$key] : $default;
+    }
+
+    /**
      * Set the data unit (or data domain).
      *
      * @param string $dataUnit
