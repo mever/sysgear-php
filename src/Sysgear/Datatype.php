@@ -273,11 +273,28 @@ class Datatype
     /**
      * Return true if a given datatype is a date, time or datetime.
      *
-     * @param $datatype integer Any datatype constant
+     * @param integer $datatype Any datatype constant
      * @return boolean
      */
     public static function isDate($datatype)
     {
         return ($datatype > 1 && $datatype < 5);
+    }
+
+    /**
+     * Return true if a given datatype is numeric.
+     *
+     * @param integer $datatype
+     */
+    public static function isNumber($datatype)
+    {
+        switch ($datatype) {
+            case self::INT:
+            case self::FLOAT:
+            case self::NUMBER:
+                return true;
+        }
+
+        return false;
     }
 }

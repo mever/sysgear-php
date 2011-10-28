@@ -426,4 +426,26 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals($asserts[$idx++], Datatype::isDate($code));
         }
     }
+
+
+
+    /*
+     * Test static method: isNumber
+     */
+
+    public function testIsNumber()
+    {
+        $refClass = new \ReflectionClass('Sysgear\Datatype');
+        $constants = $refClass->getConstants();
+        $asserts = array_fill(0, count($constants), false);
+
+        $asserts[Datatype::INT] = true;
+        $asserts[Datatype::FLOAT] = true;
+        $asserts[Datatype::NUMBER] = true;
+
+        $idx = 0;
+        foreach ($constants as $code) {
+            $this->assertEquals($asserts[$idx++], Datatype::isNumber($code));
+        }
+    }
 }
