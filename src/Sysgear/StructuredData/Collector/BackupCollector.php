@@ -3,6 +3,9 @@
 namespace Sysgear\StructuredData\Collector;
 
 use Sysgear\Backup\BackupableInterface;
+use Sysgear\StructuredData\NodeCollection;
+use Sysgear\StructuredData\NodeRef;
+use Sysgear\StructuredData\Node;
 
 /**
  * Collector for backup data from backupable objects.
@@ -20,83 +23,20 @@ class BackupCollector extends AbstractObjectCollector
     public $onlyImplementor = false;
 
     /**
-     * Preventing the Doctrine2 proxy objects from being collected.
-     *
-     * @var boolean
-     */
-    public $ignoreDoctrineProxies = true;
-
-    /**
-     * This object is a reference.
-     *
-     * @var boolean
-     */
-    protected $reference = false;
-
-    /**
-     * Name to use for this node.
-     *
-     * @var string
-     */
-    protected $name;
-
-    /**
-     * Do not descent into the properties of these relations.
-     *
-     * @var string[]
-     */
-    protected $doNotDescent = array();
-
-    /**
-     * Array of properties to ignore.
-     *
-     * @var string[]
-     */
-    protected $ignore = array();
-
-    /**
-     * Array of properties. When set
-     * only those properties will be collected.
-     *
-     * @var string[] | null
-     */
-    protected $onlyInclude;
-
-    /**
-     * Name of class to collect.
-     *
-     * @var string
-     */
-    protected $className;
-
-    /**
-     * Restore state, no remaining properties or other
-     * business that shouldn't be cloned.
-     */
-    public function __clone()
-    {
-        $this->ignore = array();
-        $this->doNotDescent = array();
-        $this->onlyInclude = null;
-        $this->className = null;
-    }
-
-    /**
      * Set option.
      *
      * @param string $key
      * @param mixed $value
      */
-    public function setOption($key, $value)
+    protected function _setOption($key, $value)
     {
         switch ($key) {
-        case 'onlyImplementor':
-            $this->onlyImplementor = (boolean) $value;
-            break;
+            case 'onlyImplementor':
+                $this->onlyImplementor = (boolean) $value;
+                break;
 
-        default:
-            parent::setOption($key, $value);
-            break;
+            default:
+                parent::_setOption($key, $value);
         }
     }
 
@@ -106,92 +46,71 @@ class BackupCollector extends AbstractObjectCollector
      */
     public function fromObject($object, array $options = array())
     {
+        // check interface
         if (! ($object instanceof BackupableInterface)) {
             throw new CollectorException("Given object does not implement BackupableInterface.");
         }
 
-        // apply instance options. These apply only
-        // to this instance of the collector.
+        $this->addedObjects[] = $object;
         foreach ($options as $key => $value) {
-            switch ($key) {
-            case "doNotDescent":
-                $this->doNotDescent = (array) $value;
-                break;
-
-            case "ignore":
-                $this->ignore = (array) $value;
-                break;
-
-            case "onlyInclude":
-                $this->onlyInclude = (null === $value) ? null : (array) $value;
-                break;
-
-            case "className":
-                $this->className = (string) $value;
-                break;
-            }
+            $this->_setOption($key, $value);
         }
 
-        // Add this object to the list of excluded objects to
-        // prevent infinite recursive collecting.
-        $this->addedObjects[] = $object;
-
-        $className = $this->className ?: $this->getClassName($object);
-        $name = $this->name ?: $this->getNodeName($object);
+        $name = $this->getNodeName($object);
+        $className = $this->getClassName($object);
         $objHash = spl_object_hash($object);
-        $this->element = $this->document->createElement($name);
-        $refClass = new \ReflectionClass($object);
-        if ($this->reference) {
 
-            // Create reference.
-            $this->element->setAttribute('ref', $objHash);
+        if ($this->reference) {
+            $this->node = new NodeRef($objHash, $name);
+
         } else {
 
-            $this->element->setAttribute('type', 'object');
-            $this->element->setAttribute('class', $className);
-            $this->element->setAttribute('id', $objHash);
-            foreach ($refClass->getProperties() as $property) {
+            $this->node = new Node($objHash, $name);
+            $this->node->setMetadata('type', 'object');
+            $this->node->setMetadata('class', $className);
 
-                // Exclude properties.
+            $refClass = new \ReflectionClass($object);
+            foreach ($refClass->getProperties() as $property) {
+                $property->setAccessible(true);
                 if ($this->filterProperty($property)) {
 
-                    $property->setAccessible(true);
                     $name = $property->getName();
-
-                    if (null !== $this->onlyInclude && (! in_array($name, $this->onlyInclude, true))) {
-                        continue;
-                    }
-
-                    if (in_array($name, $this->ignore, true) || ($this->onlyImplementor
-                      && $property->getDeclaringClass()->getName() !== $className)) {
-                        continue;
-                    }
-
-                    // Scan scalar or composite property.
                     $value = $property->getValue($object);
                     if (is_scalar($value)) {
-                        $this->addScalarNode($name, $value);
+                        $this->node->setProperty($name, array(
+                            'type' => gettype($value),
+                            'value' => $value));
+
                     } elseif ($this->followCompositeNodes) {
-                        $this->addCompositeNode($name, $value);
+                        $this->addCompositeProperty($name, $value);
                     }
                 }
             }
         }
-        $this->document->appendChild($this->element);
     }
 
     /**
-     * Add scalar property node.
+     * Return true if property can be collected, else return false.
      *
-     * @param string $name
-     * @param scalar $value
+     * @param \ReflectionProperty $property
      */
-    protected function addScalarNode($name, $value)
+    protected function filterProperty(\ReflectionProperty $property)
     {
-        $property = $this->document->createElement($name);
-        $this->element->appendChild($property);
-        $property->setAttribute('type', gettype($value));
-        $property->setAttribute('value', $value);
+        if (! parent::filterProperty($property)) {
+            return false;
+        }
+
+        if ($this->onlyImplementor) {
+            $object = $property->getDeclaringClass();
+            $className = $this->getFirstClassnameImplementing($object,
+                '\\Sysgear\\Backup\\BackupableInterface');
+
+            if ($property->getDeclaringClass()->getName() === $className) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -200,7 +119,7 @@ class BackupCollector extends AbstractObjectCollector
      * @param string $name
      * @param mixed $value
      */
-    protected function addCompositeNode($name, $value)
+    protected function addCompositeProperty($name, $value)
     {
         if (1 === $this->descentLevel) {
             $doNotDescent = true;
@@ -209,49 +128,48 @@ class BackupCollector extends AbstractObjectCollector
             $this->descentLevel -= 1;
         }
 
-        // Scan BackupableInterface implmentation
+        // scan BackupableInterface implmentation
         if ($value instanceof BackupableInterface) {
-            $this->element->appendChild($this->createNode($name, $value, $doNotDescent));
+            $this->node->setProperty($name, $this->createChildNode($value, $doNotDescent));
         }
 
-        // Scan sub-collection.
+        // scan sub-collection
         if (is_array($value) || ($value instanceof \IteratorAggregate)) {
 
-            $collection = $this->document->createElement($name);
-            $collection->setAttribute('type', 'array');
-            $this->element->appendChild($collection);
+            $collection = new NodeCollection();
             if (! is_array($value)) {
-                $collection->setAttribute('class', get_class($value));
-                $collection->setAttribute('id', spl_object_hash($value));
+                $collection->setMetadata('class', get_class($value));
+                $collection->setMetadata('id', spl_object_hash($value));
             }
 
             foreach ($value as $elem) {
 
-                // Collect array element objects implementing the BackupableInterface.
+                // collect array element objects implementing the BackupableInterface
                 if ($elem instanceof BackupableInterface) {
-                    $node = $this->createNode($this->getNodeName($elem), $elem, $doNotDescent);
-                    $collection->appendChild($node);
+                    $node = $this->createChildNode($elem, $doNotDescent, $name);
+                    $node->setName($name);
+                    $collection->add($node);
                 }
             }
+
+            $this->node->setProperty($name, $collection);
         }
     }
 
     /**
      * Create child node from backupable.
      *
-     * @param string $name
      * @param \Sysgear\Backup\BackupableInterface $backupable
      * @param boolean $doNotDescent
-     * @return \DOMNode
+     * @return \Sysgear\StructuredData\NodeInterface
      */
-    protected function createNode($name, BackupableInterface $backupable, $doNotDescent)
+    protected function createChildNode(BackupableInterface $backupable, $doNotDescent)
     {
-        // Make a copy of this collector to allow recursive collecting.
-        $collector = clone $this;
+        // make a copy of this collector to allow recursive collecting
+        $collector = new self($this->persistentOptions);
         $collector->addedObjects =& $this->addedObjects;
-        $collector->name = $name;
 
-        // Prevent infinite loops...
+        // prevent infinite loops...
         if (in_array($backupable, $this->addedObjects, true)) {
             $collector->followCompositeNodes = false;
             $collector->reference = true;
@@ -261,7 +179,7 @@ class BackupCollector extends AbstractObjectCollector
         }
 
         $backupable->collectStructedData($collector);
-        return $collector->getDomElement();
+        return $collector->getNode();
     }
 
     /**
@@ -270,7 +188,7 @@ class BackupCollector extends AbstractObjectCollector
      * @param \Sysgear\Backup\BackupableInterface $backupable
      * @return string
      */
-    protected function getNodeName($backupable)
+    protected function getNodeName(BackupableInterface $backupable)
     {
         return parent::getNodeName($this->getClassName($backupable));
     }
@@ -288,18 +206,8 @@ class BackupCollector extends AbstractObjectCollector
         }
 
         if ($this->onlyImplementor) {
-
-            // Fetches the oldest parent name which implements the backupable interface.
-            $previousClass = $class = get_class($backupable);
-            while (false !== $class) {
-                $refClass = new \ReflectionClass($class);
-                if (! $refClass->implementsInterface('\\Sysgear\\Backup\\BackupableInterface')) {
-                    break;
-                }
-                $previousClass = $class;
-                $class = get_parent_class($class);
-            }
-            return $previousClass;
+            return $this->getFirstClassnameImplementing($backupable,
+                '\\Sysgear\\Backup\\BackupableInterface');
 
         } else {
             return get_class($backupable);

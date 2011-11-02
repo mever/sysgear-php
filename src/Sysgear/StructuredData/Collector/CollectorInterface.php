@@ -26,11 +26,4 @@ interface CollectorInterface
      * @return \Sysgear\StructuredData\Collector\CollectorInterface
      */
     public function fromObject($object, array $options = array());
-
-    /**
-     * Get DOM from collector.
-     *
-     * @return \DOMDocument
-     */
-    public function getDom();
 }

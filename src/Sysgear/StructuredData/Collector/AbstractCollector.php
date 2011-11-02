@@ -7,14 +7,11 @@ use Sysgear\StructuredData\Exporter\ExporterInterface;
 abstract class AbstractCollector implements CollectorInterface
 {
     /**
-     * @var \DOMDocument
+     * @var \Sysgear\StructuredData\NodeInterface
      */
-    protected $document;
+    protected $node;
 
-    /**
-     * @var \DOMElement
-     */
-    protected $element;
+    protected $persistentOptions = array();
 
     /**
      * The descent level of the object graph.
@@ -27,16 +24,32 @@ abstract class AbstractCollector implements CollectorInterface
      */
     protected $descentLevel = 0;
 
+    // disable object cloning
+    private function __clone() {}
+
     /**
      * Construct data collector.
      *
-     * @param array $options
+     * @param array $options General options
      */
     public function __construct(array $options = array())
     {
-        $this->document = new \DOMDocument('1.0', 'UTF-8');
         foreach ($options as $key => $value) {
             $this->setOption($key, $value);
+        }
+    }
+
+    /**
+     * Set general option.
+     *
+     * @param string $key
+     * @param mixed $value
+     */
+    public function setOption($key, $value)
+    {
+        $this->persistentOptions[$key] = $value;
+        if (property_exists($this, $key)) {
+            $this->_setOption($key, $value);
         }
     }
 
@@ -46,31 +59,22 @@ abstract class AbstractCollector implements CollectorInterface
      * @param string $key
      * @param mixed $value
      */
-    public function setOption($key, $value)
+    protected function _setOption($key, $value)
     {
         switch ($key) {
-        case "descentLevel":
-            $this->descentLevel = (integer) $value;
-            break;
+            case 'descentLevel':
+                $this->descentLevel = (int) $value;
+                break;
         }
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Collector.CollectorInterface::getDom()
-     */
-    public function getDom()
-    {
-        return $this->document;
-    }
-
-    /**
-     * Return the DOM element.
+     * Return collected node.
      *
-     * @return \DOMDocument
+     * @return \Sysgear\StructuredData\NodeInterface
      */
-    public function getDomElement()
+    public function getNode()
     {
-        return $this->element;
+        return $this->node;
     }
 }
