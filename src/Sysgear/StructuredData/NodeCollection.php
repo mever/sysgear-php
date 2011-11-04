@@ -4,13 +4,15 @@ namespace Sysgear\StructuredData;
 
 use Closure, Countable, IteratorAggregate, ArrayAccess, Serializable;
 
-class NodeCollection implements Countable, IteratorAggregate, ArrayAccess, Serializable
+class NodeCollection extends NodeInterface implements Countable,
+    IteratorAggregate, ArrayAccess, Serializable
 {
     protected $collection = array();
     protected $metadata = array();
 
-    public function __construct(array $collection = array())
+    public function __construct($type, array $collection = array())
     {
+        parent::__construct($type);
         $this->collection = $collection;
     }
 
@@ -220,7 +222,7 @@ class NodeCollection implements Countable, IteratorAggregate, ArrayAccess, Seria
      * Gets the node with the given key/index.
      *
      * @param mixed $key The key.
-     * @return \Sysgear\StructuredData\Node The node or NULL, if no node exists for the given key.
+     * @return \Sysgear\StructuredData\NodeInterface The node or NULL, if no node exists for the given key.
      */
     public function get($key)
     {
@@ -268,8 +270,8 @@ class NodeCollection implements Countable, IteratorAggregate, ArrayAccess, Seria
      * When the collection is a Map this is like put(key,value)/add(key,value).
      * When the collection is a List this is like add(position,value).
      *
-     * @param NodeInterface $key
-     * @param mixed $value
+     * @param mixed $key
+     * @param NodeInterface $node
      */
     public function set($key, NodeInterface $node)
     {

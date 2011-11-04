@@ -2,22 +2,8 @@
 
 namespace Sysgear\StructuredData;
 
-class Node implements NodeInterface
+class Node extends NodeInterface
 {
-    /**
-     * The unique identification of each node.
-     *
-     * @var string
-     */
-    protected $id;
-
-    /**
-     * A descriptive name for this node.
-     *
-     * @var string
-     */
-    protected $name;
-
     /**
      * Node metadata.
      *
@@ -33,15 +19,21 @@ class Node implements NodeInterface
     protected $properties = array();
 
     /**
+     * A descriptive name for this node.
+     *
+     * @var string
+     */
+    protected $name;
+
+    /**
      * Create a new node instance.
      *
-     * @param string $id
+     * @param string $type
      * @param string $name
-     * @param boolean $isReference
      */
-    public function __construct($id, $name = 'node')
+    public function __construct($type, $name = 'node')
     {
-        $this->id = $id;
+        parent::__construct($type);
         $this->name = $name;
     }
 
@@ -57,37 +49,10 @@ class Node implements NodeInterface
     }
 
     /**
-     * Set property.
-     *
-     * @param string $name
-     * @param map|Node|NodeCollection $value
-     */
-    public function setProperty($name, $value)
-    {
-        if (is_array($value) || $value instanceof NodeInterface || $value instanceof NodeCollection) {
-            $this->properties[$name] = $value;
-
-        } else {
-            $type = 'Sysgear\\StructuredData\\NodeInterface or Sysgear\\StructuredData\\NodeCollection';
-            throw new \InvalidArgumentException("Second argument must be of type: map, {$type}");
-        }
-    }
-
-    /**
-     * Return the unique node id.
-     *
-     * @return string
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
      * Set name name.
      *
      * @param string $name
-     * @return \Sysgear\StructuredData\Node
+     * @return \Sysgear\StructuredData\NodeInterface
      */
     public function setName($name)
     {
@@ -103,6 +68,17 @@ class Node implements NodeInterface
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Set property.
+     *
+     * @param string $name
+     * @param NodeInterface $value
+     */
+    public function setProperty($name, NodeInterface $value)
+    {
+        $this->properties[$name] = $value;
     }
 
     /**

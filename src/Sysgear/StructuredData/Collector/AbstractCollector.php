@@ -7,10 +7,15 @@ use Sysgear\StructuredData\Exporter\ExporterInterface;
 abstract class AbstractCollector implements CollectorInterface
 {
     /**
-     * @var \Sysgear\StructuredData\NodeInterface
+     * @var \Sysgear\StructuredData\Node
      */
     protected $node;
 
+    /**
+     * Store options that should be persistent when collecting data recursive.
+     *
+     * @var array
+     */
     protected $persistentOptions = array();
 
     /**
@@ -40,10 +45,8 @@ abstract class AbstractCollector implements CollectorInterface
     }
 
     /**
-     * Set general option.
-     *
-     * @param string $key
-     * @param mixed $value
+     * (non-PHPdoc)
+     * @see Sysgear\StructuredData\Collector.CollectorInterface::setOption()
      */
     public function setOption($key, $value)
     {
@@ -69,9 +72,8 @@ abstract class AbstractCollector implements CollectorInterface
     }
 
     /**
-     * Return collected node.
-     *
-     * @return \Sysgear\StructuredData\NodeInterface
+     * (non-PHPdoc)
+     * @see Sysgear\StructuredData\Collector.CollectorInterface::getNode()
      */
     public function getNode()
     {

@@ -20,13 +20,6 @@ abstract class AbstractObjectCollector extends AbstractCollector
     protected $followCompositeNodes = true;
 
     /**
-     * This object is a reference.
-     *
-     * @var boolean
-     */
-    protected $reference = false;
-
-    /**
      * Array of properties to ignore.
      *
      * @var string[]

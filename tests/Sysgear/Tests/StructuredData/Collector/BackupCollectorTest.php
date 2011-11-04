@@ -27,14 +27,13 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         $collector->fromObject($object);
 
         $node = $collector->getNode();
-        $this->assertEquals(spl_object_hash($object), $node->getId());
+        $this->assertEquals('object', $node->getType());
         $this->assertEquals($this->getClassName($object), $node->getName());
         $this->assertInstanceOf('Sysgear\\StructuredData\\Node', $node);
-        $this->assertEquals(array('type' => 'object', 'class' => get_class($object)), $node->getMetadata());
-        $this->assertEquals(array(
-            'number' => array('type' => 'integer', 'value' => 3),
-            'string' => array('type' => 'string', 'value' => 'abc')
-        ), $node->getProperties());
+        $this->assertEquals(array('class' => get_class($object)), $node->getMetadata());
+        $props = $node->getProperties();
+        $this->assertEquals(3, $props['number']->getValue());
+        $this->assertEquals('abc', $props['string']->getValue());
     }
 
     public function testFromObject_protectedScalarProperties()
@@ -51,11 +50,10 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         $collector->fromObject($object);
 
         $node = $collector->getNode();
-        $this->assertEquals(array('type' => 'object', 'class' => get_class($object)), $node->getMetadata());
-        $this->assertEquals(array(
-            'number' => array('type' => 'integer', 'value' => 3),
-            'string' => array('type' => 'string', 'value' => 'abc')
-        ), $node->getProperties());
+        $this->assertEquals(array('class' => get_class($object)), $node->getMetadata());
+        $props = $node->getProperties();
+        $this->assertEquals(3, $props['number']->getValue());
+        $this->assertEquals('abc', $props['string']->getValue());
     }
 
     public function testFromObject_privateScalarProperties()
@@ -72,11 +70,10 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         $collector->fromObject($object);
 
         $node = $collector->getNode();
-        $this->assertEquals(array('type' => 'object', 'class' => get_class($object)), $node->getMetadata());
-        $this->assertEquals(array(
-            'number' => array('type' => 'integer', 'value' => 3),
-            'string' => array('type' => 'string', 'value' => 'abc')
-        ), $node->getProperties());
+        $this->assertEquals(array('class' => get_class($object)), $node->getMetadata());
+        $props = $node->getProperties();
+        $this->assertEquals(3, $props['number']->getValue());
+        $this->assertEquals('abc', $props['string']->getValue());
     }
 
     public function testFromObject_nodeProperty()
@@ -87,8 +84,7 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         );
 
         $className = $this->createClass(
-            array('public $obj'),
-            array('Sysgear\Backup\BackupableInterface'),
+            array('public $obj'), array('Sysgear\Backup\BackupableInterface'),
             $this->createClassBackupableInterface()
         );
 
@@ -100,8 +96,9 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
 
         $props = $collector->getNode()->getProperties();
         $this->assertEquals(1, count($props));
-        $this->assertEquals(array('number' =>
-            array('type' => 'integer', 'value' => 123)), $props['obj']->getProperties());
+        $props = $props['obj']->getProperties();
+        $this->assertEquals('integer', $props['number']->getType());
+        $this->assertEquals(123, $props['number']->getValue());
     }
 
     public function testFromObject_nodeCollectionProperty()
@@ -112,8 +109,7 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         );
 
         $className = $this->createClass(
-            array('public $col'),
-            array('Sysgear\Backup\BackupableInterface'),
+            array('public $col'), array('Sysgear\Backup\BackupableInterface'),
             $this->createClassBackupableInterface()
         );
 
@@ -124,10 +120,10 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         $collector->fromObject($object);
         $props = $collector->getNode()->getProperties();
         $col = $props['col']->toArray();
-
-        $props = $collector->getNode()->getProperties();
         $this->assertEquals(2, count($col));
-        $this->assertEquals(array('number' => array('type' => 'integer', 'value' => 123)), $col[1]->getProperties());
+        $props = $col[1]->getProperties();
+        $this->assertEquals('integer', $props['number']->getType());
+        $this->assertEquals(123, $props['number']->getValue());
     }
 
     public function testFromObject_nodeCollectionPropertyRefs()
@@ -138,8 +134,7 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         );
 
         $className = $this->createClass(
-            array('public $col'),
-            array('Sysgear\Backup\BackupableInterface'),
+            array('public $col'), array('Sysgear\Backup\BackupableInterface'),
             $this->createClassBackupableInterface()
         );
 
@@ -153,16 +148,27 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         $props = $collector->getNode()->getProperties();
         $col = $props['col']->toArray();
 
-        $props = $collector->getNode()->getProperties();
         $this->assertEquals(2, count($col));
-        $this->assertEquals(array('number' => array('type' => 'integer', 'value' => 123)), $col[0]->getProperties());
+        $props = $col[0]->getProperties();
 
-        $this->assertEquals($col[0]->getId(), $col[1]->getId());
+        $this->assertEquals(123, $props['number']->getValue());
+        $props['number']->setValue(456);
+
+        $props = $col[1]->getProperties();
+        $this->assertEquals('integer', $props['number']->getType());
+        $this->assertEquals(456, $props['number']->getValue());
+
+        $this->assertEquals($col[0], $col[1]);
+
+        print_r($collector->getNode());
     }
 
     public function testOption_onlyImplementor()
     {
-        // TODO:
+        $className = $this->createClass(
+            array('public $col'), array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
     }
 
     protected function getClassName($object)
@@ -191,10 +197,10 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
     {
         // get classname
         $count = 0;
-        $className = 'Generated' . $count;
+        $className = 'Generated_' . $count;
         while (class_exists(__CLASS__ . '\\' .$className)) {
             $count++;
-            $className = 'Generated' . $count;
+            $className = 'Generated_' . $count;
         }
 
         // get interfaces

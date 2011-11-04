@@ -26,4 +26,19 @@ interface CollectorInterface
      * @return \Sysgear\StructuredData\Collector\CollectorInterface
      */
     public function fromObject($object, array $options = array());
+
+    /**
+     * Set persistent option.
+     *
+     * @param string $key
+     * @param mixed $value
+     */
+    public function setOption($key, $value);
+
+    /**
+     * Return collected node.
+     *
+     * @return \Sysgear\StructuredData\Node
+     */
+    public function getNode();
 }

@@ -2,35 +2,32 @@
 
 namespace Sysgear\StructuredData;
 
-interface NodeInterface
+abstract class NodeInterface
 {
+    /**
+     * The node type.
+     *
+     * @var string
+     */
+    protected $type;
+
     /**
      * Create a new node instance.
      *
-     * @param string $id
-     * @param string $name
+     * @param string $type
      */
-    public function __construct($id, $name = 'node');
+    public function __construct($type)
+    {
+        $this->type = $type;
+    }
 
     /**
-     * Return the unique node id.
+     * Return the node type.
      *
      * @return string
      */
-    public function getId();
-
-    /**
-     * Set name name.
-     *
-     * @param string $name
-     * @return \Sysgear\StructuredData\NodeInterface
-     */
-    public function setName($name);
-
-    /**
-     * Return the descriptive node name.
-     *
-     * @return string
-     */
-    public function getName();
+    public function getType()
+    {
+        return $this->type;
+    }
 }

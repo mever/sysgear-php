@@ -4,7 +4,7 @@ namespace Sysgear\StructuredData\Collector;
 
 use Sysgear\Backup\BackupableInterface;
 use Sysgear\StructuredData\NodeCollection;
-use Sysgear\StructuredData\NodeRef;
+use Sysgear\StructuredData\NodeProperty;
 use Sysgear\StructuredData\Node;
 
 /**
@@ -51,24 +51,21 @@ class BackupCollector extends AbstractObjectCollector
             throw new CollectorException("Given object does not implement BackupableInterface.");
         }
 
-        $this->addedObjects[] = $object;
         foreach ($options as $key => $value) {
             $this->_setOption($key, $value);
         }
 
-        $name = $this->getNodeName($object);
-        $className = $this->getClassName($object);
-        $objHash = spl_object_hash($object);
+        if (null === $this->node) {
 
-        if ($this->reference) {
-            $this->node = new NodeRef($objHash, $name);
+            $name = $this->getNodeName($object);
+            $objHash = spl_object_hash($object);
 
-        } else {
+            // create new node
+            $this->node = new Node('object', $name);
+            $this->node->setMetadata('class', $this->getClassName($object));
+            $this->addedObjects[$objHash] = $this->node;
 
-            $this->node = new Node($objHash, $name);
-            $this->node->setMetadata('type', 'object');
-            $this->node->setMetadata('class', $className);
-
+            // collect data to populate the node with
             $refClass = new \ReflectionClass($object);
             foreach ($refClass->getProperties() as $property) {
                 $property->setAccessible(true);
@@ -77,10 +74,7 @@ class BackupCollector extends AbstractObjectCollector
                     $name = $property->getName();
                     $value = $property->getValue($object);
                     if (is_scalar($value)) {
-                        $this->node->setProperty($name, array(
-                            'type' => gettype($value),
-                            'value' => $value));
-
+                        $this->node->setProperty($name, new NodeProperty(gettype($value), $value));
                     } elseif ($this->followCompositeNodes) {
                         $this->addCompositeProperty($name, $value);
                     }
@@ -136,19 +130,18 @@ class BackupCollector extends AbstractObjectCollector
         // scan sub-collection
         if (is_array($value) || ($value instanceof \IteratorAggregate)) {
 
-            $collection = new NodeCollection();
-            if (! is_array($value)) {
+            if (is_array($value)) {
+                $collection = new NodeCollection('array');
+            } else {
+                $collection = new NodeCollection('object');
                 $collection->setMetadata('class', get_class($value));
-                $collection->setMetadata('id', spl_object_hash($value));
             }
 
             foreach ($value as $elem) {
 
                 // collect array element objects implementing the BackupableInterface
                 if ($elem instanceof BackupableInterface) {
-                    $node = $this->createChildNode($elem, $doNotDescent, $name);
-                    $node->setName($name);
-                    $collection->add($node);
+                    $collection->add($this->createChildNode($elem, $doNotDescent));
                 }
             }
 
@@ -170,9 +163,10 @@ class BackupCollector extends AbstractObjectCollector
         $collector->addedObjects =& $this->addedObjects;
 
         // prevent infinite loops...
-        if (in_array($backupable, $this->addedObjects, true)) {
+        $objHash = spl_object_hash($backupable);
+        if (array_key_exists($objHash, $this->addedObjects)) {
             $collector->followCompositeNodes = false;
-            $collector->reference = true;
+            $collector->node =& $this->addedObjects[$objHash];
 
         } elseif ($doNotDescent) {
             $collector->followCompositeNodes = false;
