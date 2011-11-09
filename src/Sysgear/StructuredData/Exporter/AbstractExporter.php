@@ -2,20 +2,22 @@
 
 namespace Sysgear\StructuredData\Exporter;
 
+use Sysgear\StructuredData\Node;
+
 abstract class AbstractExporter implements ExporterInterface
 {
     /**
-     * @var \DOMDocument
+     * @var \Sysgear\StructuredData\Node
      */
-    protected $document;
+    protected $node;
 
     /**
      * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Exporter.ExporterInterface::setDom()
+     * @see Sysgear\StructuredData\Exporter.ExporterInterface::setNode()
      */
-    public function setDom(\DOMDocument $domDocument)
+    public function setNode(Node $node)
     {
-        $this->document = $domDocument;
+        $this->node = $node;
         return $this;
     }
 }

@@ -3,20 +3,20 @@
 namespace Sysgear\StructuredData\Exporter;
 
 use Sysgear\StructuredData\Collector\CollectorInterface;
+use Sysgear\StructuredData\Node;
 
 interface ExporterInterface
 {
     /**
-     * Set the DOM to export.
-     * 
-     * @param \DOMDocument $domDocument
-     * @return \Sysgear\StructuredData\Exporter\ExporterInterface
+     * Set node.
+     *
+     * @param Node $node
      */
-    public function setDom(\DOMDocument $domDocument);
+    public function setNode(Node $node);
 
 	/**
      * Return the exporter as string.
-     * 
+     *
      * @return string
      */
     public function __toString();
