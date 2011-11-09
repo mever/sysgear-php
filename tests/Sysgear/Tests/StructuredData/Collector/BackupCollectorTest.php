@@ -159,8 +159,48 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(456, $props['number']->getValue());
 
         $this->assertEquals($col[0], $col[1]);
+    }
 
-        print_r($collector->getNode());
+    public function testOption_className()
+    {
+        $className = $this->createClass(array(
+            'public $number = 3',
+            'public $string = \'abc\'',
+            'public $null'), array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $object = new $className();
+        $collector = new BackupCollector();
+        $collector->setOption('className', 'blaat');
+        $collector->fromObject($object);
+
+        $node = $collector->getNode();
+        $this->assertEquals('object', $node->getType());
+        $this->assertEquals('blaat', $node->getName());
+        $this->assertInstanceOf('Sysgear\\StructuredData\\Node', $node);
+        $this->assertEquals(array('class' => 'blaat'), $node->getMetadata());
+    }
+
+    public function testOption_className_fq()
+    {
+        $className = $this->createClass(array(
+            'public $number = 3',
+            'public $string = \'abc\'',
+            'public $null'), array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $object = new $className();
+        $collector = new BackupCollector();
+        $collector->setOption('className', '\Nowhere\Blaat');
+        $collector->fromObject($object);
+
+        $node = $collector->getNode();
+        $this->assertEquals('object', $node->getType());
+        $this->assertEquals('Blaat', $node->getName());
+        $this->assertInstanceOf('Sysgear\\StructuredData\\Node', $node);
+        $this->assertEquals(array('class' => '\Nowhere\Blaat'), $node->getMetadata());
     }
 
     public function testOption_onlyImplementor()
@@ -169,6 +209,8 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
             array('public $col'), array('Sysgear\Backup\BackupableInterface'),
             $this->createClassBackupableInterface()
         );
+
+        // TODO: finish this
     }
 
     protected function getClassName($object)

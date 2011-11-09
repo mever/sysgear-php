@@ -73,6 +73,10 @@ abstract class AbstractObjectCollector extends AbstractCollector
                 $this->onlyInclude = (null === $value) ? null : (array) $value;
                 break;
 
+            case "className":
+                $this->className = (string) $value;
+                break;
+
             default:
                 parent::_setOption($key, $value);
         }
