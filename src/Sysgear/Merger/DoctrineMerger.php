@@ -85,6 +85,16 @@ class DoctrineMerger implements MergerInterface
 
     /**
      * (non-PHPdoc)
+     * @see Sysgear\Merger.MergerInterface::getObjectId()
+     */
+    public function getObjectId($object)
+    {
+        $class = get_class($object);
+        return $this->entityManager->getClassMetadata($class)->getIdentifierValues($object);
+    }
+
+    /**
+     * (non-PHPdoc)
      * @see Sysgear\Merger.MergerInterface::flush()
      */
     public function flush()

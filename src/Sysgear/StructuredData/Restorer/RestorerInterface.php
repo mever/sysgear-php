@@ -3,6 +3,7 @@
 namespace Sysgear\StructuredData\Restorer;
 
 use Sysgear\StructuredData\Importer\ImporterInterface;
+use Sysgear\StructuredData\Node;
 
 /**
  * Responsible for restoring data.
@@ -19,21 +20,6 @@ interface RestorerInterface
     public function __construct(array $options = array());
 
     /**
-     * Set option.
-     *
-     * @param string $key
-     * @param mixed $value
-     */
-    public function setOption($key, $value);
-
-    /**
-     * Get option.
-     *
-     * @param string $key
-     */
-    public function getOption($key);
-
-    /**
      * Restore data to object.
      *
      * @param \StdClass $object
@@ -44,10 +30,21 @@ interface RestorerInterface
     public function toObject($object);
 
     /**
-     * Set the DOM for restorer.
+     * Set option.
      *
-     * @param \DOMDocument $domDocument
-     * @return \Sysgear\StructuredData\Restorer\RestorerInterface
+     * @param string $key
+     * @param mixed $value
      */
-    public function setDom(\DOMDocument $domDocument);
+    public function setOption($key, $value);
+
+    /**
+     * Restore a object.
+     *
+     * @param Node $node The node representing the object to restore.
+     * @param object $object Optional object to restore, else try to create an object based
+     *   on metadata stored in the $node.
+     *
+     * @return object
+     */
+    public function restore(Node $node, $object = null);
 }

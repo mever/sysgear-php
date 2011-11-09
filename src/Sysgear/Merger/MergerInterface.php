@@ -28,9 +28,18 @@ interface MergerInterface
     /**
      * Returns all mandatory properties according the target system.
      *
-     * @param object $object
+     * @param object $object Similar object to search for in the target system.
+     * @return array Mandatory properties
      */
     public function getMandatoryProperties($object);
+
+    /**
+     * Return an object identification unique within the target system.
+     *
+     * @param object $object Similar object to search for in the target system.
+     * @return string|null
+     */
+    public function getObjectId($object);
 
     /**
      * Apply changes to the target system.
