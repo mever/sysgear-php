@@ -28,6 +28,16 @@ class NodeCollection extends NodeInterface implements Countable,
     }
 
     /**
+     * Return node metadata.
+     *
+     * @return map
+     */
+    public function getMetadata()
+    {
+        return $this->metadata;
+    }
+
+    /**
      * Gets the PHP array representation of this node collection.
      *
      * @return array The PHP array representation of this node collection.

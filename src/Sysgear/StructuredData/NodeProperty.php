@@ -9,12 +9,12 @@ class NodeProperty extends NodeInterface
     /**
      * Create a new node instance.
      *
-     * @param string $id Buildin type: int, string, etc...
+     * @param string $type Buildin type: int, string, etc...
      * @param mixed $value Property value
      */
-    public function __construct($id, $value = null)
+    public function __construct($type, $value = null)
     {
-        parent::__construct($id);
+        parent::__construct($type);
         if (null !== $value) {
             $this->setValue($value);
         }

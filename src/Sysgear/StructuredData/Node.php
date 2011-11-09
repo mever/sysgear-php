@@ -49,6 +49,16 @@ class Node extends NodeInterface
     }
 
     /**
+     * Return node metadata.
+     *
+     * @return map
+     */
+    public function getMetadata()
+    {
+        return $this->metadata;
+    }
+
+    /**
      * Set name name.
      *
      * @param string $name
@@ -82,13 +92,14 @@ class Node extends NodeInterface
     }
 
     /**
-     * Return node metadata.
+     * Return metadata under $key.
      *
-     * @return map
+     * @param string $key
+     * @param mixed $default
      */
-    public function getMetadata()
+    public function getMeta($key, $default = null)
     {
-        return $this->metadata;
+        return array_key_exists($key, $this->metadata) ? $this->metadata[$key] : $default;
     }
 
     /**
