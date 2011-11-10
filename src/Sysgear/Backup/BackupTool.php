@@ -6,6 +6,8 @@ use Sysgear\StructuredData\Collector\BackupCollector;
 use Sysgear\StructuredData\Restorer\BackupRestorer;
 use Sysgear\StructuredData\Exporter\ExporterInterface;
 use Sysgear\StructuredData\Importer\ImporterInterface;
+use Sysgear\StructuredData\NodeProperty;
+use Sysgear\StructuredData\Node;
 
 /**
  * Universal tool to backup about anything.
@@ -17,9 +19,6 @@ use Sysgear\StructuredData\Importer\ImporterInterface;
  */
 class BackupTool
 {
-    const META_DATETIME = 'datetime';
-    const DEFAULT_DATETIME_FORMAT = \DateTime::W3C;
-
     /**
      * @var \Sysgear\StructuredData\Exporter\ExporterInterface
      */
@@ -130,8 +129,8 @@ class BackupTool
         $collector = new BackupCollector($collectorOptions);
         $object->collectStructedData($collector);
 
-        $dom = $this->writeContent($collector->getDom());
-        $this->exporter->setDom($dom);
+        $node = $this->writeContent($collector->getNode());
+        $this->exporter->setNode($node);
         return $this->exporter;
     }
 
@@ -205,59 +204,20 @@ class BackupTool
     /**
      * Write backup content.
      *
-     * @param \DOMDocument $document
+     * @param Node $node
      * @return \DOMDocument
      */
-    protected function writeContent(\DOMDocument $document)
+    protected function writeContent(Node $node)
     {
-        // Create backup
-        $dom = new \DOMDocument('1.0', 'UTF-8');
-        $backupElem = $dom->createElement('backup');
+        // create backup
+        $backupNode = new Node('container', 'backup');
 
-        // Create metadata
-        $metadataElem = $dom->createElement('metadata');
-        $backupElem->appendChild($metadataElem);
-        foreach ($this->options as $name => $option) {
-            $this->setMetadata($dom, $metadataElem, $name, $option);
-        }
+        // set date
+        $format = \DateTime::RFC1123;
+        $backupNode->setProperty('date', new NodeProperty('rfc1123', date($format)));
 
-        // Create backup content
-        $content = $dom->createElement('content');
-        $backupElem->appendChild($content);
-        foreach ($document->childNodes as $child) {
-            $content->appendChild($dom->importNode($child, true));
-        }
-
-        $dom->appendChild($backupElem);
-        return $dom;
-    }
-
-    /**
-     * Create metadata for this backup.
-     *
-     * @param \DOMDocument $document
-     * @param \DOMNode $node
-     * @param string $name
-     * @param mixed $option
-     */
-    protected function setMetadata(\DOMDocument $document, \DOMNode $node, $name, $option)
-    {
-        switch ($name) {
-        case self::META_DATETIME:
-            $format = self::DEFAULT_DATETIME_FORMAT;
-            if (is_array($option)) {
-                $format = $option['format'];
-                $option = true;
-            }
-            if ((boolean) $option) {
-                $dateElem = $document->createElement('datetime');
-                $node->appendChild($dateElem);
-                $dateElem->setAttribute('format', $format);
-                $dateElem->setAttribute('value', date($format));
-                $dateElem->setAttribute('description', "PHP date format. See: ".
-                    "http://nl3.php.net/manual/en/function.date.php");
-            }
-            break;
-        }
+        // create backup content
+        $backupNode->setProperty('content', $node);
+        return $backupNode;
     }
 }

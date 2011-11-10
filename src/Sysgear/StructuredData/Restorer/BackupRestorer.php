@@ -299,7 +299,7 @@ class BackupRestorer extends AbstractRestorer
             // collect missing property nodes from complete object
             // TODO: Find out if the "onlyImplementor" option can cause trouble! This is
             //       needed to prevent the collector from collecting Doctrine proxy objects.
-            $backupCollector = new BackupCollector(array('descentLevel' => 1, 'onlyImplementor' => true));
+            $backupCollector = new BackupCollector(array('descentLevel' => 1, 'implClassName' => true));
             $completeObject->collectStructedData($backupCollector, array('onlyInclude' => $incl));
 
             // restore incomplete object
