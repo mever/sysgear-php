@@ -131,7 +131,7 @@ abstract class AbstractObjectCollector extends AbstractCollector
     protected function getFirstClassnameImplementing($object, $interface)
     {
         // Fetches the oldest parent name which implements the backupable interface.
-        $previousClass = $class = get_class($object);
+        $previousClass = $class = (is_object($object) ? get_class($object) : $object);
         while (false !== $class) {
             $refClass = new \ReflectionClass($class);
             if (! $refClass->implementsInterface($interface)) {

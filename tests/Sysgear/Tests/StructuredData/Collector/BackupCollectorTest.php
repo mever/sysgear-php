@@ -203,14 +203,113 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array('class' => '\Nowhere\Blaat'), $node->getMetadata());
     }
 
-    public function testOption_onlyImplementor()
+    public function testOption_implClassName_disabled()
     {
-        $className = $this->createClass(
-            array('public $col'), array('Sysgear\Backup\BackupableInterface'),
+        $supClassName = $this->createClass(
+            array('public $col', 'public $col2 = "abc"'),
+            array('Sysgear\Backup\BackupableInterface'),
             $this->createClassBackupableInterface()
         );
 
-        // TODO: finish this
+        $className = $this->createClass(array(
+            'public $shouldBeIgnored1 = true',
+            'protected $shouldBeIgnored2 = true'
+        ), array(), array(), $supClassName);
+
+        $object = new $className();
+        $collector = new BackupCollector();
+        $node = $collector->fromObject($object);
+
+        $this->assertEquals(get_class($object), __CLASS__ . '\\' . $node->getName());
+        $this->assertEquals(get_class($object), $node->getMeta('class'));
+        $props = $node->getProperties();
+        $this->assertEquals(3, count($props));
+        $this->assertTrue(array_key_exists('shouldBeIgnored1', $props));
+        $this->assertEquals('boolean', $props['shouldBeIgnored2']->getType());
+        $this->assertTrue($props['shouldBeIgnored2']->getValue());
+        $this->assertEquals('string', $props['col2']->getType());
+        $this->assertEquals('abc', $props['col2']->getValue());
+    }
+
+    public function testOption_implClassName_enabled()
+    {
+        $supClassName = $this->createClass(
+            array('public $col', 'public $col2 = "abc"'),
+            array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $className = $this->createClass(array(
+            'public $shouldBeIgnored1 = true',
+            'protected $shouldBeIgnored2 = true'
+        ), array(), array(), $supClassName);
+
+        $object = new $className();
+        $collector = new BackupCollector(array('implClassName' => true));
+        $node = $collector->fromObject($object);
+
+        $this->assertEquals(get_parent_class($object), __CLASS__ . '\\' . $node->getName());
+        $this->assertEquals(get_parent_class($object), $node->getMeta('class'));
+        $props = $node->getProperties();
+        $this->assertEquals(3, count($props));
+        $this->assertTrue(array_key_exists('shouldBeIgnored1', $props));
+        $this->assertEquals('boolean', $props['shouldBeIgnored2']->getType());
+        $this->assertTrue($props['shouldBeIgnored2']->getValue());
+        $this->assertEquals('string', $props['col2']->getType());
+        $this->assertEquals('abc', $props['col2']->getValue());
+    }
+
+    public function testOption_onlyImplementor_disabled()
+    {
+        $supClassName = $this->createClass(
+            array('public $col', 'public $col2 = "abc"'),
+            array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $className = $this->createClass(array(
+            'public $shouldBeIgnored1 = true',
+            'protected $shouldBeIgnored2 = true'
+        ), array(), array(), $supClassName);
+
+        $object = new $className();
+        $collector = new BackupCollector();
+        $node = $collector->fromObject($object);
+
+        $this->assertEquals(get_class($object), __CLASS__ . '\\' . $node->getName());
+        $this->assertEquals(get_class($object), $node->getMeta('class'));
+        $props = $node->getProperties();
+        $this->assertEquals(3, count($props));
+        $this->assertTrue(array_key_exists('shouldBeIgnored1', $props));
+        $this->assertEquals('boolean', $props['shouldBeIgnored2']->getType());
+        $this->assertTrue($props['shouldBeIgnored2']->getValue());
+        $this->assertEquals('string', $props['col2']->getType());
+        $this->assertEquals('abc', $props['col2']->getValue());
+    }
+
+    public function testOption_onlyImplementor_enabled()
+    {
+        $supClassName = $this->createClass(
+            array('public $col', 'public $col2 = "abc"'),
+            array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $className = $this->createClass(array(
+            'public $shouldBeIgnored1 = true',
+            'protected $shouldBeIgnored2 = true'
+        ), array(), array(), $supClassName);
+
+        $object = new $className();
+        $collector = new BackupCollector(array('onlyImplementor' => true));
+        $node = $collector->fromObject($object);
+
+        $this->assertEquals(get_parent_class($object), __CLASS__ . '\\' . $node->getName());
+        $this->assertEquals(get_parent_class($object), $node->getMeta('class'));
+        $props = $node->getProperties();
+        $this->assertEquals(1, count($props));
+        $this->assertEquals('string', $props['col2']->getType());
+        $this->assertEquals('abc', $props['col2']->getValue());
     }
 
     protected function getClassName($object)
@@ -235,7 +334,7 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
     }
 
     protected function createClass(array $properties = array(),
-        array $interfaces = array(), array $methods = array())
+        array $interfaces = array(), array $methods = array(), $extends = null)
     {
         // get classname
         $count = 0;
@@ -245,12 +344,13 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
             $className = 'Generated_' . $count;
         }
 
-        // get interfaces
+        // get extends and interfaces
+        $extends = (null === $extends) ? '' : ' extends \\' . $extends;
         $implements = (! $interfaces) ? '' : ' implements \\' . join(', \\', $interfaces);
 
         // build class code
         $code = 'namespace ' . __CLASS__ . ";\n";
-        $code .= "class {$className}{$implements} {\n";
+        $code .= "class {$className}{$implements}{$extends} {\n";
         foreach ($properties as $propertyLine) {
             $code .= "\t{$propertyLine};\n";
         }

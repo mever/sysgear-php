@@ -23,7 +23,7 @@ interface CollectorInterface
      *
      * @param \StdClass $object
      * @param mixed[] $options Map of instance options
-     * @return \Sysgear\StructuredData\Collector\CollectorInterface
+     * @return \Sysgear\StructuredData\Node
      */
     public function fromObject($object, array $options = array());
 

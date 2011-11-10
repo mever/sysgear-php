@@ -16,11 +16,19 @@ class BackupCollector extends AbstractObjectCollector
 {
     /**
      * When true only collect data from the first
-     * implementor of the backupable interface, start search from parent to subclass.
+     * implementor of the backupable interface, start search from super- to subclass.
      *
      * @var boolean
      */
-    public $onlyImplementor = false;
+    protected $onlyImplementor = false;
+
+    /**
+     * When true use the class name from the first implementor of the
+     * backupable interface, start search from super- to subclass.
+     *
+     * @var boolean
+     */
+    protected $implClassName = false;
 
     /**
      * Set option.
@@ -33,6 +41,10 @@ class BackupCollector extends AbstractObjectCollector
         switch ($key) {
             case 'onlyImplementor':
                 $this->onlyImplementor = (boolean) $value;
+                break;
+
+            case 'implClassName':
+                $this->implClassName = (boolean) $value;
                 break;
 
             default:
@@ -68,6 +80,7 @@ class BackupCollector extends AbstractObjectCollector
             // collect data to populate the node with
             $refClass = new \ReflectionClass($object);
             foreach ($refClass->getProperties() as $property) {
+
                 $property->setAccessible(true);
                 if ($this->filterProperty($property)) {
 
@@ -81,6 +94,8 @@ class BackupCollector extends AbstractObjectCollector
                 }
             }
         }
+
+        return $this->node;
     }
 
     /**
@@ -95,11 +110,11 @@ class BackupCollector extends AbstractObjectCollector
         }
 
         if ($this->onlyImplementor) {
-            $object = $property->getDeclaringClass();
-            $className = $this->getFirstClassnameImplementing($object,
+            $className = $this->getFirstClassnameImplementing(
+                $property->getDeclaringClass()->getName(),
                 '\\Sysgear\\Backup\\BackupableInterface');
 
-            if ($property->getDeclaringClass()->getName() === $className) {
+            if ($property->getDeclaringClass()->getName() !== $className) {
                 return false;
             }
         }
@@ -197,7 +212,7 @@ class BackupCollector extends AbstractObjectCollector
             return $this->className;
         }
 
-        if ($this->onlyImplementor) {
+        if ($this->implClassName || $this->onlyImplementor) {
             return $this->getFirstClassnameImplementing($backupable,
                 '\\Sysgear\\Backup\\BackupableInterface');
 
