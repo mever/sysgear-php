@@ -6,6 +6,7 @@ use Sysgear\Backup\BackupableInterface;
 use Sysgear\StructuredData\NodeCollection;
 use Sysgear\StructuredData\NodeProperty;
 use Sysgear\StructuredData\Node;
+use Sysgear\Util;
 
 /**
  * Collector for backup data from backupable objects.
@@ -69,7 +70,7 @@ class BackupCollector extends AbstractObjectCollector
 
         if (null === $this->node) {
 
-            $name = $this->getNodeName($object);
+            $name = Util::getShortClassName($this->getClassName($object));
             $objHash = spl_object_hash($object);
 
             // create new node
@@ -187,17 +188,6 @@ class BackupCollector extends AbstractObjectCollector
 
         $backupable->collectStructedData($collector);
         return $collector->getNode();
-    }
-
-    /**
-     * Return the node name which represents this $object.
-     *
-     * @param \Sysgear\Backup\BackupableInterface $backupable
-     * @return string
-     */
-    protected function getNodeName(BackupableInterface $backupable)
-    {
-        return parent::getNodeName($this->getClassName($backupable));
     }
 
     /**

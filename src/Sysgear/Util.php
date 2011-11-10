@@ -6,7 +6,7 @@ class Util
 {
     /**
      * Sort a two dimensional array on field.
-     * 
+     *
      * @param array $original
      * @param string|int $field
      * @param boolean $descending
@@ -32,7 +32,7 @@ class Util
     /**
      * Normalize a directory path to always end with a slash.
      * All slashes are forward.
-     * 
+     *
      * @param string $dirPath
      * @return $string
      */
@@ -44,7 +44,7 @@ class Util
 
     /**
      * Return the number of seconds between two DateTime objects.
-     * 
+     *
      * @param \DateTime $startDate
      * @param \DateTime $endDate
      * @return int
@@ -52,5 +52,18 @@ class Util
     public static function getDateDiff($startDate, $endDate)
     {
         return strtotime($endDate->format('c')) - strtotime($startDate->format('c'));
+    }
+
+    /**
+     * Return the short class name for the object or class.
+     *
+     * @param string|object $object Classname or object
+     * @return string Short class name
+     */
+    public static function getShortClassName($object)
+    {
+        $fullClassname = is_string($object) ? $object : get_class($object);
+        $pos = strrpos($fullClassname, '\\');
+        return (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
     }
 }

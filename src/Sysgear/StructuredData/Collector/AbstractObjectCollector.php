@@ -2,6 +2,8 @@
 
 namespace Sysgear\StructuredData\Collector;
 
+use Sysgear\Util;
+
 abstract class AbstractObjectCollector extends AbstractCollector
 {
     /**
@@ -116,9 +118,7 @@ abstract class AbstractObjectCollector extends AbstractCollector
      */
     protected function getNodeName($object)
     {
-        $fullClassname = is_string($object) ? $object : get_class($object);
-        $pos = strrpos($fullClassname, '\\');
-        return (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
+        return Util::getShortClassName($object);
     }
 
     /**
