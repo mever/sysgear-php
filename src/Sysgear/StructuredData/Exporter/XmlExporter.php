@@ -91,11 +91,12 @@ class XmlExporter extends AbstractExporter
                 }
 
                 // set collection elements
+                $pos = 0;
                 foreach ($n as $e) {
-                     $colElem->appendChild($this->compiler($e, "{$sequence}/{$childCount}"));
+                    $pos++;
+                    $colElem->appendChild($this->compiler($e, "{$sequence}/{$childCount}/{$pos}"));
                 }
                 $elem->appendChild($colElem);
-
             }
 
             // set node

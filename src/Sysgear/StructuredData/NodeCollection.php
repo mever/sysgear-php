@@ -10,7 +10,7 @@ class NodeCollection extends NodeInterface implements Countable,
     protected $collection = array();
     protected $metadata = array();
 
-    public function __construct($type, array $collection = array())
+    public function __construct(array $collection = array(), $type = 'list')
     {
         parent::__construct($type);
         $this->collection = $collection;

@@ -30,7 +30,7 @@ class XmlTest extends TestCase
     <id type="integer" value="12"/>
     <name type="string" value="rts"/>
   </employer>
-  <roles type="array">
+  <roles type="list">
     <Role type="object" class="\Sysgear\Tests\StructuredData\Role">
       <id type="integer" value="13"/>
       <name type="string" value="superAdmin123"/>
@@ -54,7 +54,7 @@ class XmlTest extends TestCase
   <employer type="object" class="Sysgear\Tests\StructuredData\Company">
     <id type="integer" value="22"/>
   </employer>
-  <roles type="array">
+  <roles type="list">
     <Role type="object" class="\Sysgear\Tests\StructuredData\Role">
       <id type="integer" value="23"/>
       <name type="string" value="admin role"/>
@@ -62,5 +62,43 @@ class XmlTest extends TestCase
     </Role>
   </roles>
 </User>', $exporter->__toString());
+    }
+
+    public function testCompile_companyReferenced()
+    {
+        $exporter = new XmlExporter();
+        $exporter->setNode($this->getCompanyReferenced());
+        $exporter->formatOutput(true);
+
+        $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
+<Company xmlns:xlink="http://www.w3.org/1999/xlink" type="object" class="Sysgear\Tests\StructuredData\Company">
+  <id type="integer" value="222"/>
+  <functions type="list">
+    <Role type="object" class="\Sysgear\Tests\StructuredData\Role">
+      <id type="integer" value="225"/>
+    </Role>
+    <Role type="object" class="\Sysgear\Tests\StructuredData\Role">
+      <id type="integer" value="223"/>
+      <name type="string" value="admin role"/>
+      <company xlink:href="#element(/1)"/>
+      <members type="list">
+        <User type="object" class="\Sysgear\Tests\StructuredData\User">
+          <id type="integer" value="224"/>
+          <password type="string" value="$1$irVZosm9$eYSZynm/kUm1e6ja3YIya1"/>
+          <employer xlink:href="#element(/1)"/>
+        </User>
+        <User type="object" class="\Sysgear\Tests\StructuredData\User">
+          <id type="integer" value="221"/>
+          <password type="string" value="$1$irVZosm9$eYSZynm/kUm1e6ja3YIya1"/>
+          <employer xlink:href="#element(/1)"/>
+        </User>
+      </members>
+    </Role>
+  </functions>
+  <employees type="list">
+    <User xlink:href="#element(/1/2/2/4/2)"/>
+    <User xlink:href="#element(/1/2/2/4/1)"/>
+  </employees>
+</Company>', $exporter->__toString());
     }
 }

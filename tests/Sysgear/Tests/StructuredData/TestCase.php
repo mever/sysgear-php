@@ -36,7 +36,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $userNode->setProperty('id', new NodeProperty('integer', 1));
         $userNode->setProperty('name', new NodeProperty('string', 'test'));
         $userNode->setProperty('password', new NodeProperty('string', '$1$irVZosm9$eYSZynm/kUm1e6ja3YIya1'));
-        $userNode->setProperty('roles', new NodeCollection('array', array($roleNode)));
+        $userNode->setProperty('roles', new NodeCollection(array($roleNode)));
         // employer > missing
 
         return $userNode;
@@ -65,7 +65,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $userNode->setProperty('name', new NodeProperty('string', 'test'));
         $userNode->setProperty('password', new NodeProperty('string', '$1$irVZosm9$eYSZynm/kUm1e6ja3YIya1'));
         $userNode->setProperty('employer', $employerNode);
-        $userNode->setProperty('roles', new NodeCollection('array', array($roleNode)));
+        $userNode->setProperty('roles', new NodeCollection(array($roleNode)));
 
         return $userNode;
     }
@@ -87,12 +87,42 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $userNode->setProperty('id', new NodeProperty('integer', 21));
         $userNode->setProperty('password', new NodeProperty('string', '$1$irVZosm9$eYSZynm/kUm1e6ja3YIya1'));
         $userNode->setProperty('employer', $companyNode);
-        $userNode->setProperty('roles', new NodeCollection('array', array($roleNode)));
+        $userNode->setProperty('roles', new NodeCollection(array($roleNode)));
 
         return $userNode;
     }
 
     protected function getCompanyReferenced()
     {
+        $companyNode = new Node('object', 'Company');
+        $companyNode->setMetadata('class', 'Sysgear\Tests\StructuredData\Company');
+        $companyNode->setProperty('id', new NodeProperty('integer', 222));
+
+        $userNode = new Node('object', 'User');
+        $userNode->setMetadata('class', '\Sysgear\Tests\StructuredData\User');
+        $userNode->setProperty('id', new NodeProperty('integer', 221));
+        $userNode->setProperty('password', new NodeProperty('string', '$1$irVZosm9$eYSZynm/kUm1e6ja3YIya1'));
+        $userNode->setProperty('employer', $companyNode);
+
+        $userNode2 = new Node('object', 'User');
+        $userNode2->setMetadata('class', '\Sysgear\Tests\StructuredData\User');
+        $userNode2->setProperty('id', new NodeProperty('integer', 224));
+        $userNode2->setProperty('password', new NodeProperty('string', '$1$irVZosm9$eYSZynm/kUm1e6ja3YIya1'));
+        $userNode2->setProperty('employer', $companyNode);
+
+        $roleNode = new Node('object', 'Role');
+        $roleNode->setMetadata('class', '\Sysgear\Tests\StructuredData\Role');
+        $roleNode->setProperty('id', new NodeProperty('integer', 223));
+        $roleNode->setProperty('name', new NodeProperty('string', 'admin role'));
+        $roleNode->setProperty('company', $companyNode);
+        $roleNode->setProperty('members', new NodeCollection(array($userNode2, $userNode)));
+
+        $roleNode2 = new Node('object', 'Role');
+        $roleNode2->setMetadata('class', '\Sysgear\Tests\StructuredData\Role');
+        $roleNode2->setProperty('id', new NodeProperty('integer', 225));
+
+        $companyNode->setProperty('functions', new NodeCollection(array($roleNode2, $roleNode)));
+        $companyNode->setProperty('employees', new NodeCollection(array($userNode, $userNode2)));
+        return $companyNode;
     }
 }

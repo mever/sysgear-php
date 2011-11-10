@@ -130,10 +130,8 @@ class BackupCollector extends AbstractObjectCollector
         // scan sub-collection
         if (is_array($value) || ($value instanceof \IteratorAggregate)) {
 
-            if (is_array($value)) {
-                $collection = new NodeCollection('array');
-            } else {
-                $collection = new NodeCollection('object');
+            $collection = new NodeCollection();
+            if (! is_array($value)) {
                 $collection->setMetadata('class', get_class($value));
             }
 
