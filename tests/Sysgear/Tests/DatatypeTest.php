@@ -265,6 +265,14 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
             '["a", 1, 4, null, true, false, "blaat"]'));
     }
 
+    public function testTypecastGet_string() {
+        $this->assertEquals('1', Datatype::typecastGet(Datatype::STRING, 1));
+        $this->assertEquals('1', Datatype::typecastGet(Datatype::STRING, true));
+        $this->assertEquals('', Datatype::typecastGet(Datatype::STRING, false));
+        $this->assertEquals('0', Datatype::typecastGet(Datatype::STRING, 0));
+        $this->assertEquals('abc', Datatype::typecastGet(Datatype::STRING, 'abc'));
+    }
+
     public function testTypecastGet_int() {
         $this->assertEquals(1234, Datatype::typecastGet(Datatype::INT, '1234'));
         $this->assertEquals(1234, Datatype::typecastGet(Datatype::INT, '1234.32'));
@@ -297,6 +305,9 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(false, Datatype::typecastGet(Datatype::BOOL, ''));
     }
 
+    public function testTypecastGet_unknown() {
+        $this->assertNull(Datatype::typecastGet(999, 'test'));
+    }
 
 
     /*

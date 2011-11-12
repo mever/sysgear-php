@@ -186,12 +186,13 @@ class Datatype
             case self::INT:     return (int) $value;
             case self::FLOAT:   return (float) $value;
             case self::NUMBER:  return (float) $value;
+            case self::STRING:  return (string) $value;
             case self::BOOL:
                 return ('n' === strtolower($value) ||
                 	'false' === strtolower($value)) ? false : (boolean) $value;
 
             default:
-                return $value;
+                return null;
         }
     }
 
