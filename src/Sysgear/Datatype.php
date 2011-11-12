@@ -142,7 +142,7 @@ class Datatype
             default:
                 if (is_bool($value)) { return $value ? 'true' : 'false'; }
                 if (is_null($value)) { return 'null'; }
-                if (is_numeric($value)) { return $value; }
+                if (is_numeric($value)) { return (string) $value; }
 
                 $str = print_r($value, true);
                 return "\"{$str}\"";
