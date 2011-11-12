@@ -179,6 +179,10 @@ class Datatype
      */
     public static function typecastGet($datatype, $value)
     {
+        if (null === $datatype) {
+            $datatype = -1;
+        }
+
         switch($datatype) {
             case self::JSON:    return \json_decode($value);
             case self::MAP:     return (array) \json_decode($value);
@@ -192,7 +196,8 @@ class Datatype
                 	'false' === strtolower($value)) ? false : (boolean) $value;
 
             default:
-                return null;
+                throw new \InvalidArgumentException('first argument must be '.
+                	'one of the constant datatype integers from this class');
         }
     }
 

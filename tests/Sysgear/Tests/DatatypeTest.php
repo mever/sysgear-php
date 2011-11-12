@@ -305,9 +305,20 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(false, Datatype::typecastGet(Datatype::BOOL, ''));
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
     public function testTypecastGet_unknown() {
         $this->assertNull(Datatype::typecastGet(999, 'test'));
     }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testTypecastGet_nullDatatype() {
+        $this->assertNull(Datatype::typecastGet(null, 'test'));
+    }
+
 
 
     /*
