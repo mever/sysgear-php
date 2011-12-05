@@ -7,20 +7,30 @@ class DatetimeFormatter
     /**
      * Source timezone. This is the timezone of current values.
      *
+     * Default: date_default_timezone_get
+     *
      * @var string
      */
     public $srcTimezone;
 
     /**
-     * Destination timezone. This is the timezone yo cast values to.
+     * Destination timezone. This is the timezone you cast values to.
      *
      * @var string
      */
-    public $dstTimezone;
+    public $dstTimezone = 'Zulu';
 
     public $formatDate = 'Y-m-d';
     public $formatTime = 'H:i:s';
     public $formatDatetime = \DATE_W3C;
+
+    /**
+     * Create a new date/time formatter.
+     */
+    public function __construct()
+    {
+        $this->srcTimezone = date_default_timezone_get();
+    }
 
     /**
      * Cast date, time and datetime fields in records to another timezone and/or formatting.
