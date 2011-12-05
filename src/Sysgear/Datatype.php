@@ -12,12 +12,12 @@ class Datatype
     const TIME          = 3;
     const DATETIME      = 4;
     const FLOAT         = 5;
-    const JSON          = 6;
+    const JSON          = 6;    // PHP object
     const BOOL          = 7;
     const NUMBER        = 8;
-    const ARR           = 9;        // Enumerative javascript array
+    const ARR           = 9;    // Enumerative PHP array
     const XML           = 10;
-    const MAP           = 11;       // Associative javascript array
+    const MAP           = 11;   // Associative PHP array
     const ENTITY        = 12;
     const PASSWORD      = 13;
     const EMAIL         = 14;
@@ -202,8 +202,8 @@ class Datatype
     }
 
     /**
-     * Cast time and datetime fields in $records to
-     * UTC time and datetime values.
+     * Cast date, time and datetime fields in $records to
+     * UTC date, time and datetime values.
      *
      * @param string $timezone Any timezone specified in the latest timezone
      * 	 database for the given time or datetimes. See: http://nl3.php.net/manual/en/timezones.php
@@ -230,10 +230,11 @@ class Datatype
                     return $date->format('H:i:s');
 
                 default:
-                    throw new \Exception("Can not cast (time or datetime) to UTC.");
+                    throw new \Exception("Can not cast (date, time or datetime) to UTC.");
             }
         };
 
+        // perform cast
         foreach ($records as &$record) {
             foreach ($datatypes as $idx => $dt) {
                 $record[$idx] = $cast($record[$idx], $dt);
