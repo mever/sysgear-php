@@ -295,6 +295,10 @@ class Datatype
      */
     public static function isNumber($datatype)
     {
+        if (null === $datatype) {
+            return false;
+        }
+
         switch ($datatype) {
             case self::INT:
             case self::FLOAT:

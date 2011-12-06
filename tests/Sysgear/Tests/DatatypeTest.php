@@ -447,6 +447,8 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
         foreach ($constants as $code) {
             $this->assertSame($asserts[$idx++], Datatype::isDate($code));
         }
+
+        $this->assertFalse(Datatype::isDate(null));
     }
 
 
@@ -469,5 +471,7 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
         foreach ($constants as $code) {
             $this->assertSame($asserts[$idx++], Datatype::isNumber($code));
         }
+
+        $this->assertFalse(Datatype::isNumber(null));
     }
 }
