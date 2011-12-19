@@ -6,16 +6,20 @@ use Sysgear\StructuredData\Restorer\RestorerInterface;
 
 interface ImporterInterface
 {
+    const NODE_TYPE_OBJECT = 'object';
+    const NODE_TYPE_PROPERTY = 'property';
+    const NODE_TYPE_COLLECTION = 'collection';
+
     /**
-     * Get DOM from importer.
-     * 
-     * @return \DOMDocument
+     * Get the imported node.
+     *
+     * @param \Sysgear\StructuredData\Node $node
      */
-    public function getDom();
+    public function getNode();
 
 	/**
-     * Import the importer from string.
-     * 
+     * Import from string.
+     *
      * @param string $string
      * @return \Sysgear\StructuredData\Importer\ImporterInterface
      */

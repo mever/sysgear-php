@@ -92,6 +92,18 @@ class Node extends NodeInterface
     }
 
     /**
+     * Return a property.
+     *
+     * @param string $name
+     * @param mixed $default
+     * @return \Sysgear\StructuredData\NodeInterface
+     */
+    public function getProperty($name, $default = null)
+    {
+        return array_key_exists($name, $this->properties) ? $this->properties[$name] : $default;
+    }
+
+    /**
      * Return metadata under $key.
      *
      * @param string $key
