@@ -156,7 +156,10 @@ class BackupCollector extends AbstractObjectCollector
 
                 // collect array element objects implementing the BackupableInterface
                 if ($elem instanceof BackupableInterface) {
-                    $collection->add($this->createChildNode($elem, $doNotDescent));
+                    $node = $this->createChildNode($elem, $doNotDescent);
+                    if (null !== $node) {
+                        $collection->add($node);
+                    }
                 }
             }
 
