@@ -34,6 +34,7 @@ class BackupTest extends TestCase
         $comp = $this->basicCompany();
         $tool = new BackupTool(new XmlExporter(), new XmlImporter());
         $export = $tool->backup($comp);
+        $export->setMetaTypeField(null);
         $string = $this->removeDateLine($export->formatOutput(true)->__toString());
 
         $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
@@ -80,6 +81,7 @@ class BackupTest extends TestCase
         $user = $this->basicUser();
         $tool = new BackupTool(new XmlExporter(), new XmlImporter());
         $export = $tool->backup($user);
+        $export->setMetaTypeField(null);
         $string = $this->removeDateLine($export->formatOutput(true)->__toString());
 
         $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
@@ -117,6 +119,7 @@ class BackupTest extends TestCase
         $user = $this->ignoreSomeUserPropertiesUser();
         $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
         $export = $tool->backup($user);
+        $export->setMetaTypeField(null);
         $string = $this->removeDateLine($export->formatOutput(true)->__toString());
 
         $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
@@ -138,6 +141,7 @@ class BackupTest extends TestCase
         $user = $this->doNotScanAndIgnoreSomeUserPropertiesUser();
         $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
         $export = $tool->backup($user);
+        $export->setMetaTypeField(null);
         $string = $this->removeDateLine($export->formatOutput(true)->__toString());
 
         $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
@@ -167,6 +171,7 @@ class BackupTest extends TestCase
         $comp = $this->inheritedBasicCompany();
         $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
         $export = $tool->backup($comp, array('onlyImplementor' => $onlyImplementor));
+        $export->setMetaTypeField(null);
         $string = $this->removeDateLine($export->formatOutput(true)->__toString());
 
         $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
@@ -217,6 +222,7 @@ class BackupTest extends TestCase
         $comp = $this->inheritedBasicCompany();
         $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
         $export = $tool->backup($comp, array('onlyImplementor' => $onlyImplementor));
+        $export->setMetaTypeField(null);
         $string = $this->removeDateLine($export->formatOutput(true)->__toString());
 
         $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>

@@ -2,6 +2,7 @@
 
 namespace Sysgear\StructuredData\Exporter;
 
+use Sysgear\StructuredData\NodeInterface;
 use Sysgear\StructuredData\NodeCollection;
 use Sysgear\StructuredData\NodeProperty;
 use Sysgear\StructuredData\Node;
@@ -71,6 +72,10 @@ class XmlExporter extends AbstractExporter
         // create node
         $this->references[$hash] = $sequence;
         $elem->setAttribute('type', $node->getType());
+        if ('' !== $this->metaTypeField) {
+            $elem->setAttribute($this->metaTypeField, 'object');
+        }
+
         foreach ($node->getMetadata() as $key => $meta) {
             $elem->setAttribute($key, $meta);
         }
@@ -86,6 +91,9 @@ class XmlExporter extends AbstractExporter
                 // set collection meta data
                 $colElem = $doc->createElement($key);
                 $colElem->setAttribute('type', $n->getType());
+                if ('' !== $this->metaTypeField) {
+                    $colElem->setAttribute($this->metaTypeField, 'collection');
+                }
                 foreach ($n->getMetadata() as $k => $meta) {
                     $colElem->setAttribute($k, $meta);
                 }
@@ -96,6 +104,7 @@ class XmlExporter extends AbstractExporter
                     $pos++;
                     $colElem->appendChild($this->compiler($e, "{$sequence}/{$childCount}/{$pos}"));
                 }
+
                 $elem->appendChild($colElem);
             }
 
@@ -110,6 +119,9 @@ class XmlExporter extends AbstractExporter
                 $propElem = $doc->createElement($key);
                 $propElem->setAttribute('type', $n->getType());
                 $propElem->setAttribute('value', $n->getValue());
+                if ('' !== $this->metaTypeField) {
+                    $propElem->setAttribute($this->metaTypeField, 'property');
+                }
                 $elem->appendChild($propElem);
             }
         }
