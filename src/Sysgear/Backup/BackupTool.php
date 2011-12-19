@@ -62,9 +62,7 @@ class BackupTool
     {
         $this->exporter = $exporter;
         $this->importer = $importer;
-
-        $this->options = array_merge(array(
-            'datetime' => true), $options);
+        $this->options = $options;
     }
 
     /**
@@ -110,10 +108,12 @@ class BackupTool
      * Read restore data from file.
      *
      * @param string $path
+     * @return \Sysgear\Backup\BackupTool
      */
     public function readFile($path)
     {
         $this->importer->fromString(file_get_contents($path));
+        return $this;
     }
 
     /**
@@ -143,32 +143,20 @@ class BackupTool
      */
     public function restore(array $restorerOptions = array(), BackupableInterface $object = null)
     {
-        $document = $this->importer->getDom();
-        $dom = new \DOMDocument('1.0', 'UTF-8');
-
-        // Create restorer.
+        // create restorer
         if (array_key_exists("merger", $this->options)) {
             $this->restorerOptions["merger"] = $this->options["merger"];
         }
+
         $restorerOptions = array_merge($this->restorerOptions, $restorerOptions);
         $restorer = new BackupRestorer($restorerOptions);
 
-        // Collect content to restore.
-        $content = $document->getElementsByTagName('content')->item(0);
-        foreach ($content->childNodes as $child) {
-
-            if (XML_ELEMENT_NODE === $child->nodeType) {
-                $dom->appendChild($dom->importNode($child, true));
-                $restorer->setDom($dom);
-
-                if (null === $object) {
-                    $object = $restorer->restore($child);
-                }
-                break;
-            }
+        $contentNode = $this->importer->getNode()->getProperty('content');
+        if (null === $contentNode) {
+            throw Exception::backupHasNoContent($this->importer->getNode());
         }
 
-        return $object;
+        return $restorer->restore($contentNode, $object);
     }
 
     /**

@@ -79,9 +79,10 @@ class BackupCollector extends AbstractObjectCollector
             $this->addedObjects[$objHash] = $this->node;
 
             // collect data to populate the node with
-            $refClass = new \ReflectionClass($object);
-            foreach ($refClass->getProperties() as $property) {
+            $refClass = new \ReflectionClass(($this->onlyImplementor) ?
+                $this->getFirstClassnameImplementing($object, '\\Sysgear\\Backup\\BackupableInterface') : $object);
 
+            foreach ($refClass->getProperties() as $property) {
                 $property->setAccessible(true);
                 if ($this->filterProperty($property)) {
 

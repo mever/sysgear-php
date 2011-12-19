@@ -385,7 +385,6 @@ class BackupRestorer extends AbstractRestorer
     {
         $hash = (null === $node) ? $this->getHash() : spl_object_hash($node);
         if (! empty($hash)) {
-//            echo "create ref: {$hash}\n";
             $this->referenceCandidates[$hash] = $object;
         }
     }
@@ -402,6 +401,7 @@ class BackupRestorer extends AbstractRestorer
         if (null === $class) {
             // TODO: throw exception
         }
+
         return new $class();
     }
 

@@ -2,6 +2,8 @@
 
 namespace Sysgear\Backup;
 
+use Sysgear\StructuredData\Node;
+
 class Exception extends \Exception
 {
     public static function noEntityManager()
@@ -22,5 +24,10 @@ class Exception extends \Exception
     {
         return new self("The given element is not valid and can't be used. It ".
         	"is missing these field(s): '" . join(", '", $missingFields) . "'");
+    }
+
+    public static function backupHasNoContent(Node $backupNode)
+    {
+        return new self("The backup has no content to restore");
     }
 }
