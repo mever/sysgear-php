@@ -9,8 +9,6 @@
 * file that was distributed with this source code.
 */
 
-// \Ncompany\Cfunctions\4\Nadmin\Cmembers\2\Nuser\Vname
-
 namespace Sysgear\Tests\StructuredData;
 
 use Sysgear\StructuredData\NodePath;
@@ -33,7 +31,7 @@ class NodePathTest extends \PHPUnit_Framework_TestCase
         $path->add(NodePath::NODE, 'user', 2);
         $path->add(NodePath::VALUE, 'name');
 
-        $this->assertEquals('\\Ncompany\\Cfunctions\\4\\Nadmin\\Cmembers\\2\\Nuser\\Vname', (string) $path);
+        $this->assertEquals('\\Ncompany\\Cfunctions\\4Nadmin\\Cmembers\\2Nuser\\Vname', (string) $path);
     }
 
     public function testAdd_escaping()
@@ -43,7 +41,7 @@ class NodePathTest extends \PHPUnit_Framework_TestCase
         $path->add(NodePath::COLLECTION, 'fun\\Nctions');
         $path->add(NodePath::NODE, 'admin', 4);
 
-        $this->assertEquals('\\Ncompany\\Cfun\\\\Nctions\\4\\Nadmin', (string) $path);
+        $this->assertEquals('\\Ncompany\\Cfun\\\\Nctions\\4Nadmin', (string) $path);
     }
 
     public function testAdd_missingIndexOnCol()
@@ -56,7 +54,87 @@ class NodePathTest extends \PHPUnit_Framework_TestCase
         $path->add(NodePath::NODE, 'user', 2);
         $path->add(NodePath::VALUE, 'name');
 
-        $this->assertEquals('\\Ncompany\\Cfunctions\\0\\Nadmin\\Cmembers\\2\\Nuser\\Vname', (string) $path);
+        $this->assertEquals('\\Ncompany\\Cfunctions\\0Nadmin\\Cmembers\\2Nuser\\Vname', (string) $path);
+    }
+
+    public function testgetSegments()
+    {
+        $path = new NodePath();
+        $path->add(NodePath::NODE, 'company');
+        $path->add(NodePath::COLLECTION, 'fun\\Nctions');
+        $path->add(NodePath::NODE, 'admin', 4);
+        $path->add(NodePath::VALUE, 'name');
+
+        $this->assertEquals(array(
+            'Ncompany',
+            'Cfun\\Nctions',
+            '4Nadmin',
+            'Vname'
+        ), $path->getSegments());
+    }
+
+    public function testIn_full()
+    {
+        $path = new NodePath();
+        $path->add(NodePath::NODE, 'company');
+        $path->add(NodePath::COLLECTION, 'fun\\Nctions');
+        $path->add(NodePath::NODE, 'admin', 4);
+        $path->add(NodePath::VALUE, 'name');
+
+        $path2 = new NodePath();
+        $path2->add(NodePath::NODE, 'company');
+        $path2->add(NodePath::COLLECTION, 'fun\\Nctions');
+        $path2->add(NodePath::NODE, 'admin', 4);
+        $path2->add(NodePath::VALUE, 'name');
+
+        $this->assertTrue($path2->in($path));
+    }
+
+    public function testIn_full_false()
+    {
+        $path = new NodePath();
+        $path->add(NodePath::NODE, 'company');
+        $path->add(NodePath::COLLECTION, 'fun\\Nctions');
+        $path->add(NodePath::NODE, 'admin', 4);
+        $path->add(NodePath::VALUE, 'name');
+
+        $path2 = new NodePath();
+        $path2->add(NodePath::NODE, 'company');
+        $path2->add(NodePath::COLLECTION, 'fun\\Nctions');
+        $path2->add(NodePath::NODE, 'admin', 4);
+        $path2->add(NodePath::VALUE, 'nam');
+
+        $this->assertFalse($path2->in($path));
+    }
+
+    public function testIn_part()
+    {
+        $path = new NodePath();
+        $path->add(NodePath::NODE, 'company');
+        $path->add(NodePath::COLLECTION, 'fun\\Nctions');
+        $path->add(NodePath::NODE, 'admin', 4);
+        $path->add(NodePath::VALUE, 'name');
+
+        $path2 = new NodePath();
+        $path2->add(NodePath::NODE, 'company');
+        $path2->add(NodePath::COLLECTION, 'fun\\Nctions');
+
+        $this->assertTrue($path2->in($path));
+    }
+
+    public function testIn_part_false()
+    {
+        $path = new NodePath();
+        $path->add(NodePath::NODE, 'company');
+        $path->add(NodePath::COLLECTION, 'fun\\Nctions');
+        $path->add(NodePath::NODE, 'admin', 4);
+        $path->add(NodePath::VALUE, 'name');
+
+        $path2 = new NodePath();
+        $path2->add(NodePath::NODE, 'compAny');
+        $path2->add(NodePath::COLLECTION, 'fun\\Nctions');
+
+        $this->assertFalse($path2->in($path));
     }
 
     public function testClear()

@@ -25,7 +25,7 @@ class NodePath
     /**
      * @var string
      */
-    protected $encodededPath = '';
+    protected $encodedPath = '';
 
     /**
      * @var boolean
@@ -33,29 +33,101 @@ class NodePath
     protected $isCollection = false;
 
     /**
+     * Create a new node path.
+     *
+     * TODO: check encoding
+     *
+     * @param string $encodedPath
+     */
+    public function __construct($encodedPath = '')
+    {
+        $this->encodedPath = $encodedPath;
+    }
+
+    /**
      * Add a new path segment.
      *
-     * @param string $segment Segment code constant: {@see self::*}
+     * @param string $segment Segment content type code: {@see self::*}
      * @param string $name
      * @param integer $idx
      * @throws \InvalidArgumentException
      */
     public function add($segment, $name, $idx = 0)
     {
-        if ($this->isCollection) {
-            $this->encodededPath .= '\\' . $idx;
-            $this->isCollection = false;
-        }
-
         if (strlen($segment) > 1) {
             throw new \InvalidArgumentException('given segment code has more than one character');
+        }
+
+        if ($this->isCollection) {
+            $this->isCollection = false;
+            $segment = $idx . $segment;
         }
 
         if (self::COLLECTION === $segment) {
             $this->isCollection = true;
         }
 
-        $this->encodededPath .= '\\' . $segment . addslashes($name);
+        $this->encodedPath .= '\\' . $segment . addslashes($name);
+    }
+
+    /**
+     * Get path segments.
+     *
+     * Each segment is a string. The first character indicates the segment type
+     * when it is not numeric it is a content type defined in this class. When
+     * it is numeric, the preseeding segment was a collection. The number represents
+     * the index of the current segment in that collection, it is than followed by
+     * the not-numeric content type character. After the content type character
+     * the name of the path segment is presented.
+     *
+     * @return string[] segments
+     */
+    public function getSegments()
+    {
+        $parts = explode('\\', substr($this->encodedPath, 1));
+        $segments = array();
+        $isEscaped = false;
+
+        foreach ($parts as $segment) {
+
+            if ($isEscaped) {
+                $segments[count($segments) - 1] .= '\\' . $segment;
+                $isEscaped = false;
+                continue;
+            }
+
+            if ('' === $segment) {
+                $isEscaped = true;
+            } else {
+                $segments[] = $segment;
+            }
+        }
+
+        return $segments;
+    }
+
+    /**
+     * Is this path in the supplied path, as parent or exact match.
+     *
+     * @param NodePath $path
+     * @return boolean
+     */
+    public function in(NodePath $path)
+    {
+        $subPathSegments = $this->getSegments();
+        $superPathSegments = $path->getSegments();
+
+        if (count($subPathSegments) > count($superPathSegments)) {
+            return false;
+        }
+
+        foreach ($subPathSegments as $idx => $segment) {
+            if ($segment !== $superPathSegments[$idx]) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -63,7 +135,7 @@ class NodePath
      */
     public function clear()
     {
-        $this->encodededPath = '';
+        $this->encodedPath = '';
     }
 
     /**
@@ -73,6 +145,6 @@ class NodePath
      */
     public function __toString()
     {
-        return $this->encodededPath;
+        return $this->encodedPath;
     }
 }
