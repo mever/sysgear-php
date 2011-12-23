@@ -15,7 +15,7 @@ use Sysgear\StructuredData\Node;
  * * Uses a structured data collector to backup data and pass it to the exporter.
  * * Uses an importer to import a backup and restore it using a restorer.
  *
- * @author (c) Martijn Evers <martijn4evers@gmail.com>
+ * @author (c) Martijn Evers <mevers47@gmail.com>
  */
 class BackupTool
 {

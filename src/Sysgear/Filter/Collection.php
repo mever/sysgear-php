@@ -8,11 +8,13 @@ class Collection extends Filter implements Countable, IteratorAggregate, ArrayAc
 {
     const COMPILE_COL = 'col';
     const COMPILE_EXP = 'exp';
+    const TYPE_AND = 'and';
+    const TYPE_OR = 'or';
 
     protected $collection = array();
     protected $type;
 
-    public function __construct(array $collection = array(), $type = 'and')
+    public function __construct(array $collection = array(), $type = self::TYPE_AND)
     {
         $this->collection = $collection;
         $this->setType($type);
@@ -142,8 +144,9 @@ class Collection extends Filter implements Countable, IteratorAggregate, ArrayAc
     public function setType($type)
     {
         switch ($type) {
-            case 'and': case 'or': break;
-            default: throw new \InvalidArgumentException('First argument must be "and" or "or".');
+            case self::TYPE_AND: case self::TYPE_OR: break;
+            default: throw new \InvalidArgumentException('First argument must be "' .
+                self::TYPE_AND . '" or "' . self::TYPE_OR . '".');
         }
 
         $this->type = $type;

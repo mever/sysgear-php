@@ -17,15 +17,47 @@ class Operator
     public static function toSqlComparison($operator)
     {
         switch ($operator) {
-        case self::LIKE: return 'LIKE';
-        case self::EQUAL: return '=';
-        case self::NOT_EQUAL: return '<>';
-        case self::NUM_GREATER_OR_EQUAL_THAN: return '>=';
-        case self::NUM_GREATER_THAN: return '>';
-        case self::NUM_LESS_OR_EQUAL_THAN: return '<=';
-        case self::NUM_LESS_THAN: return '<';
-        case self::STR_END_WITH: return 'LIKE';
-        case self::STR_START_WITH: return 'LIKE';
+            case self::LIKE: return 'LIKE';
+            case self::EQUAL: return '=';
+            case self::NOT_EQUAL: return '<>';
+            case self::NUM_GREATER_OR_EQUAL_THAN: return '>=';
+            case self::NUM_GREATER_THAN: return '>';
+            case self::NUM_LESS_OR_EQUAL_THAN: return '<=';
+            case self::NUM_LESS_THAN: return '<';
+            case self::STR_END_WITH: return 'LIKE';
+            case self::STR_START_WITH: return 'LIKE';
+        }
+    }
+
+    public static function compare($value1, $operator, $value2)
+    {
+        switch ($operator) {
+            case self::LIKE:
+                return (false !== strpos($value1, $value2));
+
+            case self::EQUAL:
+                return ($value1 === $value2);
+
+            case self::NOT_EQUAL:
+                return ($value1 !== $value2);
+
+            case self::NUM_GREATER_OR_EQUAL_THAN:
+                return ($value1 >= $value2);
+
+            case self::NUM_GREATER_THAN:
+                return ($value1 > $value2);
+
+            case self::NUM_LESS_OR_EQUAL_THAN:
+                return ($value1 <= $value2);
+
+            case self::NUM_LESS_THAN:
+                return ($value1 < $value2);
+
+            case self::STR_END_WITH:
+                return (0 === strpos($value1, $value2));
+
+            case self::STR_START_WITH:
+                return ((strlen($value1) - strlen($value2)) === strpos($value1, $value2));
         }
     }
 }
