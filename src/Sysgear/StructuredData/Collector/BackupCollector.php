@@ -3,6 +3,8 @@
 namespace Sysgear\StructuredData\Collector;
 
 use Sysgear\Backup\BackupableInterface;
+use Sysgear\Backup\InventoryManager;
+use Sysgear\StructuredData\NodePath;
 use Sysgear\StructuredData\NodeCollection;
 use Sysgear\StructuredData\NodeProperty;
 use Sysgear\StructuredData\Node;
@@ -32,6 +34,16 @@ class BackupCollector extends AbstractObjectCollector
     protected $implClassName = false;
 
     /**
+     * @var \Sysgear\Backup\InventoryManager
+     */
+    protected $inventoryManager;
+
+    /**
+     * @var \Sysgear\StructuredData\NodePath
+     */
+    protected $currentPath;
+
+    /**
      * Set option.
      *
      * @param string $key
@@ -46,6 +58,10 @@ class BackupCollector extends AbstractObjectCollector
 
             case 'implClassName':
                 $this->implClassName = (boolean) $value;
+                break;
+
+            case 'inventoryManager':
+                $this->inventoryManager = ($value instanceof InventoryManager) ? $value : null;
                 break;
 
             default:
@@ -64,13 +80,23 @@ class BackupCollector extends AbstractObjectCollector
             throw new CollectorException("Given object does not implement BackupableInterface.");
         }
 
+        // determine node name
+        $name = (null === $this->node) ?
+            Util::getShortClassName($this->getClassName($object)) : $this->node->getName();
+
+        // setup path (first time setup)
+        if (null !== $this->inventoryManager && null === $this->currentPath) {
+            $this->currentPath = new NodePath();
+            $this->currentPath->add(NodePath::NODE, $name);
+        }
+
+        // setup options
         foreach ($options as $key => $value) {
             $this->_setOption($key, $value);
         }
 
+        // create node
         if (null === $this->node) {
-
-            $name = Util::getShortClassName($this->getClassName($object));
             $objHash = spl_object_hash($object);
 
             // create new node
@@ -88,9 +114,24 @@ class BackupCollector extends AbstractObjectCollector
 
                     $name = $property->getName();
                     $value = $property->getValue($object);
+
+                    // add scalar (value) node property
                     if (is_scalar($value)) {
+
+                        // check inventory manager
+                        if (null !== $this->currentPath) {
+                            $propertyPath = new NodePath($this->currentPath);
+                            $propertyPath->add(NodePath::VALUE, $name);
+                            if (! $this->inventoryManager->isAllowed($propertyPath, $value)) {
+                                continue;
+                            }
+                        }
+
                         $this->node->setProperty($name, new NodeProperty(gettype($value), $value));
-                    } elseif ($this->followCompositeNodes) {
+                    } else
+
+                    // add composite (node) property
+                    if ($this->followCompositeNodes) {
                         $this->addCompositeProperty($name, $value);
                     }
                 }
@@ -132,6 +173,8 @@ class BackupCollector extends AbstractObjectCollector
      */
     protected function addCompositeProperty($name, $value)
     {
+        $propertyPath = (null === $this->currentPath) ? null : new NodePath($this->currentPath);
+
         if (1 === $this->descentLevel) {
             $doNotDescent = true;
         } else {
@@ -141,7 +184,22 @@ class BackupCollector extends AbstractObjectCollector
 
         // scan BackupableInterface implmentation
         if ($value instanceof BackupableInterface) {
-            $this->node->setProperty($name, $this->createChildNode($value, $doNotDescent));
+
+            // check path
+            if (null !== $propertyPath) {
+                $propertyPath->add(NodePath::NODE, $name);
+
+                // check with inventory manager
+                $node = ($this->inventoryManager->isAllowed($propertyPath)) ?
+                    $this->createChildNode($value, $doNotDescent, $propertyPath) : null;
+
+            } else {
+                $node = $this->createChildNode($value, $doNotDescent);
+            }
+
+            if (null !== $node) {
+                $this->node->setProperty($name, $node);
+            }
         }
 
         // scan sub-collection
@@ -152,11 +210,28 @@ class BackupCollector extends AbstractObjectCollector
                 $collection->setMetadata('class', get_class($value));
             }
 
+            if (null !== $propertyPath) {
+                $propertyPath->add(NodePath::COLLECTION, $name);
+            }
+
+            $count = 0;
+            $elemPath = null;
             foreach ($value as $elem) {
 
                 // collect array element objects implementing the BackupableInterface
                 if ($elem instanceof BackupableInterface) {
-                    $node = $this->createChildNode($elem, $doNotDescent);
+
+                    if (null !== $propertyPath) {
+                        $elemPath = clone $propertyPath;
+                        $elemPath->add(NodePath::NODE, Util::getShortClassName($this->getClassName($elem)), $count);
+                        $count++;
+
+                        if (! $this->inventoryManager->isAllowed($elemPath)) {
+                            continue;
+                        }
+                    }
+
+                    $node = $this->createChildNode($elem, $doNotDescent, $elemPath);
                     if (null !== $node) {
                         $collection->add($node);
                     }
@@ -172,13 +247,15 @@ class BackupCollector extends AbstractObjectCollector
      *
      * @param \Sysgear\Backup\BackupableInterface $backupable
      * @param boolean $doNotDescent
+     * @param NodePath $path preseeding path
      * @return \Sysgear\StructuredData\NodeInterface
      */
-    protected function createChildNode(BackupableInterface $backupable, $doNotDescent)
+    protected function createChildNode(BackupableInterface $backupable, $doNotDescent, NodePath $path = null)
     {
         // make a copy of this collector to allow recursive collecting
         $collector = new self($this->persistentOptions);
         $collector->addedObjects =& $this->addedObjects;
+        $collector->currentPath = $path;
 
         // prevent infinite loops...
         $objHash = spl_object_hash($backupable);
@@ -196,6 +273,8 @@ class BackupCollector extends AbstractObjectCollector
 
     /**
      * Return the class name of $backupable
+     *
+     * TODO: fix getClassName and getNodeName
      *
      * @param \Sysgear\Backup\BackupableInterface $backupable
      * @return string Fully qualified class name

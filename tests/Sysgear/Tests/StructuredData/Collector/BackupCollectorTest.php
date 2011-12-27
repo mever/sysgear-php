@@ -4,6 +4,13 @@ namespace Sysgear\Tests\StructuredData\Collector;
 
 use Sysgear\StructuredData\Collector\BackupCollector;
 use Sysgear\StructuredData\Restorer\BackupRestorer;
+use Sysgear\StructuredData\Node;
+use Sysgear\StructuredData\NodePath;
+use Sysgear\StructuredData\NodeProperty;
+use Sysgear\StructuredData\NodeCollection;
+use Sysgear\Backup\InventoryManager;
+use Sysgear\Filter\Expression;
+use Sysgear\Operator;
 
 class BackupCollectorTest extends \PHPUnit_Framework_TestCase
 {
@@ -310,6 +317,282 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, count($props));
         $this->assertEquals('string', $props['col2']->getType());
         $this->assertEquals('abc', $props['col2']->getValue());
+    }
+
+    public function testOption_inventoryManager_disabled()
+    {
+        // build object graph
+        $className = $this->createClass(array(
+            'public $number = 3',
+            'public $employer',
+            'public $string = \'abc\'',
+            'public $null'), array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $classNameComp = $this->createClass(array(
+            'public $name = \'hello world\''
+            ), array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $object = new $className();
+        $object->employer = new $classNameComp();
+
+        // collect!
+        $collector = new BackupCollector();
+        $collector->fromObject($object);
+
+        // assert
+        $node = $collector->getNode();
+
+        $employerNode = new Node('object', $this->getClassName($object->employer));
+        $employerNode->setMetadata('class', __CLASS__ . '\\' . $this->getClassName($object->employer));
+        $employerNode->setProperty('name', new NodeProperty('string', 'hello world'));
+
+        $expectedNode = new Node('object', $this->getClassName($object));
+        $expectedNode->setMetadata('class', __CLASS__ . '\\' . $this->getClassName($object));
+        $expectedNode->setProperty('number', new NodeProperty('integer', 3));
+        $expectedNode->setProperty('employer', $employerNode);
+        $expectedNode->setProperty('string', new NodeProperty('string', 'abc'));
+
+        $this->assertEquals($expectedNode, $node);
+    }
+
+    public function testOption_inventoryManager_excludeValue()
+    {
+        // build object graph
+        $className = $this->createClass(array(
+            'public $number = 3',
+            'public $string = \'abc\'',
+            'public $null'), array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $object = new $className();
+
+        // build path to exclude
+        $path = new NodePath();
+        $path->add(NodePath::NODE, $this->getClassName($object))->add(NodePath::VALUE, 'string');
+
+        // configure inventory manager
+        $inventoryManager = new InventoryManager();
+        $inventoryManager->getExcludeList()->add(new Expression((string) $path, null, Operator::NOT_EQUAL));
+
+        // collect!
+        $collector = new BackupCollector();
+        $collector->setOption('inventoryManager', $inventoryManager);
+        $collector->fromObject($object);
+
+        // assert
+        $node = $collector->getNode();
+
+        $expectedNode = new Node('object', $this->getClassName($object));
+        $expectedNode->setMetadata('class', __CLASS__ . '\\' . $this->getClassName($object));
+        $expectedNode->setProperty('number', new NodeProperty('integer', 3));
+
+        $this->assertEquals($expectedNode, $node);
+    }
+
+    public function testOption_inventoryManager_excludeNode()
+    {
+        // build object graph
+        $className = $this->createClass(array(
+            'public $number = 3',
+            'public $employer',
+            'public $string = \'abc\'',
+            'public $null'), array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $classNameComp = $this->createClass(array(
+            'public $name = \'hello world\''
+            ), array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $object = new $className();
+        $object->employer = new $classNameComp();
+
+        // build path to exclude
+        $path = new NodePath();
+        $path->add(NodePath::NODE, $this->getClassName($object))->add(NodePath::NODE, 'employer');
+
+        // configure inventory manager
+        $inventoryManager = new InventoryManager();
+        $inventoryManager->getExcludeList()->add(new Expression((string) $path, null));
+
+        // collect!
+        $collector = new BackupCollector();
+        $collector->setOption('inventoryManager', $inventoryManager);
+        $collector->fromObject($object);
+
+        // assert
+        $node = $collector->getNode();
+
+        $expectedNode = new Node('object', $this->getClassName($object));
+        $expectedNode->setMetadata('class', __CLASS__ . '\\' . $this->getClassName($object));
+        $expectedNode->setProperty('number', new NodeProperty('integer', 3));
+        $expectedNode->setProperty('string', new NodeProperty('string', 'abc'));
+
+        $this->assertEquals($expectedNode, $node);
+    }
+
+    public function testOption_inventoryManager_excludeItemFromCollection()
+    {
+        // build object graph
+        $className = $this->createClass(array(
+            'public $number = 3',
+            'public $members = array()',
+            'public $string = \'abc\'',
+            'public $null'), array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $classNameUser1 = $this->createClass(array(
+            'public $name = \'hello world 1\''
+            ), array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $classNameUser2 = $this->createClass(array(
+            'public $name = \'hello world 2\''
+            ), array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $object = new $className();
+        $object->members[] = new $classNameUser1();
+        $object->members[] = new $classNameUser2();
+
+        // build path to exclude
+        $path = new NodePath();
+        $path->add(NodePath::NODE, $this->getClassName($object))->add(NodePath::COLLECTION, 'members')
+            ->add(NodePath::NODE, $this->getClassName($object->members[1]), 1);
+
+        // configure inventory manager
+        $inventoryManager = new InventoryManager();
+        $inventoryManager->getExcludeList()->add(new Expression((string) $path, null));
+
+        // collect!
+        $collector = new BackupCollector();
+        $collector->setOption('inventoryManager', $inventoryManager);
+        $collector->fromObject($object);
+
+        // assert
+        $node = $collector->getNode();
+
+        $user1Node = new Node('object', $this->getClassName($object->members[0]));
+        $user1Node->setMetadata('class', __CLASS__ . '\\' . $this->getClassName($object->members[0]));
+        $user1Node->setProperty('name', new NodeProperty('string', 'hello world 1'));
+
+        $expectedNode = new Node('object', $this->getClassName($object));
+        $expectedNode->setMetadata('class', __CLASS__ . '\\' . $this->getClassName($object));
+        $expectedNode->setProperty('number', new NodeProperty('integer', 3));
+        $expectedNode->setProperty('members', new NodeCollection(array($user1Node)));
+        $expectedNode->setProperty('string', new NodeProperty('string', 'abc'));
+
+        $this->assertEquals($expectedNode, $node);
+    }
+
+    public function testOption_inventoryManager_excludeMixed()
+    {
+        // build object graph
+        $className = $this->createClass(array(
+        'public $number = 3',
+        'public $members = array()',
+        'public $string = \'abc\'',
+        'public $null'), array('Sysgear\Backup\BackupableInterface'),
+        $this->createClassBackupableInterface()
+        );
+
+        $classNameUser1 = $this->createClass(array(
+        'public $name = \'hello world 1\''
+        ), array('Sysgear\Backup\BackupableInterface'),
+        $this->createClassBackupableInterface()
+        );
+
+        $classNameUser2 = $this->createClass(array(
+        'public $name = \'hello world 2\'',
+        'public $hideMe = \'one two tree\''
+        ), array('Sysgear\Backup\BackupableInterface'),
+        $this->createClassBackupableInterface()
+        );
+
+        $object = new $className();
+        $object->members[] = new $classNameUser1();
+        $object->members[] = new $classNameUser2();
+
+        // build path to exclude
+        $path = new NodePath();
+        $path->add(NodePath::NODE, $this->getClassName($object))
+            ->add(NodePath::COLLECTION, 'members')
+            ->add(NodePath::NODE, $this->getClassName($object->members[0]), 0);
+
+        $path2 = new NodePath();
+        $path2->add(NodePath::NODE, $this->getClassName($object))
+            ->add(NodePath::COLLECTION, 'members')
+            ->add(NodePath::NODE, $this->getClassName($object->members[1]), 1)
+            ->add(NodePath::VALUE, 'hideMe');
+
+        // configure inventory manager
+        $inventoryManager = new InventoryManager();
+        $inventoryManager->getExcludeList()->add(new Expression((string) $path, null));
+        $inventoryManager->getExcludeList()->add(new Expression((string) $path2, 'two', Operator::LIKE));
+
+        // collect!
+        $collector = new BackupCollector();
+        $collector->setOption('inventoryManager', $inventoryManager);
+        $collector->fromObject($object);
+
+        // assert
+        $node = $collector->getNode();
+
+        $user1Node = new Node('object', $this->getClassName($object->members[1]));
+        $user1Node->setMetadata('class', __CLASS__ . '\\' . $this->getClassName($object->members[1]));
+        $user1Node->setProperty('name', new NodeProperty('string', 'hello world 2'));
+
+        $expectedNode = new Node('object', $this->getClassName($object));
+        $expectedNode->setMetadata('class', __CLASS__ . '\\' . $this->getClassName($object));
+        $expectedNode->setProperty('number', new NodeProperty('integer', 3));
+        $expectedNode->setProperty('members', new NodeCollection(array($user1Node)));
+        $expectedNode->setProperty('string', new NodeProperty('string', 'abc'));
+
+        $this->assertEquals($expectedNode, $node);
+    }
+
+    public function testOption_inventoryManager_excludeMemberNode()
+    {
+        $className = $this->createClass(array(
+            'public $number = 3',
+            'public $members = array()',
+            'public $string = \'abc\'',
+            'public $null'), array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $classNameUser = $this->createClass(array(
+            'public $name = \'hello world\''
+            ), array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface()
+        );
+
+        $object = new $className();
+        $object->members[] = new $classNameUser();
+
+        $path = new NodePath();
+        $path->add(NodePath::NODE, $this->getClassName($object));
+        $path->add(NodePath::COLLECTION, $this->getClassName($object->members[0]), 0);
+
+        $inventoryManager = new InventoryManager();
+        $inventoryManager->getExcludeList()->add(new Expression((string) $path, null));
+
+        $collector = new BackupCollector();
+        $collector->setOption('inventoryManager', $inventoryManager);
+        $collector->fromObject($object);
+
+        $node = $collector->getNode();
+//         print_r($node);
     }
 
     protected function getClassName($object)

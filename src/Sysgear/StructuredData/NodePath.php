@@ -51,6 +51,7 @@ class NodePath
      * @param string $name
      * @param integer $idx
      * @throws \InvalidArgumentException
+     * @return \Sysgear\StructuredData\NodePath
      */
     public function add($segment, $name, $idx = 0)
     {
@@ -68,6 +69,7 @@ class NodePath
         }
 
         $this->encodedPath .= '\\' . $segment . addslashes($name);
+        return $this;
     }
 
     /**
@@ -128,6 +130,25 @@ class NodePath
         }
 
         return true;
+    }
+
+    /**
+     * Return segment name by segment index.
+     *
+     * TODO: unit test
+     *
+     * @param integer $index Segment index
+     * @return string
+     */
+    public function getSegmentName($index)
+    {
+        $segments = $this->getSegments();
+        $segment = $segments[$index];
+        if (is_numeric($segment[0])) {
+            return preg_replace('/[0-9]*.(.*)/', '${1}', $segment);
+        }
+
+        return substr($segment, 1);
     }
 
     /**

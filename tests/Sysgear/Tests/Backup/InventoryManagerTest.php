@@ -180,7 +180,7 @@ class InventoryManagerTest extends \PHPUnit_Framework_TestCase
         $inventory = new InventoryManager();
         $inventory->getExcludeList()->add(new Expression('no match', null));
         $inventory->getExcludeList()->add(new Expression((string) $path, null));
-        $this->assertTrue($inventory->isAllowed($path));
+        $this->assertFalse($inventory->isAllowed($path));
     }
 
     public function testIsAllowed_orExclude()
@@ -192,7 +192,6 @@ class InventoryManagerTest extends \PHPUnit_Framework_TestCase
         $path->add(NodePath::VALUE, 'name');
 
         $inventory = new InventoryManager();
-        $inventory->getExcludeList()->setType(Collection::TYPE_OR);
         $inventory->getExcludeList()->add(new Expression('no match', null));
         $inventory->getExcludeList()->add(new Expression((string) $path, null));
         $this->assertFalse($inventory->isAllowed($path));
@@ -249,9 +248,8 @@ class InventoryManagerTest extends \PHPUnit_Framework_TestCase
 
         $inventory = new InventoryManager();
         $inventory->getExcludeList()->add(
-            new Expression('\\Ncompany\\Cemployees\\1Nuser\\Vname', 'hello world', Operator::LIKE));
+            new Expression('\\Ncompany\\Cemployees\\1Nuser\\Vname', 'lo wor', Operator::LIKE));
 
-        $this->assertFalse($inventory->isAllowed($path, 'lo wo'));
         $this->assertFalse($inventory->isAllowed($path, 'hello world'));
     }
 }

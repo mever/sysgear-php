@@ -20,11 +20,6 @@ use \Serializable;
 class InventoryManager implements Serializable
 {
     /**
-     * @var \Sysgear\StructuredData\NodePath
-     */
-    protected $currentPath;
-
-    /**
      * @var \Sysgear\Filter\Collection
      */
     protected $include;
@@ -39,9 +34,8 @@ class InventoryManager implements Serializable
      */
     public function __construct()
     {
-        $this->currentPath = new NodePath();
-        $this->exclude = new Collection();
-        $this->include = new Collection();
+        $this->exclude = new Collection(array(), Collection::TYPE_OR);
+        $this->include = new Collection(array(), Collection::TYPE_OR);
     }
 
     /**
@@ -64,10 +58,14 @@ class InventoryManager implements Serializable
         return $this->exclude;
     }
 
-    public function isBlocked($segment, $name, $idx = 0)
+    /**
+     * Return current path.
+     *
+     * @return \Sysgear\StructuredData\NodePath
+     */
+    public function getCurrentPath()
     {
-        $this->currentPath->add($segment, $name, $idx);
-        return ! $this->isAllowed($this->currentPath);
+        return $this->currentPath;
     }
 
     public function isAllowed(NodePath $path, $value = null)
@@ -127,7 +125,7 @@ class InventoryManager implements Serializable
     {
         $fieldPath = new NodePath($filter->getField());
         if ($fieldPath->in($path)) {
-            return Operator::compare($filter->getValue(), $filter->getOperator(), $value);
+            return Operator::compare($value, $filter->getOperator(), $filter->getValue());
         }
 
         return false;
@@ -135,7 +133,7 @@ class InventoryManager implements Serializable
 
     public function serialize()
     {
-        return serialize(array('path' => $this->path,
+        return serialize(array(
             'exclude' => $this->exclude,
             'include' => $this->include));
     }
@@ -143,7 +141,6 @@ class InventoryManager implements Serializable
     public function unserialize($serialized)
     {
         $data = unserialize($serialized);
-        $this->path = $data['path'];
         $this->exclude = $data['exclude'];
         $this->include = $data['include'];
     }

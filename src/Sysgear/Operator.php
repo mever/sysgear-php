@@ -29,6 +29,15 @@ class Operator
         }
     }
 
+    /**
+     * Compare two values with each other.
+     *
+     * TODO: unit test
+     *
+     * @param mixed $value1
+     * @param integer $operator
+     * @param mixed $value2
+     */
     public static function compare($value1, $operator, $value2)
     {
         switch ($operator) {
