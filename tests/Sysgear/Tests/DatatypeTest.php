@@ -325,6 +325,22 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
      * Test static method: castDatesInRecords
      */
 
+    public function testCastDatesInRecords_empty()
+    {
+        $records = array(
+            array('abc', '0001-02-03', 123, null),
+            array('d7a', '', 489, null),
+            array('3d7', null, null, 3246)
+        );
+
+        Datatype::castDatesInRecords('Europe/Amsterdam', $records, array(1 => Datatype::DATE));
+        $this->assertSame(array(
+            array('abc', '0001-02-03', 123, null),
+            array('d7a', null, 489, null),
+            array('3d7', null, null, 3246)
+        ), $records);
+    }
+
     public function testCastDatesInRecords_date()
     {
         $records = array(
@@ -399,6 +415,13 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
     /*
      * Test static method: castDate
      */
+
+    public function testCastDate_empty()
+    {
+        $this->assertSame('0001-02-03', Datatype::castDate(-1, Datatype::DATE, '0001-02-03')->format('Y-m-d'));
+        $this->assertSame(null, Datatype::castDate(-1, Datatype::DATE, ''));
+        $this->assertSame(null, Datatype::castDate(-1, Datatype::DATE, null));
+    }
 
     public function testCastDate_date()
     {

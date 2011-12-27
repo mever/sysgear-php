@@ -215,6 +215,10 @@ class Datatype
     public static function castDatesInRecords($timezone, array &$records, array $datatypes)
     {
         $cast = function($cellValue, $dt) use ($timezone) {
+            if (empty($cellValue)) {
+                return null;
+            }
+
             switch ($dt) {
                 case Datatype::DATE:
                     $date = new \DateTime($cellValue, new \DateTimeZone($timezone));
@@ -259,6 +263,10 @@ class Datatype
      */
     public static function castDate($timezone, $datatype, $value)
     {
+        if (empty($value)) {
+            return null;
+        }
+
         switch ($datatype) {
             case Datatype::DATE:
                 return new \DateTime($value, new \DateTimeZone('Zulu'));
