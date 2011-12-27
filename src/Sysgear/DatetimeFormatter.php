@@ -59,6 +59,11 @@ class DatetimeFormatter
 
         // cast function
         $cast = function($cellValue, $dt) use ($format, $srcTz, $dstTz) {
+
+            if (empty($cellValue)) {
+                return '';
+            }
+
             switch ($dt) {
                 case Datatype::DATE:
                     $date = new \DateTime($cellValue, new \DateTimeZone($srcTz));

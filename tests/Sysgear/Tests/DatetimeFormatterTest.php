@@ -24,7 +24,9 @@ class DatetimeFormatterTest extends \PHPUnit_Framework_TestCase
         $records = array(
                 array('abc', '0001-02-03', 123, null),
                 array('d7a', '2011-09-29', 489, null),
-                array('3d7', '2011-9-29', null, 3246)
+                array('3d7', '2011-9-29', null, 3246),
+                array('3d7', '', null, 3246),
+                array('3d7', null, null, 3246)
         );
 
         // timzone data is not used for date
@@ -32,7 +34,9 @@ class DatetimeFormatterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(array(
                 array('abc', '0001-02-03', 123, null),
                 array('d7a', '2011-09-29', 489, null),
-                array('3d7', '2011-09-29', null, 3246)
+                array('3d7', '2011-09-29', null, 3246),
+                array('3d7', '', null, 3246),
+                array('3d7', '', null, 3246)
         ), $records);
     }
     public function testCastRecords_date_customFormatting_to_zulu()
