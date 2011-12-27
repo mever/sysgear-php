@@ -133,6 +133,7 @@ class Datatype
         switch($datatype) {
             case self::JSON:
             case self::MAP:
+            case self::ARR:
                 return (is_array($value) || is_object($value)) ?
                     \json_encode($value) : $value;
 
