@@ -23,11 +23,11 @@ class Exception extends \Exception
     public static function invalidElement(array $missingFields)
     {
         return new self("The given element is not valid and can't be used. It ".
-        	"is missing these field(s): '" . join(", '", $missingFields) . "'");
+            "is missing these field(s): '" . join(", '", $missingFields) . "'.");
     }
 
     public static function backupHasNoContent(Node $backupNode)
     {
-        return new self("The backup has no content to restore");
+        return new self("The backup has no content to restore.");
     }
 }

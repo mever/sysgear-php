@@ -160,36 +160,6 @@ class BackupTool
     }
 
     /**
-     * Restore collection from DOM to $object.
-     *
-     * @param \DOMDocument $dom
-     * @param array $restorerOptions
-     * @param BackupableInterface $object
-     * @return BackupableInterface
-     */
-    public function restoreFromDom(\DOMDocument $dom, array $restorerOptions = array())
-    {
-        // Create restorer.
-        if (array_key_exists("merger", $this->options)) {
-            $this->restorerOptions["merger"] = $this->options["merger"];
-        }
-        $restorerOptions = array_merge($this->restorerOptions, $restorerOptions);
-        $restorer = new BackupRestorer($restorerOptions);
-        $restorer->setDom($dom);
-
-        // Collect content to restore.
-        foreach ($dom->childNodes as $child) {
-
-            if (XML_ELEMENT_NODE === $child->nodeType) {
-                $object = $restorer->restore($child);
-                break;
-            }
-        }
-
-        return $object;
-    }
-
-    /**
      * Write backup content.
      *
      * @param Node $node

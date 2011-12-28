@@ -38,7 +38,8 @@ class BackupTest extends TestCase
         $string = $this->removeDateLine($export->formatOutput(true)->__toString());
 
         $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
-<backup xmlns:xlink="http://www.w3.org/1999/xlink" type="container">
+<backup xmlns:xlink="http://www.w3.org/1999/xlink" type="container">'
+  /* -removed: date field */ .'
   <content type="object" class="Sysgear\Tests\Backup\Company">
     <id type="integer" value="1"/>
     <name type="string" value="rts"/>
@@ -85,7 +86,8 @@ class BackupTest extends TestCase
         $string = $this->removeDateLine($export->formatOutput(true)->__toString());
 
         $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
-<backup xmlns:xlink="http://www.w3.org/1999/xlink" type="container">
+<backup xmlns:xlink="http://www.w3.org/1999/xlink" type="container">'
+  /* -removed: date field */ .'
   <content type="object" class="Sysgear\Tests\Backup\User">
     <id type="integer" value="1"/>
     <name type="string" value="piet"/>
@@ -123,7 +125,8 @@ class BackupTest extends TestCase
         $string = $this->removeDateLine($export->formatOutput(true)->__toString());
 
         $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
-<backup xmlns:xlink="http://www.w3.org/1999/xlink" type="container">
+<backup xmlns:xlink="http://www.w3.org/1999/xlink" type="container">'
+  /* -removed: date field */ .'
   <content type="object" class="Sysgear\Tests\Backup\IgnorePropertiesUser">
     <id type="integer" value="1"/>
     <roles type="list"/>
@@ -145,7 +148,8 @@ class BackupTest extends TestCase
         $string = $this->removeDateLine($export->formatOutput(true)->__toString());
 
         $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
-<backup xmlns:xlink="http://www.w3.org/1999/xlink" type="container">
+<backup xmlns:xlink="http://www.w3.org/1999/xlink" type="container">'
+  /* -removed: date field */ .'
   <content type="object" class="Sysgear\Tests\Backup\DoNotScanAndIgnorePropertiesUser">
     <id type="integer" value="1"/>
     <employer type="object" class="Sysgear\Tests\Backup\Company">
@@ -175,7 +179,8 @@ class BackupTest extends TestCase
         $string = $this->removeDateLine($export->formatOutput(true)->__toString());
 
         $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
-<backup xmlns:xlink="http://www.w3.org/1999/xlink" type="container">
+<backup xmlns:xlink="http://www.w3.org/1999/xlink" type="container">'
+  /* -removed: date field */ .'
   <content type="object" class="Sysgear\Tests\Backup\ProxyCompany">
     <shouldBeIgnored1 type="boolean" value="1"/>
     <shouldBeIgnored2 type="boolean" value="1"/>
@@ -226,7 +231,8 @@ class BackupTest extends TestCase
         $string = $this->removeDateLine($export->formatOutput(true)->__toString());
 
         $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
-<backup xmlns:xlink="http://www.w3.org/1999/xlink" type="container">
+<backup xmlns:xlink="http://www.w3.org/1999/xlink" type="container">'
+  /* -removed: date field */ .'
   <content type="object" class="Sysgear\Tests\Backup\Company">
     <id type="integer" value="1"/>
     <name type="string" value="rts"/>
