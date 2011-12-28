@@ -402,7 +402,32 @@ class BackupRestorer extends AbstractRestorer
             // TODO: throw exception
         }
 
-        return new $class();
+        $refClass = new \ReflectionClass($class);
+        if (\PHP_VERSION_ID > 50400) {
+            return $refClass->newInstanceWithoutConstructor();
+
+        } else {
+            $properties = $refClass->getProperties();
+            $defaults = $refClass->getDefaultProperties();
+
+            $serealized = "O:" . strlen($class) . ":\"$class\":".count($properties) .':{';
+            foreach ($properties as $property){
+                $name = $property->getName();
+                if($property->isProtected()){
+                    $name = chr(0) . '*' .chr(0) .$name;
+                } elseif($property->isPrivate()){
+                    $name = chr(0)  . $class.  chr(0).$name;
+                }
+                $serealized .= serialize($name);
+                if(array_key_exists($property->getName(),$defaults) ){
+                    $serealized .= serialize($defaults[$property->getName()]);
+                } else {
+                    $serealized .= serialize(null);
+                }
+            }
+            $serealized .="}";
+            return unserialize($serealized);
+        }
     }
 
     /**

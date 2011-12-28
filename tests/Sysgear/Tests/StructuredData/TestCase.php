@@ -23,6 +23,57 @@ require_once 'fixtures/User.php';
 
 class TestCase extends \PHPUnit_Framework_TestCase
 {
+    protected function getClassName($object)
+    {
+        $fullClassname = is_string($object) ? $object : get_class($object);
+        $pos = strrpos($fullClassname, '\\');
+        return (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
+    }
+
+    protected function createClassBackupableInterface()
+    {
+        $ns = '\\Sysgear\\StructuredData\\Collector\\BackupCollector';
+        $m1 = "public function collectStructedData({$ns} \$col, array \$options = array())\n".
+            '{$col->fromObject($this, $options);}';
+
+        $ns = '\\Sysgear\\StructuredData\\Restorer\\BackupRestorer';
+        $m2 = "public function restoreStructedData({$ns} \$res)\n".
+            '{$remaining = $res->toObject($this);'."\n".
+            'foreach ($remaining as $name => $value) {$this->{$name} = $value;}}';
+
+        return array($m1, $m2);
+    }
+
+    protected function createClass(array $properties = array(),
+        array $interfaces = array(), array $methods = array(), $extends = null)
+    {
+        // get classname
+        $count = 0;
+        $className = 'Generated_' . $count;
+        while (class_exists(__CLASS__ . '\\' .$className)) {
+            $count++;
+            $className = 'Generated_' . $count;
+        }
+
+        // get extends and interfaces
+        $extends = (null === $extends) ? '' : ' extends \\' . $extends;
+        $implements = (! $interfaces) ? '' : ' implements \\' . join(', \\', $interfaces);
+
+        // build class code
+        $code = 'namespace ' . __CLASS__ . ";\n";
+        $code .= "class {$className}{$implements}{$extends} {\n";
+        foreach ($properties as $propertyLine) {
+            $code .= "\t{$propertyLine};\n";
+        }
+        foreach ($methods as $methodLine) {
+            $code .= "\t{$methodLine}\n";
+        }
+        $code .= "}";
+
+        eval($code);
+        return __CLASS__ . '\\' . $className;
+    }
+
     protected function getUserIncomplete()
     {
         $roleNode = new Node('object', 'Role');

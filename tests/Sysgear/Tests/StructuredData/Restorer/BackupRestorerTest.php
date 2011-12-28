@@ -22,6 +22,36 @@ class BackupRestorerTest extends TestCase
 {
     public static $debug = false;
 
+    public function testRestoreConstructorWithMandatoryParams()
+    {
+        $methods = $this->createClassBackupableInterface();
+        $methods[] = 'public function __construct($mandatory) {$this->number = $mandatory;}';
+        $className = $this->createClass(array(
+            'public $number = 3',
+            'public $string = \'abc\'',
+            'public $default = \'still here\'',
+            'public $null'), array('Sysgear\Backup\BackupableInterface'),
+            $methods
+        );
+
+        $objNode = new Node('object', 'Object');
+        $objNode->setMetadata('class', $className);
+        $objNode->setProperty('number', new NodeProperty('integer', 4));
+        $objNode->setProperty('string', new NodeProperty('integer', 123));
+        $objNode->setProperty('null', new NodeProperty('string', 'not null'));
+
+        $restorer = new BackupRestorer();
+        $object = $restorer->restore($objNode);
+
+        $assertObj = new $className(8);
+        $this->assertEquals(8, $assertObj->number);
+        $assertObj->number = 4;
+        $assertObj->string = 123;
+        $assertObj->null = 'not null';
+
+        $this->assertEquals($assertObj, $object);
+    }
+
     /**
      * Test merging incomplete nodes, assume these as incomplete.
      */
