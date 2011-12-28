@@ -114,4 +114,35 @@ class XmlTest extends TestCase
 
         $this->assertEquals($node, $importer->getNode());
     }
+
+    /**
+     * @expectedException \Sysgear\StructuredData\Importer\ImporterException
+     * @expectedExceptionMessage Could not determine node type ''
+     */
+    public function testCompile_cannotFindMetaType()
+    {
+        $importer = new XmlImporter();
+        $importer->fromString('<?xml version="1.0" encoding="UTF-8"?>
+<User xmlns:xlink="http://www.w3.org/1999/xlink" type="object" class="\Sysgear\Tests\StructuredData\User">
+  <id type="integer" value="11"/>
+  <name type="string" value="test"/>
+  <password type="string" value="$1$irVZosm9$eYSZynm/kUm1e6ja3YIya1"/>
+</User>');
+    }
+
+    /**
+     * @expectedException \Sysgear\StructuredData\Importer\ImporterException
+     * @expectedExceptionMessage Could not determine node type 'blaaat'
+     */
+    public function testCompile_wrongFindMetaType()
+    {
+        $importer = new XmlImporter();
+        $importer->fromString('<?xml version="1.0" encoding="UTF-8"?>
+<User xmlns:xlink="http://www.w3.org/1999/xlink" type="object"
+        meta-type="blaaat" class="\Sysgear\Tests\StructuredData\User">
+  <id type="integer" value="11"/>
+  <name type="string" value="test"/>
+  <password type="string" value="$1$irVZosm9$eYSZynm/kUm1e6ja3YIya1"/>
+</User>');
+    }
 }

@@ -6,6 +6,6 @@ class ImporterException extends \Exception
 {
     public static function couldNotDetermineNodeType($nodeType)
     {
-        return new self('could not determine node type');
+        return new self("Could not determine node type '{$nodeType}'.");
     }
 }

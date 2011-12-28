@@ -67,6 +67,7 @@ class XmlImporter extends AbstractImporter
         $type = null;
         $value = null;
         $metaDatas = array();
+        $nodeType = null;
         foreach ($domNode->attributes as $attribute) {
             switch ($attribute->nodeName) {
                 case 'type':
@@ -91,6 +92,7 @@ class XmlImporter extends AbstractImporter
         switch ($nodeType) {
             case self::NODE_TYPE_OBJECT:
                 $node = new Node($type, $domNode->nodeName);
+                $this->references["#element({$sequence})"] = $node;
                 foreach ($domNode->childNodes as $child) {
                     if (\XML_ELEMENT_NODE === $child->nodeType) {
                         $node->setProperty($child->nodeName, $this->compile($child, $sequence . "/{$childCount}"));
@@ -104,26 +106,25 @@ class XmlImporter extends AbstractImporter
                 break;
 
             case self::NODE_TYPE_COLLECTION:
-                $collection = array();
+                $node = new NodeCollection(array(), $type);
+                $this->references["#element({$sequence})"] = $node;
                 foreach ($domNode->childNodes as $child) {
                     if (\XML_ELEMENT_NODE === $child->nodeType) {
-                        $collection[] = $this->compile($child, $sequence . "/{$childCount}");
+                        $node->add($this->compile($child, $sequence . "/{$childCount}"));
                         $childCount++;
                     }
                 }
-                $node = new NodeCollection($collection, $type);
                 break;
 
             case self::NODE_TYPE_PROPERTY:
                 $node = new NodeProperty($type, $value);
+                $this->references["#element({$sequence})"] = $node;
                 break;
 
             default:
                 throw ImporterException::couldNotDetermineNodeType($nodeType);
         }
 
-        // add reference and return in-memory node
-        $this->references["#element({$sequence})"] = $node;
         return $node;
     }
 }
