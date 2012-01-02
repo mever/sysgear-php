@@ -14,6 +14,22 @@ class Collection extends Filter implements Countable, IteratorAggregate, ArrayAc
     protected $collection = array();
     protected $type;
 
+    /**
+     * Create a filter collection from array. Accepts both expressing as collection structures.
+     *
+     * @param array $filter
+     * @return \Sysgear\Filter\Collection
+     */
+    public static function fromArray(array $filter)
+    {
+        $collection = Filter::fromArray($filter);
+        if ($collection instanceof Expression) {
+            $collection = new self(array($collection));
+        }
+
+        return $collection;
+    }
+
     public function __construct(array $collection = array(), $type = self::TYPE_AND)
     {
         $this->collection = $collection;
@@ -67,7 +83,7 @@ class Collection extends Filter implements Countable, IteratorAggregate, ArrayAc
         $filter = $this;
         $compiler = function($type, $filter) use ($connection) {
 
-            if ($type === self::COMPILE_COL) {
+            if ($type === Collection::COMPILE_COL) {
 
                 // return left, operator and right parts
                 $type = strtoupper($filter->getType());
