@@ -497,16 +497,6 @@ class Collection extends Filter implements Countable, IteratorAggregate, ArrayAc
     }
 
     /**
-     * Returns a string representation of this object.
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return __CLASS__ . '@' . spl_object_hash($this);
-    }
-
-    /**
      * Clears the collection.
      */
     public function clear()

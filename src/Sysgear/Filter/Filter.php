@@ -84,4 +84,14 @@ abstract class Filter implements \Serializable
             return $compiler(Collection::COMPILE_EXP, $filter);
         }
     }
+
+    /**
+     * Returns a string representation of this filter.
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return json_encode($this->toArray());
+    }
 }
