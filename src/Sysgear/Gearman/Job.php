@@ -18,9 +18,9 @@ class Job
         $this->parameters[$key] = $value;
     }
 
-    public function getParameter($key)
+    public function getParameter($key, $default = null)
     {
-        return $this->parameters[$key];
+        return (array_key_exists($key, $this->parameters)) ? $this->parameters[$key] : $default;
     }
 
     public function getParameters()
