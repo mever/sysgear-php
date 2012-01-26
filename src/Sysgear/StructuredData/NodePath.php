@@ -73,6 +73,45 @@ class NodePath
     }
 
     /**
+     * Chaining supported add node.
+     *
+     * @param string $name
+     * @param integer $idx
+     * @return \Sysgear\StructuredData\NodePath
+     */
+    public function node($name, $idx = 0)
+    {
+        $this->add(self::NODE, $name, $idx);
+        return $this;
+    }
+
+    /**
+     * Chaining supported add collection.
+     *
+     * @param string $name
+     * @param integer $idx
+     * @return \Sysgear\StructuredData\NodePath
+     */
+    public function col($name, $idx = 0)
+    {
+        $this->add(self::COLLECTION, $name, $idx);
+        return $this;
+    }
+
+    /**
+     * Chaining supported add value.
+     *
+     * @param string $name
+     * @param integer $idx
+     * @return \Sysgear\StructuredData\NodePath
+     */
+    public function value($name, $idx = 0)
+    {
+        $this->add(self::VALUE, $name, $idx);
+        return $this;
+    }
+
+    /**
      * Get path segments.
      *
      * Each segment is a string. The first character indicates the segment type

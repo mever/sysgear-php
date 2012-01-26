@@ -57,6 +57,13 @@ class NodePathTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('\\Ncompany\\Cfunctions\\0Nadmin\\Cmembers\\2Nuser\\Vname', (string) $path);
     }
 
+    public function testChaining()
+    {
+        $path = new NodePath();
+        $path->node('company')->col('functions')->node('admin')->col('members')->node('user', 2)->value('name');
+        $this->assertEquals('\\Ncompany\\Cfunctions\\0Nadmin\\Cmembers\\2Nuser\\Vname', (string) $path);
+    }
+
     public function testgetSegments()
     {
         $path = new NodePath();
