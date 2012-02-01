@@ -44,9 +44,7 @@ abstract class AbstractRestorer implements RestorerInterface
     public function setOption($key, $value)
     {
         $this->persistentOptions[$key] = $value;
-        if (property_exists($this, $key)) {
-            $this->_setOption($key, $value);
-        }
+        $this->_setOption($key, $value);
     }
 
     /**
@@ -62,18 +60,5 @@ abstract class AbstractRestorer implements RestorerInterface
                 $this->logger = ($value instanceof Closure) ? $value : null;
                 break;
         }
-    }
-
-    /**
-     * Return the node name which represents this $object.
-     *
-     * @param object $object
-     * @return string
-     */
-    protected function getNodeName($object)
-    {
-        $fullClassname = get_class($object);
-        $pos = strrpos($fullClassname, '\\');
-        return (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
     }
 }

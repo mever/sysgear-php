@@ -122,8 +122,12 @@ class BackupRestorer extends AbstractRestorer
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Restorer.RestorerInterface::toObject()
+     * Restore data to object.
+     *
+     * @param \StdClass $object
+     * @return array Return a list of remaining properties, those that could not
+     *               be set because the restorer was not able to access the
+     *               modifiers of the $object.
      */
     public function toObject($object)
     {
