@@ -39,6 +39,38 @@ class InventoryManager implements Serializable
     }
 
     /**
+     * Shortcut for adding a node path to the include list.
+     *
+     * TODO: unit test
+     *
+     * @param NodePath $path
+     * @param mixed $value
+     * @return \Sysgear\Backup\InventoryManager
+     */
+    public function incl(NodePath $path, $value = null)
+    {
+        $filter = new Expression((string) $path, $value);
+        $this->include->add($filter);
+        return $this;
+    }
+
+    /**
+     * Shortcut for adding a node path to the exclude list.
+     *
+     * TODO: unit test
+     *
+     * @param NodePath $path
+     * @param mixed $value
+     * @return \Sysgear\Backup\InventoryManager
+     */
+    public function excl(NodePath $path, $value = null)
+    {
+        $filter = new Expression((string) $path, $value);
+        $this->exclude->add($filter);
+        return $this;
+    }
+
+    /**
      * Return the include list.
      *
      * @return \Sysgear\Filter\Collection
