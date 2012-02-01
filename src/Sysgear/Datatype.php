@@ -101,7 +101,7 @@ class Datatype
                 break;
 
             default:
-                throw new \Exception('This datatype is not supported!');
+                throw new \LogicException('This datatype is not supported!');
                 break;
         }
     }

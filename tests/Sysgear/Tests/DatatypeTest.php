@@ -114,7 +114,7 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException Exception
+     * @expectedException LogicException
      */
     public function testToOracleBind_default() {
         Datatype::toOracleBind(-1);
