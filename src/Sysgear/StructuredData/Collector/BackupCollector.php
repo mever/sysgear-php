@@ -17,6 +17,9 @@ use Sysgear\Util;
  */
 class BackupCollector extends AbstractObjectCollector
 {
+    const MERGE_FLAG = 1;
+    const MERGE_ONLY = 2;
+
     /**
      * When true only collect data from the first
      * implementor of the backupable interface, start search from super- to subclass.
@@ -34,7 +37,8 @@ class BackupCollector extends AbstractObjectCollector
     protected $implClassName = false;
 
     /**
-     * List of composite fields to merge.
+     * List of composite fields to merge. First element is
+     * always the merge mode: self::MERGE_*
      *
      * @var array
      */
@@ -43,9 +47,9 @@ class BackupCollector extends AbstractObjectCollector
     /**
      * Is merging in process.
      *
-     * @var boolean
+     * @var integer
      */
-    protected $merging = false;
+    protected $merging;
 
     /**
      * @var \Sysgear\Backup\InventoryManager
@@ -75,7 +79,15 @@ class BackupCollector extends AbstractObjectCollector
                 break;
 
             case 'merge':
-                $this->merge = (array) $value;
+                $merge = (array) $value;
+                array_unshift($merge, self::MERGE_FLAG);
+                $this->merge = $merge;
+                break;
+
+            case 'mergeOnly':
+                $merge = (array) $value;
+                array_unshift($merge, self::MERGE_ONLY);
+                $this->merge = $merge;
                 break;
 
             case 'inventoryManager':
@@ -123,10 +135,16 @@ class BackupCollector extends AbstractObjectCollector
             $this->addedObjects[$objHash] = $this->node;
 
             // merge mode enabled, include only fields that can be used to restore this backup
-            if ($this->merging && is_array(@$options['mergeFields'])) {
-                $this->onlyInclude = $options['mergeFields'];
-                $this->followCompositeNodes = true;
-                $this->doNotDescent = array();
+            if (null !== $this->merging && is_array(@$options['mergeFields'])) {
+
+                if (self::MERGE_ONLY === $this->merging) {
+                    $this->onlyInclude = $options['mergeFields'];
+                    $this->followCompositeNodes = true;
+                    $this->doNotDescent = array();
+
+                } else {
+                    $this->node->setMetadata('merge-fields', json_encode($options['mergeFields']));
+                }
 
             } elseif (null !== $this->merge) {
                 $this->node->setMetadata('merge', json_encode($this->merge));
@@ -156,10 +174,10 @@ class BackupCollector extends AbstractObjectCollector
                         }
 
                         $this->node->setProperty($name, new NodeProperty(gettype($value), $value));
-                    } else
+                    }
 
                     // add composite (node) property
-                    if ($this->followCompositeNodes) {
+                    elseif ($this->followCompositeNodes) {
                         $this->addCompositeProperty($name, $value);
                     }
                 }
@@ -296,8 +314,8 @@ class BackupCollector extends AbstractObjectCollector
             $collector->followCompositeNodes = false;
         }
 
-        if (null !== $this->merge && in_array($name, $this->merge)) {
-            $collector->merging = true;
+        if (null !== $this->merge && in_array($name, $this->merge, true)) {
+            $collector->merging = $this->merge[0];
         }
 
         $backupable->collectStructedData($collector);

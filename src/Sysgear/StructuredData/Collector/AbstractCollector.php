@@ -51,9 +51,7 @@ abstract class AbstractCollector implements CollectorInterface
     public function setOption($key, $value)
     {
         $this->persistentOptions[$key] = $value;
-        if (property_exists($this, $key)) {
-            $this->_setOption($key, $value);
-        }
+        $this->_setOption($key, $value);
     }
 
     /**

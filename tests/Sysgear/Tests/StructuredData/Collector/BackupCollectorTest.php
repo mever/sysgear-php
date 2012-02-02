@@ -321,7 +321,7 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
 
     public function testOption_merge()
     {
-        $className = $this->createClass(array('public $a', 'public $b = true'),
+        $className = $this->createClass(array('public $a', 'public $b = true', 'public $c = 123'),
             array('Sysgear\Backup\BackupableInterface'),
             $this->createClassBackupableInterface(array('mergeFields' => array('b'))));
 
@@ -330,7 +330,26 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         $collector = new BackupCollector(array('merge' => array('a')));
         $node = $collector->fromObject($object);
 
-        $this->assertEquals('["a"]', $node->getMeta('merge'));
+        $this->assertEquals('[' . BackupCollector::MERGE_FLAG . ',"a"]', $node->getMeta('merge'));
+
+        $props = $node->getProperty('a')->getProperties();
+        $this->assertCount(2, $props);
+        $this->assertTrue($props['b']->getValue());
+        $this->assertEquals(123, $props['c']->getValue());
+    }
+
+    public function testOption_mergeOnly()
+    {
+        $className = $this->createClass(array('public $a', 'public $b = true', 'public $c = 123'),
+            array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface(array('mergeFields' => array('b'))));
+
+        $object = new $className();
+        $object->a = new $className();
+        $collector = new BackupCollector(array('mergeOnly' => array('a')));
+        $node = $collector->fromObject($object);
+
+        $this->assertEquals('[' . BackupCollector::MERGE_ONLY . ',"a"]', $node->getMeta('merge'));
 
         $props = $node->getProperty('a')->getProperties();
         $this->assertCount(1, $props);
