@@ -34,6 +34,20 @@ class BackupCollector extends AbstractObjectCollector
     protected $implClassName = false;
 
     /**
+     * List of composite fields to merge.
+     *
+     * @var array
+     */
+    protected $merge;
+
+    /**
+     * Is merging in process.
+     *
+     * @var boolean
+     */
+    protected $merging = false;
+
+    /**
      * @var \Sysgear\Backup\InventoryManager
      */
     protected $inventoryManager;
@@ -58,6 +72,10 @@ class BackupCollector extends AbstractObjectCollector
 
             case 'implClassName':
                 $this->implClassName = (boolean) $value;
+                break;
+
+            case 'merge':
+                $this->merge = (array) $value;
                 break;
 
             case 'inventoryManager':
@@ -103,6 +121,16 @@ class BackupCollector extends AbstractObjectCollector
             $this->node = new Node('object', $name);
             $this->node->setMetadata('class', $this->getClassName($object));
             $this->addedObjects[$objHash] = $this->node;
+
+            // merge mode enabled, include only fields that can be used to restore this backup
+            if ($this->merging && is_array(@$options['mergeFields'])) {
+                $this->onlyInclude = $options['mergeFields'];
+                $this->followCompositeNodes = true;
+                $this->doNotDescent = array();
+
+            } elseif (null !== $this->merge) {
+                $this->node->setMetadata('merge', json_encode($this->merge));
+            }
 
             // collect data to populate the node with
             $refClass = new \ReflectionClass(($this->onlyImplementor) ?
@@ -191,10 +219,10 @@ class BackupCollector extends AbstractObjectCollector
 
                 // check with inventory manager
                 $node = ($this->inventoryManager->isAllowed($propertyPath)) ?
-                    $this->createChildNode($value, $doNotDescent, $propertyPath) : null;
+                    $this->createChildNode($value, $doNotDescent, $propertyPath, $name) : null;
 
             } else {
-                $node = $this->createChildNode($value, $doNotDescent);
+                $node = $this->createChildNode($value, $doNotDescent, null, $name);
             }
 
             if (null !== $node) {
@@ -202,8 +230,8 @@ class BackupCollector extends AbstractObjectCollector
             }
         }
 
-        // scan sub-collection
-        if (is_array($value) || ($value instanceof \IteratorAggregate)) {
+        // scan collection
+        elseif (is_array($value) || ($value instanceof \IteratorAggregate)) {
 
             $collection = new NodeCollection();
             if (! is_array($value)) {
@@ -231,7 +259,7 @@ class BackupCollector extends AbstractObjectCollector
                         }
                     }
 
-                    $node = $this->createChildNode($elem, $doNotDescent, $elemPath);
+                    $node = $this->createChildNode($elem, $doNotDescent, $elemPath, $name);
                     if (null !== $node) {
                         $collection->add($node);
                     }
@@ -248,9 +276,11 @@ class BackupCollector extends AbstractObjectCollector
      * @param \Sysgear\Backup\BackupableInterface $backupable
      * @param boolean $doNotDescent
      * @param NodePath $path preseeding path
+     * @param string $name
      * @return \Sysgear\StructuredData\NodeInterface
      */
-    protected function createChildNode(BackupableInterface $backupable, $doNotDescent, NodePath $path = null)
+    protected function createChildNode(BackupableInterface $backupable,
+        $doNotDescent, NodePath $path = null, $name = null)
     {
         // make a copy of this collector to allow recursive collecting
         $collector = new self($this->persistentOptions);
@@ -260,11 +290,14 @@ class BackupCollector extends AbstractObjectCollector
         // prevent infinite loops...
         $objHash = spl_object_hash($backupable);
         if (array_key_exists($objHash, $this->addedObjects)) {
-            $collector->followCompositeNodes = false;
-            $collector->node =& $this->addedObjects[$objHash];
+            return $this->addedObjects[$objHash];
 
         } elseif ($doNotDescent) {
             $collector->followCompositeNodes = false;
+        }
+
+        if (null !== $this->merge && in_array($name, $this->merge)) {
+            $collector->merging = true;
         }
 
         $backupable->collectStructedData($collector);

@@ -47,28 +47,28 @@ class NodePath
     /**
      * Add a new path segment.
      *
-     * @param string $segment Segment content type code: {@see self::*}
+     * @param string $type Segment content type code: {@see self::*}
      * @param string $name
      * @param integer $idx
      * @throws \InvalidArgumentException
      * @return \Sysgear\StructuredData\NodePath
      */
-    public function add($segment, $name, $idx = 0)
+    public function add($type, $name, $idx = 0)
     {
-        if (strlen($segment) > 1) {
+        if (strlen($type) > 1) {
             throw new \InvalidArgumentException('given segment code has more than one character');
         }
 
         if ($this->isCollection) {
             $this->isCollection = false;
-            $segment = $idx . $segment;
+            $type = $idx . $type;
         }
 
-        if (self::COLLECTION === $segment) {
+        if (self::COLLECTION === $type) {
             $this->isCollection = true;
         }
 
-        $this->encodedPath .= '\\' . $segment . addslashes($name);
+        $this->encodedPath .= '\\' . $type . addslashes($name);
         return $this;
     }
 

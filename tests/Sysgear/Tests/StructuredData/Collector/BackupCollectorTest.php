@@ -319,6 +319,24 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('abc', $props['col2']->getValue());
     }
 
+    public function testOption_merge()
+    {
+        $className = $this->createClass(array('public $a', 'public $b = true'),
+            array('Sysgear\Backup\BackupableInterface'),
+            $this->createClassBackupableInterface(array('mergeFields' => array('b'))));
+
+        $object = new $className();
+        $object->a = new $className();
+        $collector = new BackupCollector(array('merge' => array('a')));
+        $node = $collector->fromObject($object);
+
+        $this->assertEquals('["a"]', $node->getMeta('merge'));
+
+        $props = $node->getProperty('a')->getProperties();
+        $this->assertCount(1, $props);
+        $this->assertTrue(reset($props)->getValue());
+    }
+
     public function testOption_inventoryManager_disabled()
     {
         // build object graph
@@ -602,16 +620,17 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         return (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
     }
 
-    protected function createClassBackupableInterface()
+    protected function createClassBackupableInterface(array $restoreOptions = array())
     {
+        $options = var_export($restoreOptions, true);
         $ns = '\\Sysgear\\StructuredData\\Collector\\BackupCollector';
         $m1 = "public function collectStructedData({$ns} \$col, array \$options = array())\n".
-        	'{$col->fromObject($this, $options);}';
+            "{\$col->fromObject(\$this, {$options});}";
 
         $ns = '\\Sysgear\\StructuredData\\Restorer\\BackupRestorer';
         $m2 = "public function restoreStructedData({$ns} \$res)\n".
-        	'{$remaining = $res->toObject($this);'."\n".
-        	'foreach ($remaining as $name => $value) {$this->{$name} = $value;}}';
+            '{$remaining = $res->toObject($this);'."\n".
+            'foreach ($remaining as $name => $value) {$this->{$name} = $value;}}';
 
         return array($m1, $m2);
     }
