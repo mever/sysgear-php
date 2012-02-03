@@ -262,14 +262,14 @@ class BackupCollector extends AbstractObjectCollector
 
             $count = 0;
             $elemPath = null;
-            foreach ($value as $elem) {
+            foreach ($value as $key => $val) {
 
                 // collect array element objects implementing the BackupableInterface
-                if ($elem instanceof BackupableInterface) {
+                if ($val instanceof BackupableInterface) {
 
                     if (null !== $propertyPath) {
                         $elemPath = clone $propertyPath;
-                        $elemPath->add(NodePath::NODE, Util::getShortClassName($this->getClassName($elem)), $count);
+                        $elemPath->add(NodePath::NODE, Util::getShortClassName($this->getClassName($val)), $count);
                         $count++;
 
                         if (! $this->inventoryManager->isAllowed($elemPath)) {
@@ -277,8 +277,9 @@ class BackupCollector extends AbstractObjectCollector
                         }
                     }
 
-                    $node = $this->createChildNode($elem, $doNotDescent, $elemPath, $name);
+                    $node = $this->createChildNode($val, $doNotDescent, $elemPath, $name);
                     if (null !== $node) {
+                        $node->setMetadata('key', (is_integer($key) ? 'i' : 's') . ';' . $key);
                         $collection->add($node);
                     }
                 }
