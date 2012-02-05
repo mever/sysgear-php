@@ -5,10 +5,10 @@ namespace Sysgear;
 interface Comparable
 {
     /**
-     * Compares this object to $other and tell if they are equal.
-     * 
-     * @param $other
+     * Compares this object to another and tell if they are equal.
+     *
+     * @param Comparable $object
      * @return bool
      */
-    public function equals($other);
+    public function equals(Comparable $object);
 }
