@@ -36,10 +36,11 @@ class DoctrineRestorerTest extends TestCase
         $restorer->restore($node);
     }
 
-    public function testGetRecord_attributeFields()
+    public function testCreateRecord_attributeFields()
     {
-        $metadata = $this->getMock('Doctrine\ORM\Mapping\ClassMetadata', array('getColumnName'));
+        $metadata = $this->getMock('Doctrine\ORM\Mapping\ClassMetadata', array('hasField', 'getColumnName'));
         $metadata->expects($this->exactly(2))->method('getColumnName')->will($this->returnArgument(0));
+        $metadata->expects($this->exactly(2))->method('hasField')->will($this->returnValue(true));
 
         $restorer = $this->getMock('Sysgear\StructuredData\Restorer\DoctrineRestorer',
             array('getMetadata', 'processRecord'));
@@ -54,7 +55,7 @@ class DoctrineRestorerTest extends TestCase
         $this->assertEquals(array('name' => 'jan', 'age' => 24), $record);
     }
 
-    public function testCreateRecord_owning_foreignFields()
+    public function testCreateRecord_manyToOne()
     {
         $employerNode = new Node('object', 'company');
         $employerNode->setProperty('id', new NodeProperty('integer', 4));
@@ -65,9 +66,14 @@ class DoctrineRestorerTest extends TestCase
             )
         );
 
+        $hasField = function($field) {
+            return ('id' === $field) ? true : false;
+        };
+
         $metadata = $this->getMock('Doctrine\ORM\Mapping\ClassMetadata', array(
-            'getAssociationMapping', 'getColumnName'));
+            'hasField', 'getAssociationMapping', 'getColumnName'));
         $metadata->expects($this->exactly(1))->method('getAssociationMapping')->will($this->returnValue($mapping));
+        $metadata->expects($this->exactly(2))->method('hasField')->will($this->returnCallback($hasField));
         $metadata->expects($this->exactly(1))->method('getColumnName')->will($this->returnArgument(0));
 
         $restorer = $this->getMock('Sysgear\StructuredData\Restorer\DoctrineRestorer',

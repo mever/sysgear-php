@@ -521,6 +521,7 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
 
         $user1Node = new Node('object', $this->getClassName($object->members[0]));
         $user1Node->setMetadata('class', __CLASS__ . '\\' . $this->getClassName($object->members[0]));
+        $user1Node->setMetadata('key', 'i;0');
         $user1Node->setProperty('name', new NodeProperty('string', 'hello world 1'));
 
         $expectedNode = new Node('object', $this->getClassName($object));
@@ -587,6 +588,7 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
 
         $user1Node = new Node('object', $this->getClassName($object->members[1]));
         $user1Node->setMetadata('class', __CLASS__ . '\\' . $this->getClassName($object->members[1]));
+        $user1Node->setMetadata('key', 'i;1');
         $user1Node->setProperty('name', new NodeProperty('string', 'hello world 2'));
 
         $expectedNode = new Node('object', $this->getClassName($object));
@@ -596,40 +598,6 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         $expectedNode->setProperty('string', new NodeProperty('string', 'abc'));
 
         $this->assertEquals($expectedNode, $node);
-    }
-
-    public function testOption_inventoryManager_excludeMemberNode()
-    {
-        $className = $this->createClass(array(
-            'public $number = 3',
-            'public $members = array()',
-            'public $string = \'abc\'',
-            'public $null'), array('Sysgear\Backup\BackupableInterface'),
-            $this->createClassBackupableInterface()
-        );
-
-        $classNameUser = $this->createClass(array(
-            'public $name = \'hello world\''
-            ), array('Sysgear\Backup\BackupableInterface'),
-            $this->createClassBackupableInterface()
-        );
-
-        $object = new $className();
-        $object->members[] = new $classNameUser();
-
-        $path = new NodePath();
-        $path->add(NodePath::NODE, $this->getClassName($object));
-        $path->add(NodePath::COLLECTION, $this->getClassName($object->members[0]), 0);
-
-        $inventoryManager = new InventoryManager();
-        $inventoryManager->getExcludeList()->add(new Expression((string) $path, null));
-
-        $collector = new BackupCollector();
-        $collector->setOption('inventoryManager', $inventoryManager);
-        $collector->fromObject($object);
-
-        $node = $collector->getNode();
-//         print_r($node);
     }
 
     protected function getClassName($object)

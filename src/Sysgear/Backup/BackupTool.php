@@ -4,6 +4,7 @@ namespace Sysgear\Backup;
 
 use Sysgear\StructuredData\Collector\BackupCollector;
 use Sysgear\StructuredData\Restorer\BackupRestorer;
+use Sysgear\StructuredData\Restorer\DoctrineRestorer;
 use Sysgear\StructuredData\Exporter\ExporterInterface;
 use Sysgear\StructuredData\Importer\ImporterInterface;
 use Sysgear\StructuredData\NodeProperty;
@@ -11,9 +12,6 @@ use Sysgear\StructuredData\Node;
 
 /**
  * Universal tool to backup about anything.
- *
- * * Uses a structured data collector to backup data and pass it to the exporter.
- * * Uses an importer to import a backup and restore it using a restorer.
  *
  * @author (c) Martijn Evers <mevers47@gmail.com>
  */
@@ -28,13 +26,6 @@ class BackupTool
      * @var \Sysgear\StructuredData\Importer\ImporterInterface
      */
     protected $importer;
-
-    /**
-     * Configuration options for this backup tool.
-     *
-     * @var array
-     */
-    protected $options = array();
 
     /**
      * Configuration options for the collector.
@@ -62,7 +53,6 @@ class BackupTool
     {
         $this->exporter = $exporter;
         $this->importer = $importer;
-        $this->options = $options;
     }
 
     /**
@@ -74,7 +64,6 @@ class BackupTool
      */
     public function setOption($key, $value)
     {
-        $this->options[$key] = $value;
         return $this;
     }
 
@@ -143,20 +132,22 @@ class BackupTool
      */
     public function restore(array $restorerOptions = array(), BackupableInterface $object = null)
     {
-        // create restorer
-        if (array_key_exists("merger", $this->options)) {
-            $this->restorerOptions["merger"] = $this->options["merger"];
-        }
-
         $restorerOptions = array_merge($this->restorerOptions, $restorerOptions);
-        $restorer = new BackupRestorer($restorerOptions);
 
         $contentNode = $this->importer->getNode()->getProperty('content');
         if (null === $contentNode) {
             throw Exception::backupHasNoContent($this->importer->getNode());
         }
 
-        return $restorer->restore($contentNode, $object);
+        if (array_key_exists('entityManager', $restorerOptions)) {
+            $restorer = new DoctrineRestorer(array('entityManager' => $restorerOptions['entityManager']));
+            $restorer->restore($contentNode);
+        }
+
+        if (true !== @$restorerOptions['doNotReconstruct']) {
+            $restorer = new BackupRestorer($restorerOptions);
+            return $restorer->restore($contentNode, $object);
+        }
     }
 
     /**

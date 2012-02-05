@@ -2,17 +2,19 @@
 
 namespace Sysgear\StructuredData\Restorer;
 
+use Sysgear\StructuredData\NodeInterface;
 use Sysgear\StructuredData\NodeCollection;
 use Sysgear\StructuredData\NodeProperty;
 use Sysgear\StructuredData\Node;
 use Sysgear\StructuredData\NodePath;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\DBAL\Types\Type;
 
 /**
  * Developers notes:
- * - this class is designed from the domain perspective, we use associations and properties.
- * - current only the insert merge mode is supported.
+ * - this class is designed from the domain perspective, we follow associations and properties.
+ * - current only the insert merge mode is supported and the default.
  */
 class DoctrineRestorer extends AbstractRestorer
 {
@@ -96,11 +98,7 @@ class DoctrineRestorer extends AbstractRestorer
             throw new \InvalidArgumentException("No entity manager given.");
         }
 
-//         $this->entityManager->getConnection()->beginTransaction();
         $this->restoreNode($node);
-//         $this->entityManager->getConnection()->rollback();
-
-        die();
     }
 
     /**
@@ -123,6 +121,85 @@ class DoctrineRestorer extends AbstractRestorer
     }
 
     /**
+     * Find a record for $nodeToMerge.
+     *
+     * @return array Record
+     */
+    protected function findRecord(Node $nodeToMerge)
+    {
+        // prevent recursion
+        $oid = '#' . spl_object_hash($nodeToMerge);
+        if (array_key_exists($oid, $this->recordList)) {
+            return $this->recordList[$oid];
+        }
+
+        $conn = $this->entityManager->getConnection();
+
+        $whereClause = array();
+        foreach ($nodeToMerge->getProperties() as $name => $prop) {
+
+            $mergeFields = $nodeToMerge->getMeta('merge-fields');
+            if (null === $mergeFields || in_array($name, json_decode($mergeFields))) {
+                if ($prop instanceof Node) {
+                } elseif ($prop instanceof NodeProperty) {
+                    $whereClause[] = $conn->quoteIdentifier($name) . ' = ' . $conn->quote($prop->getValue());
+                }
+            }
+        }
+
+        if (0 === count($whereClause)) {
+            throw new \RuntimeException("No merge criteria is given");
+        }
+
+        // build SQL statement to fetch a record to merge with
+        $metadata = $this->getMetadata($nodeToMerge);
+        $sql = "SELECT * FROM {$metadata->getTableName()} WHERE " . join(', ', $whereClause);
+
+        $records = $conn->fetchAll($sql);
+        if (1 === count($records)) {
+            $this->recordList[$oid] = $records[0];
+            return $records[0];
+        } elseif (count($records) > 1) {
+            throw new \RuntimeException("Mutiple record to merge found with: '{$sql}'");
+        }
+    }
+
+    /**
+     * Create a value from a any type of node based
+     * on Doctrine's field mapping.
+     *
+     * @param array $fieldMapping
+     * @param NodeInterface $node
+     * @return string
+     */
+    protected function createCompositeValue(array $fieldMapping, NodeInterface $node)
+    {
+        $value = null;
+        $objRestorer = new ObjectRestorer();
+        if ($node instanceof Node) {
+            $value = $objRestorer->restore($node);
+
+        } elseif ($node instanceof NodeCollection) {
+            $value = array();
+            foreach ($node as $elem) {
+                $objRestorer = new ObjectRestorer();
+                $key = $elem->getMeta('key');
+                if (null === $key) {
+                    $value[] = $objRestorer->restore($elem);
+                } else {
+                    $isEnum = ('i' === $key[0]);
+                    $key = substr($key, 2);
+                    $val = ($isEnum) ? (integer) $key : (string) $key;
+                    $value[$val] = $objRestorer->restore($elem);
+                }
+            }
+        }
+
+        $platform = $this->entityManager->getConnection()->getDatabasePlatform();
+        return Type::getType($fieldMapping['type'])->convertToDatabaseValue($value, $platform);
+    }
+
+    /**
      * Recursively create records, start with $node.
      *
      * @param Node $node
@@ -136,6 +213,9 @@ class DoctrineRestorer extends AbstractRestorer
             return $this->recordList[$oid];
         }
 
+        // get merge list
+        $merge = json_decode($node->getMeta('merge', '[]'));
+
         // gather column data
         $record = array();
         $relations = array();
@@ -143,12 +223,18 @@ class DoctrineRestorer extends AbstractRestorer
         foreach ($node->getProperties() as $fieldName => $property) {
 
             // attribute data
-            if ($property instanceof NodeProperty) {
-                $record[$metadata->getColumnName($fieldName)] = $property->getValue();
+            if ($metadata->hasField($fieldName)) {
+                if ($property instanceof NodeProperty) {
+                    $record[$metadata->getColumnName($fieldName)] = $property->getValue();
+
+                } else {
+                    $fieldMapping = $metadata->getFieldMapping($fieldName);
+                    $record[$fieldMapping['columnName']] = $this->createCompositeValue($fieldMapping, $property);
+                }
                 continue;
             }
 
-            // owning associations
+            // owning relations
             $mapping = $metadata->getAssociationMapping($fieldName);
             if ($mapping['isOwningSide']) {
 
@@ -162,7 +248,9 @@ class DoctrineRestorer extends AbstractRestorer
                 elseif (1 === count($mapping['joinColumns'])) {
                     $foreignColumn = $mapping['joinColumns'][0];
                     if ($property instanceof Node) {
-                        $foreignRecord = $this->createRecord($property);
+
+                        $foreignRecord = (in_array($fieldName, $merge, true)) ? $this->findRecord($property) : null;
+                        $foreignRecord = (null === $foreignRecord) ? $this->createRecord($property) : $foreignRecord;
                         $record[$foreignColumn['name']] = @$foreignRecord[$foreignColumn['referencedColumnName']];
 
                     } else {
@@ -183,7 +271,8 @@ class DoctrineRestorer extends AbstractRestorer
                         'type' => 'inverseJoinTable', 'node' => $property, 'mappedBy' => $mapping['mappedBy']);
 
                 } else {
-                    $relations[$fieldName] = array('node' => $property);
+                    $relations[$fieldName] = array(
+                        'node' => $property, 'mappedBy' => $mapping['mappedBy'], 'from' => $node);
                 }
             }
         }
@@ -205,7 +294,7 @@ class DoctrineRestorer extends AbstractRestorer
     {
         foreach ($relations as $rel) {
             $node = $rel['node'];
-            switch ($rel['type']) {
+            switch (@$rel['type']) {
                 case 'joinTable':
                     foreach ($node as $n) {
                         $foreignRecord = $this->createRecord($n);
@@ -247,9 +336,11 @@ class DoctrineRestorer extends AbstractRestorer
                 default:
                     if ($node instanceof NodeCollection) {
                         foreach ($node as $relatedNode) {
+                            $relatedNode->setProperty($rel['mappedBy'], $rel['from']);
                             $this->createRecord($relatedNode);
                         }
                     } else {
+                        $relatedNode->setProperty($rel['mappedBy'], $rel['from']);
                         $this->createRecord($node);
                     }
             }
@@ -260,6 +351,7 @@ class DoctrineRestorer extends AbstractRestorer
      * Process final record.
      *
      * @param array $record
+     * @param ClassMetadata $metadata
      * @param string $joinTableName
      * @throws \RuntimeException
      */
@@ -268,9 +360,31 @@ class DoctrineRestorer extends AbstractRestorer
         // get table name
         if (null === $metadata) {
             $tableName = $joinTableName;
-            $isIdGeneratorIdentity = false;
         } else {
             $tableName = $metadata->getTableName();
+        }
+
+        // perform data merge
+        switch ($this->mergeMode) {
+            case self::MM_INSERT:
+                $this->modeInsert($tableName, $record, $metadata);
+                break;
+        }
+    }
+
+    /**
+     * Insert mode. Given $record is inserted.
+     *
+     * @param string $tableName
+     * @param array $record
+     * @param ClassMetadata $metadata
+     * @throws \RuntimeException
+     */
+    protected function modeInsert($tableName, &$record, ClassMetadata $metadata = null)
+    {
+        if (null === $metadata) {
+            $isIdGeneratorIdentity = false;
+        } else {
             $isIdGeneratorIdentity = $metadata->isIdGeneratorIdentity();
         }
 
@@ -282,7 +396,6 @@ class DoctrineRestorer extends AbstractRestorer
         }
 
         // insert record
-        // TODO: support more merge modes
         $conn = $this->entityManager->getConnection();
         try {
             $conn->insert($tableName, $record);
@@ -297,14 +410,10 @@ class DoctrineRestorer extends AbstractRestorer
                 $record[$id[0]] = $conn->lastInsertId();
             }
         }
-
-        echo $tableName . " - "; var_dump($record);
-
-        return $record;
     }
 
     /**
-     * Return FQ-class name of entity to restore.
+     * Return class name of entity to restore.
      *
      * @param Node $node
      * @return string

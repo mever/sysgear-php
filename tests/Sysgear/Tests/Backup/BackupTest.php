@@ -51,11 +51,11 @@ class BackupTest extends TestCase
       </language>
     </locale>
     <functions type="list">
-      <Role type="object" class="Sysgear\Tests\Backup\Role">
+      <Role type="object" class="Sysgear\Tests\Backup\Role" key="i;0">
         <id type="integer" value="1"/>
         <name type="string" value="admin"/>
         <members type="list">
-          <User type="object" class="Sysgear\Tests\Backup\User">
+          <User type="object" class="Sysgear\Tests\Backup\User" key="i;0">
             <id type="integer" value="1"/>
             <name type="string" value="piet"/>
             <password type="string" value="bf7s83s"/>
@@ -88,7 +88,7 @@ class BackupTest extends TestCase
         $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>
 <backup xmlns:xlink="http://www.w3.org/1999/xlink" type="container">'
   /* -removed: date field */ .'
-  <content type="object" class="Sysgear\Tests\Backup\User">
+  <content type="object" class="Sysgear\Tests\Backup\User" key="i;0">
     <id type="integer" value="1"/>
     <name type="string" value="piet"/>
     <password type="string" value="bf7s83s"/>
@@ -157,7 +157,7 @@ class BackupTest extends TestCase
       <name type="string" value="rts"/>
     </employer>
     <roles type="list">
-      <Role type="object" class="Sysgear\Tests\Backup\Role">
+      <Role type="object" class="Sysgear\Tests\Backup\Role" key="i;0">
         <id type="integer" value="1"/>
         <name type="string" value="admin"/>
       </Role>
@@ -194,11 +194,11 @@ class BackupTest extends TestCase
       </language>
     </locale>
     <functions type="list">
-      <Role type="object" class="Sysgear\Tests\Backup\Role">
+      <Role type="object" class="Sysgear\Tests\Backup\Role" key="i;0">
         <id type="integer" value="1"/>
         <name type="string" value="admin"/>
         <members type="list">
-          <User type="object" class="Sysgear\Tests\Backup\User">
+          <User type="object" class="Sysgear\Tests\Backup\User" key="i;0">
             <id type="integer" value="1"/>
             <name type="string" value="piet"/>
             <password type="string" value="bf7s83s"/>
@@ -244,11 +244,11 @@ class BackupTest extends TestCase
       </language>
     </locale>
     <functions type="list">
-      <Role type="object" class="Sysgear\Tests\Backup\Role">
+      <Role type="object" class="Sysgear\Tests\Backup\Role" key="i;0">
         <id type="integer" value="1"/>
         <name type="string" value="admin"/>
         <members type="list">
-          <User type="object" class="Sysgear\Tests\Backup\User">
+          <User type="object" class="Sysgear\Tests\Backup\User" key="i;0">
             <id type="integer" value="1"/>
             <name type="string" value="piet"/>
             <password type="string" value="bf7s83s"/>
