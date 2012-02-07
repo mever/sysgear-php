@@ -133,6 +133,7 @@ class DoctrineRestorer extends AbstractRestorer
             return $this->recordList[$oid];
         }
 
+        $metadata = $this->getMetadata($nodeToMerge);
         $conn = $this->entityManager->getConnection();
 
         $whereClause = array();
@@ -141,6 +142,14 @@ class DoctrineRestorer extends AbstractRestorer
             $mergeFields = $nodeToMerge->getMeta('merge-fields');
             if (null === $mergeFields || in_array($name, json_decode($mergeFields))) {
                 if ($prop instanceof Node) {
+
+                    $record = $this->findRecord($prop);
+                    $mapping = $metadata->getAssociationMapping($name);
+                    foreach ($mapping['joinColumns'] as $joinColumn) {
+                        $whereClause[] = $conn->quoteIdentifier($joinColumn['name']) . ' = ' .
+                            $conn->quote(@$record[$joinColumn['referencedColumnName']]);
+                    }
+
                 } elseif ($prop instanceof NodeProperty) {
                     $whereClause[] = $conn->quoteIdentifier($name) . ' = ' . $conn->quote($prop->getValue());
                 }
@@ -152,21 +161,21 @@ class DoctrineRestorer extends AbstractRestorer
         }
 
         // build SQL statement to fetch a record to merge with
-        $metadata = $this->getMetadata($nodeToMerge);
-        $sql = "SELECT * FROM {$metadata->getTableName()} WHERE " . join(', ', $whereClause);
+        $tableName = $conn->quoteIdentifier($metadata->getTableName());
+        $sql = "SELECT * FROM {$tableName} WHERE " . join('AND ', $whereClause);
 
         $records = $conn->fetchAll($sql);
         if (1 === count($records)) {
             $this->recordList[$oid] = $records[0];
             return $records[0];
         } elseif (count($records) > 1) {
-            throw new \RuntimeException("Mutiple record to merge found with: '{$sql}'");
+            throw new \RuntimeException("Mutiple records to merge found with: '{$sql}'");
         }
     }
 
     /**
-     * Create a value from a any type of node based
-     * on Doctrine's field mapping.
+     * Create a value from any type of node
+     * based on Doctrine's field mapping.
      *
      * @param array $fieldMapping
      * @param NodeInterface $node

@@ -142,16 +142,9 @@ class BackupTool
         if (array_key_exists('entityManager', $restorerOptions)) {
             $entityManager = $restorerOptions['entityManager'];
             $restorer = new DoctrineRestorer(array('entityManager' => $entityManager));
-            $entityManager->getConnection()->beginTransaction();
-            try {
+            $entityManager->transactional(function() use ($restorer, $contentNode) {
                 $restorer->restore($contentNode);
-                $entityManager->getConnection()->commit();
-
-            } catch (\Exception $e) {
-                $entityManager->getConnection()->rollback();
-                $entityManager->close();
-                throw $e;
-            }
+            });
         }
 
         if (true !== @$restorerOptions['doNotReconstruct']) {
