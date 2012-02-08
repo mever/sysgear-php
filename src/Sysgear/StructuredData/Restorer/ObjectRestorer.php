@@ -83,9 +83,19 @@ class ObjectRestorer extends AbstractRestorer
     protected function restoreCollection(NodeCollection $collection)
     {
         $arr = array();
-        foreach ($collection as $node) {
-            $arr[] = $this->getPropertyValue($node);
+        foreach ($collection as $elem) {
+
+            $key = $elem->getMeta('key');
+            if (null === $key) {
+                $arr[] = $this->getPropertyValue($elem);
+            } else {
+                $isEnum = ('i' === $key[0]);
+                $key = substr($key, 2);
+                $val = ($isEnum) ? (integer) $key : (string) $key;
+                $arr[$val] = $this->getPropertyValue($elem);
+            }
         }
+
         return $arr;
     }
 
