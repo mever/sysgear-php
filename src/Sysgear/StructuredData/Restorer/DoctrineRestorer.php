@@ -98,7 +98,20 @@ class DoctrineRestorer extends AbstractRestorer
             throw new \InvalidArgumentException("No entity manager given.");
         }
 
-        $this->restoreNode($node);
+        $class = $node->getMeta('class');
+        $record = $this->restoreNode($node);
+        if (null !== $record && null !== $class) {
+
+            $criteria = array();
+            $identifier = $this->getMetadata($node)->getIdentifier();
+            foreach ($record as $field => $value) {
+                if (in_array($field, $identifier, true)) {
+                    $criteria[$field] = $value;
+                }
+            }
+
+            return $this->entityManager->getRepository($class)->findOneBy($criteria);
+        }
     }
 
     /**
@@ -106,13 +119,14 @@ class DoctrineRestorer extends AbstractRestorer
      *
      * @param Node $node
      * @throws \RuntimeException
+     * @return array $record
      */
     protected function restoreNode(Node $node)
     {
         switch ($this->mergeMode) {
             case self::MM_INSERT:
                 $this->recordList = array();
-                $this->createRecord($node);
+                return $this->createRecord($node);
                 break;
 
             default:
