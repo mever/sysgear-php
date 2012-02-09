@@ -132,17 +132,16 @@ class BackupTool
      */
     public function restore(array $restorerOptions = array(), BackupableInterface $object = null)
     {
-        $restorerOptions = array_merge($this->restorerOptions, $restorerOptions);
-
         $contentNode = $this->importer->getNode()->getProperty('content');
         if (null === $contentNode) {
             throw Exception::backupHasNoContent($this->importer->getNode());
         }
 
+        $restoredObject = null;
+        $restorerOptions = array_merge($this->restorerOptions, $restorerOptions);
         if (array_key_exists('entityManager', $restorerOptions)) {
             $entityManager = $restorerOptions['entityManager'];
 
-            $restoredObject = null;
             $restorer = new DoctrineRestorer(array('entityManager' => $entityManager));
             $entityManager->transactional(function() use ($restorer, $contentNode, &$restoredObject) {
                 $restoredObject = $restorer->restore($contentNode);

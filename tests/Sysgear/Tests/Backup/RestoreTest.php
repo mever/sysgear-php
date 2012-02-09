@@ -32,7 +32,7 @@ class RestoreTest extends TestCase
 </backup>');
 
         $tool = new BackupTool(new XmlExporter(), $importer);
-        $tool->restore();
+        $this->assertNull($tool->restore());
     }
 
     public function testRestore()
@@ -75,6 +75,7 @@ class RestoreTest extends TestCase
 </backup>');
 
        $tool = new BackupTool(new XmlExporter(), $importer);
+       $tool->setRestorerOption('reconstruct', true);
        $company = $tool->restore(array());
        $this->assertEquals($this->basicCompany(), $company);
     }
