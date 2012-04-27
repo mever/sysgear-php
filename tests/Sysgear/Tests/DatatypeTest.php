@@ -393,21 +393,11 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
         );
 
         Datatype::castDatesInRecords('Europe/Amsterdam', $records, array(1 => Datatype::DATETIME));
-        $dst = ('1' === date('I'));
-
-        if ($dst) {
-            $this->assertSame(array(
-                array('abc', '2011-01-01T16:13:00+00:00', 123, null),
-                array('d7a', '2011-09-29T16:02:00+00:00', 489, null),
-                array('3d7', '2011-08-31T23:12:13+00:00', null, 3246)
-            ), $records);
-        } else {
-            $this->assertSame(array(
-                array('abc', '2011-01-01T15:13:00+00:00', 123, null),
-                array('d7a', '2011-09-29T14:02:00+00:00', 489, null),
-                array('3d7', '2011-08-31T22:12:13+00:00', null, 3246)
-            ), $records);
-        }
+        $this->assertSame(array(
+            array('abc', '2011-01-01T15:13:00+00:00', 123, null),
+            array('d7a', '2011-09-29T14:02:00+00:00', 489, null),
+            array('3d7', '2011-08-31T22:12:13+00:00', null, 3246)
+        ), $records);
     }
 
 
