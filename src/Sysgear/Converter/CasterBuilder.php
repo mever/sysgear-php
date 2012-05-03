@@ -54,13 +54,14 @@ class CasterBuilder implements CasterInterface
     }
 
     /**
-     * Add default cast functions.
+     * Add default PHP types.
      */
-    public function addDefaultCasts()
+    public function useDefaultTypes()
     {
         $this->add(Datatype::INT, '(int) $v');
         $this->add(Datatype::FLOAT, '(float) $v');
         $this->add(Datatype::NUMBER, '(float) $v');
+        $this->add(Datatype::DATETIME, 'new \\DateTime($v)');
     }
 
     /**
@@ -76,7 +77,8 @@ class CasterBuilder implements CasterInterface
         $className = 'GeneratedCaster_' . sha1($switchClause);
         if (! class_exists($className)) {
             $class = "class {$className} implements Sysgear\\Converter\\CasterInterface {\n".
-                "public function cast(\$type, \$v) {\nswitch(\$type) {\n{$switchClause}}}}";
+                "public function cast(\$type, \$v) {\nswitch(\$type) {\n{$switchClause}".
+                "default: return \$v;\n}}}";
 
             eval($class);
         }
