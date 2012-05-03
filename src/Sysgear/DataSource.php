@@ -175,6 +175,20 @@ class DataSource implements \Serializable
         return $this->context;
     }
 
+    /**
+     * Return datasource timezone.
+     *
+     * @return string
+     */
+    public function getTimezone()
+    {
+        if (method_exists($this->context, 'getTimezone')) {
+            return $this->context->getTimezone();
+        }
+
+        return 'Zulu';
+    }
+
     public function serialize()
     {
         return serialize(array(
