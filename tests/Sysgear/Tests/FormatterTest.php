@@ -213,4 +213,73 @@ class FormatterTest extends \PHPUnit_Framework_TestCase
                 array('3d7', null, null, 3246)
         ), $records);
     }
+
+    public function testFormatDate_datetime()
+    {
+        $formatter = new Formatter();
+        $formatter->srcTimezone = 'Europe/Amsterdam';
+        $formatter->dstTimezone = 'Zulu';
+
+        $date = new \DateTime('2012-05-03 00:00:00');
+        $str = $formatter->formatDate($date, Datatype::DATETIME);
+        $this->assertEquals('2012-05-02T22:00:00+00:00', $str);
+    }
+
+    public function testFormatDate_datetime_format()
+    {
+        $formatter = new Formatter();
+        $formatter->srcTimezone = 'Europe/Amsterdam';
+        $formatter->dstTimezone = 'Zulu';
+        $formatter->formatDatetime = 'm#d$Y iHs';
+
+        $date = new \DateTime('2012-05-03 00:00:00');
+        $str = $formatter->formatDate($date, Datatype::DATETIME);
+        $this->assertEquals('05#02$2012 002200', $str);
+    }
+
+    public function testFormatDate_date()
+    {
+        $formatter = new Formatter();
+        $formatter->srcTimezone = 'Europe/Amsterdam';
+        $formatter->dstTimezone = 'Zulu';
+
+        $date = new \DateTime('2012-05-03 00:00:00');
+        $str = $formatter->formatDate($date, Datatype::DATE);
+        $this->assertEquals('2012-05-02', $str);    // changing the timezone is cause this
+    }
+
+    public function testFormatDate_date_format()
+    {
+        $formatter = new Formatter();
+        $formatter->srcTimezone = 'Europe/Amsterdam';
+        $formatter->dstTimezone = 'Zulu';
+        $formatter->formatDate = 'm#d$Y';
+
+        $date = new \DateTime('2012-05-03 00:00:00');
+        $str = $formatter->formatDate($date, Datatype::DATE);
+        $this->assertEquals('05#02$2012', $str);    // changing the timezone is cause this
+    }
+
+    public function testFormatDate_time()
+    {
+        $formatter = new Formatter();
+        $formatter->srcTimezone = 'Europe/Amsterdam';
+        $formatter->dstTimezone = 'Zulu';
+
+        $date = new \DateTime('2012-05-03 00:00:00');
+        $str = $formatter->formatDate($date, Datatype::TIME);
+        $this->assertEquals('22:00:00', $str);
+    }
+
+    public function testFormatDate_time_format()
+    {
+        $formatter = new Formatter();
+        $formatter->srcTimezone = 'Europe/Amsterdam';
+        $formatter->dstTimezone = 'Zulu';
+        $formatter->formatTime = 'iHs';
+
+        $date = new \DateTime('2012-05-03 00:00:00');
+        $str = $formatter->formatDate($date, Datatype::TIME);
+        $this->assertEquals('002200', $str);
+    }
 }

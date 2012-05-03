@@ -135,6 +135,32 @@ class Formatter
     }
 
     /**
+     * Format a specific date.
+     *
+     * @param \DateTime $date
+     * @param integer $dataType
+     * @return string
+     */
+    public function formatDate(\DateTime $date, $dataType)
+    {
+        switch ($dataType) {
+            case Datatype::DATE:
+                $format = $this->formatDate;
+                break;
+
+            case Datatype::TIME:
+                $format = $this->formatTime;
+                break;
+
+            default:
+                $format = $this->formatDatetime;
+                break;
+        }
+
+        return $date->setTimezone(new \DateTimeZone($this->dstTimezone))->format($format);
+    }
+
+    /**
      * Determine if $value is a datetime, date or time.
      *
      * @param string $value
