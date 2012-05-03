@@ -16,6 +16,18 @@ use Sysgear\Datatype;
 
 class ConverterTest extends \PHPUnit_Framework_TestCase
 {
+    public function testProcessRecord()
+    {
+        $record = array('abc', '123', '03-05-2012 15:16:17');
+        $types = array(Datatype::STRING, Datatype::INT, Datatype::DATETIME);
+
+        $converter = new Converter();
+        $converter->processRecord($record, $types);
+
+        $expectedRecord = array('abc', 123, new \DateTime('03-05-2012 15:16:17'));
+        $this->assertEquals($expectedRecord, $record);
+    }
+
     public function testFormatRecords_datetime_as_datetime()
     {
         $converter = new Converter();

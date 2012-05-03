@@ -12,6 +12,9 @@
 
 namespace Sysgear;
 
+use Sysgear\Converter\CasterInterface;
+use Sysgear\Converter\CasterBuilder;
+
 /**
  * Utility to convert and format values with certain data types.
  *
@@ -24,6 +27,11 @@ namespace Sysgear;
  */
 class Converter
 {
+    /**
+     * @var \Sysgear\Converter\CasterInterface
+     */
+    protected $caster;
+
     /**
      * Source timezone. This is the timezone of current values.
      *
@@ -45,11 +53,33 @@ class Converter
     public $formatTime = 'H:i:s';
 
     /**
-     * Create a new date/time formatter.
+     * Create a new converter.
+     *
+     * @param CasterInterface $caster
      */
-    public function __construct()
+    public function __construct(CasterInterface $caster = null)
     {
         $this->srcTimezone = date_default_timezone_get();
+
+        if (null === $caster) {
+            $this->caster = new CasterBuilder();
+            $this->caster->useDefaultTypes();
+        } else {
+            $this->caster = $caster;
+        }
+    }
+
+    /**
+     * Process a record.
+     *
+     * @param array $record
+     * @param array $types
+     */
+    public function processRecord(&$record, $types)
+    {
+        foreach ($record as $field => &$value) {
+            $value = $this->caster->cast(@$types[$field], $value);
+        }
     }
 
     /**
