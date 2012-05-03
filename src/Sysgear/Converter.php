@@ -13,7 +13,7 @@
 namespace Sysgear;
 
 /**
- * Utility to format values with certain data types.
+ * Utility to convert and format values with certain data types.
  *
  * Parsing and formatting is weak typed, dateTime
  * values can be formatted as datetime, date and time.
@@ -22,7 +22,7 @@ namespace Sysgear;
  * date and time can never be cast to a datetime type. Date cannot
  * supply time information and time cannot supply date information.
  */
-class Formatter
+class Converter
 {
     /**
      * Source timezone. This is the timezone of current values.
