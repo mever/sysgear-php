@@ -58,10 +58,10 @@ class CasterBuilder implements CasterInterface
      */
     public function useDefaultTypes()
     {
-        $this->add(Datatype::INT, '(int) $v');
-        $this->add(Datatype::FLOAT, '(float) $v');
-        $this->add(Datatype::NUMBER, '(float) $v');
-        $this->add(Datatype::DATETIME, 'new \\DateTime($v)');
+        $this->add(Datatype::INT, 'return (int) $v');
+        $this->add(Datatype::FLOAT, 'return (float) $v');
+        $this->add(Datatype::NUMBER, 'return (float) $v');
+        $this->add(Datatype::DATETIME, 'return new \\DateTime($v)');
     }
 
     /**
@@ -71,7 +71,7 @@ class CasterBuilder implements CasterInterface
     {
         $switchClause = '';
         foreach ($this->castMethods as $type => $code) {
-            $switchClause .= "case {$type}:return {$code};break;\n";
+            $switchClause .= "case {$type}:{$code};break;\n";
         }
 
         $className = 'GeneratedCaster_' . sha1($switchClause);

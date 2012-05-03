@@ -66,7 +66,16 @@ class CasterBuilderTest extends \PHPUnit_Framework_TestCase
     public function testCast_castDatatime()
     {
         $builder = new CasterBuilder();
-        $builder->add(Datatype::DATETIME, 'new \\DateTime($v)');
+        $builder->add(Datatype::DATETIME, 'return new \\DateTime($v)');
+
+        $date = new \DateTime('2012-05-03 16:46:24');
+        $this->assertEquals($date, $builder->cast(Datatype::DATETIME, '2012-05-03 16:46:24'));
+    }
+
+    public function testCast_castDatatime_twoStatments()
+    {
+        $builder = new CasterBuilder();
+        $builder->add(Datatype::DATETIME, '$date = new \\DateTime($v); return $date');
 
         $date = new \DateTime('2012-05-03 16:46:24');
         $this->assertEquals($date, $builder->cast(Datatype::DATETIME, '2012-05-03 16:46:24'));
