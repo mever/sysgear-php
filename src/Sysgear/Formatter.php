@@ -141,7 +141,7 @@ class Formatter
      * @param integer $dataType
      * @return string
      */
-    public function formatDate(\DateTime $date, $dataType)
+    public function formatDate(\DateTime $date, $dataType = Datatype::DATETIME)
     {
         switch ($dataType) {
             case Datatype::DATE:
