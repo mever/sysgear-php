@@ -22,4 +22,11 @@ interface CasterInterface
      * @return mixed
      */
     public function cast($type, $value);
+
+    /**
+     * Set the timzone of data to cast.
+     *
+     * @param \DateTimeZone $timezone
+     */
+    public function setTimezone(\DateTimeZone $timezone);
 }

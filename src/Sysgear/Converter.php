@@ -13,7 +13,7 @@
 namespace Sysgear;
 
 use Sysgear\Converter\CasterInterface;
-use Sysgear\Converter\CasterBuilder;
+use Sysgear\Converter\BuildCaster;
 
 /**
  * Utility to convert and format values with certain data types.
@@ -37,16 +37,16 @@ class Converter
      *
      * Default: date_default_timezone_get
      *
-     * @var string
+     * @var \DateTimeZone
      */
-    public $srcTimezone;
+    protected $srcTimezone;
 
     /**
      * Destination timezone. This is the timezone you cast values to.
      *
-     * @var string
+     * @var \DateTimeZone
      */
-    public $dstTimezone = 'Zulu';
+    protected $dstTimezone;
 
     public $formatDatetime = \DATE_W3C;
     public $formatDate = 'Y-m-d';
@@ -59,14 +59,36 @@ class Converter
      */
     public function __construct(CasterInterface $caster = null)
     {
-        $this->srcTimezone = date_default_timezone_get();
+        $this->srcTimezone = new \DateTimeZone(date_default_timezone_get());
+        $this->dstTimezone = new \DateTimeZone('Zulu');
 
         if (null === $caster) {
-            $this->caster = new CasterBuilder();
+            $this->caster = new BuildCaster();
             $this->caster->useDefaultTypes();
         } else {
             $this->caster = $caster;
         }
+    }
+
+    /**
+     * Set source timzone. This is the timezone from which data is formatted / cast.
+     *
+     * @param \DateTimeZone $timezone
+     */
+    public function setTimezoneSrc(\DateTimeZone $timezone)
+    {
+        $this->srcTimezone = $timezone;
+        $this->caster->setTimezone($timezone);
+    }
+
+    /**
+     * Set destination timzone. This is the timezone to which data needs to be formatted / cast.
+     *
+     * @param \DateTimeZone $timezone
+     */
+    public function setTimezoneDest(\DateTimeZone $timezone)
+    {
+        $this->dstTimezone = $timezone;
     }
 
     /**
@@ -124,9 +146,14 @@ class Converter
             case Datatype::DATE:
                 if (empty($value)) {
                     $value = null;
+
+                } elseif ($value instanceof \DateTime) {
+                    $value = $value->format($this->formatDate);
+
                 } elseif (Datatype::TIME !== $this->getDateTimeType($value)) {
-                    $date = new \DateTime($value, new \DateTimeZone($this->srcTimezone));
+                    $date = new \DateTime($value, $this->srcTimezone);
                     $value = $date->format($this->formatDate);
+
                 } else {
                     throw new \LogicException('Trying to format, something that looks like a ' .
                         Datatype::toDesc($this->getDateTimeType($value)) . ', as date');
@@ -136,10 +163,15 @@ class Converter
             case Datatype::DATETIME:
                 if (empty($value)) {
                     $value = null;
+
+                } elseif ($value instanceof \DateTime) {
+                    $value = $value->format($this->formatDatetime);
+
                 } elseif (Datatype::DATETIME === $this->getDateTimeType($value)) {
-                    $date = new \DateTime($value, new \DateTimeZone($this->srcTimezone));
-                    $date->setTimezone(new \DateTimeZone($this->dstTimezone));
+                    $date = new \DateTime($value, $this->srcTimezone);
+                    $date->setTimezone($this->dstTimezone);
                     $value = $date->format($this->formatDatetime);
+
                 } else {
                     throw new \LogicException('Trying to format, something that looks like a ' .
                         Datatype::toDesc($this->getDateTimeType($value)) . ', as datetime');
@@ -147,18 +179,28 @@ class Converter
                 break;
 
             case Datatype::TIME:
-                $dt = $this->getDateTimeType($value);
                 if (empty($value)) {
                     $value = null;
-                } elseif (Datatype::DATE !== $dt) {
-                    $date = new \DateTime($value, new \DateTimeZone($this->srcTimezone));
-                    if (Datatype::DATETIME === $dt) {
-                        $date->setTimezone(new \DateTimeZone($this->dstTimezone));
-                    }
-                    $value = $date->format($this->formatTime);
+
+                } elseif ($value instanceof \DateTime) {
+                    $value = $value->format($this->formatTime);
+
                 } else {
-                    throw new \LogicException('Trying to format, something that looks like a ' .
-                        Datatype::toDesc($dt) . ', as time');
+                    $dt = $this->getDateTimeType($value);
+                    if (Datatype::DATE !== $dt) {
+                        $date = new \DateTime($value, $this->srcTimezone);
+
+                        // only change timezone if datetime is supplied, this
+                        // should prevent unexpected DST calculations.
+                        if (Datatype::DATETIME === $dt) {
+                            $date->setTimezone($this->dstTimezone);
+                        }
+                        $value = $date->format($this->formatTime);
+
+                    } else {
+                        throw new \LogicException('Trying to format, something that looks like a ' .
+                            Datatype::toDesc($dt) . ', as time');
+                    }
                 }
                 break;
         }
@@ -187,7 +229,7 @@ class Converter
                 break;
         }
 
-        return $date->setTimezone(new \DateTimeZone($this->dstTimezone))->format($format);
+        return $date->setTimezone($this->dstTimezone)->format($format);
     }
 
     /**
