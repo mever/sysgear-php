@@ -51,13 +51,14 @@ class DataSourceTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTimezone()
     {
+        $timezone = new \DateTimeZone('Europe/Amsterdam');
         $context = $this->getMock('Serializable', array('getTimezone', 'serialize', 'unserialize'));
-        $context->expects($this->once())->method('getTimezone')->will($this->returnValue('Europe/Amsterdam'));
+        $context->expects($this->once())->method('getTimezone')->will($this->returnValue($timezone));
 
         $ds = new DataSource('test://ABC');
         $ds->setContext($context);
 
-        $this->assertEquals('Europe/Amsterdam', $ds->getTimezone());
+        $this->assertEquals('Europe/Amsterdam', $ds->getTimezone()->getName());
     }
 
     public function testGetTimezone_noTimezoneInfo()
@@ -67,6 +68,6 @@ class DataSourceTest extends \PHPUnit_Framework_TestCase
         $ds = new DataSource('test://ABC');
         $ds->setContext($context);
 
-        $this->assertEquals('Zulu', $ds->getTimezone());
+        $this->assertEquals('Zulu', $ds->getTimezone()->getName());
     }
 }
