@@ -178,15 +178,18 @@ class DataSource implements \Serializable
     /**
      * Return datasource timezone.
      *
-     * @return string
+     * @return \DateTimeZone
      */
     public function getTimezone()
     {
         if (method_exists($this->context, 'getTimezone')) {
-            return $this->context->getTimezone();
+            $timezone = $this->context->getTimezone();
+            if ($timezone instanceof \DateTimeZone) {
+                return $timezone;
+            }
         }
 
-        return 'Zulu';
+        return new \DateTimeZone('Zulu');
     }
 
     public function serialize()
