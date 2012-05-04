@@ -16,6 +16,15 @@ use Sysgear\Datatype;
 
 class ConverterTest extends \PHPUnit_Framework_TestCase
 {
+    public function testContructor_default_timezones()
+    {
+        $converter = new Converter();
+
+        $ref = '03-05-2012 15:16:17';
+        $converter->formatValue($ref, Datatype::DATETIME);
+        $this->assertEquals('2012-05-03T17:16:17+02:00', $ref);
+    }
+
     public function testProcessRecord()
     {
         $record = array('abc', '123', '03-05-2012 15:16:17');

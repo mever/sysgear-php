@@ -59,8 +59,8 @@ class Converter
      */
     public function __construct(CasterInterface $caster = null)
     {
-        $this->srcTimezone = new \DateTimeZone(date_default_timezone_get());
-        $this->dstTimezone = new \DateTimeZone('Zulu');
+        $this->srcTimezone = new \DateTimeZone('Zulu');
+        $this->dstTimezone = new \DateTimeZone(date_default_timezone_get());
 
         if (null === $caster) {
             $this->caster = new BuildCaster();
