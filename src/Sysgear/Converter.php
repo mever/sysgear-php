@@ -74,21 +74,45 @@ class Converter
      * Set source timzone. This is the timezone from which data is formatted / cast.
      *
      * @param \DateTimeZone $timezone
+     * @return \Sysgear\Converter
      */
     public function setTimezoneSrc(\DateTimeZone $timezone)
     {
         $this->srcTimezone = $timezone;
         $this->caster->setTimezone($timezone);
+        return $this;
+    }
+
+    /**
+     * Return source timezone.
+     *
+     * @return \DateTimeZone
+     */
+    public function getTimezoneSrc()
+    {
+        return $this->srcTimezone;
     }
 
     /**
      * Set destination timzone. This is the timezone to which data needs to be formatted / cast.
      *
      * @param \DateTimeZone $timezone
+     * @return \Sysgear\Converter
      */
     public function setTimezoneDest(\DateTimeZone $timezone)
     {
         $this->dstTimezone = $timezone;
+        return $this;
+    }
+
+    /**
+     * Return destination timezone.
+     *
+     * @return \DateTimeZone
+     */
+    public function getTimezoneDest()
+    {
+        return $this->dstTimezone;
     }
 
     /**
