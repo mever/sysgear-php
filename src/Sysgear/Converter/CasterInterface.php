@@ -12,7 +12,7 @@
 
 namespace Sysgear\Converter;
 
-interface CasterInterface
+interface CasterInterface extends \Serializable
 {
     /**
      * Cast value with $type to a more specific type.

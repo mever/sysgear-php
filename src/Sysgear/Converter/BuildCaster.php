@@ -134,4 +134,16 @@ class BuildCaster implements CasterInterface
         $this->caster = new $className();
         return $className;
     }
+
+    public function serialize()
+    {
+        return serialize(array($this->castMethods, $this->timezone));
+    }
+
+    public function unserialize($serialized)
+    {
+        $properties = unserialize($serialized);
+        $this->castMethods = $properties[0];
+        $this->timezone = $properties[1];
+    }
 }

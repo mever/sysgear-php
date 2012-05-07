@@ -25,7 +25,7 @@ use Sysgear\Converter\BuildCaster;
  * date and time can never be cast to a datetime type. Date cannot
  * supply time information and time cannot supply date information.
  */
-class Converter
+class Converter implements \Serializable
 {
     /**
      * @var \Sysgear\Converter\CasterInterface
@@ -116,12 +116,25 @@ class Converter
     }
 
     /**
+     * Process a records.
+     *
+     * @param array $records
+     * @param array $types
+     */
+    public function processRecords(array &$records, array $types)
+    {
+        foreach ($records as &$record) {
+            $this->processRecord($record, $types);
+        }
+    }
+
+    /**
      * Process a record.
      *
      * @param array $record
      * @param array $types
      */
-    public function processRecord(&$record, $types)
+    public function processRecord(array &$record, array $types)
     {
         foreach ($record as $field => &$value) {
             $value = $this->caster->cast(@$types[$field], $value);
@@ -272,5 +285,24 @@ class Converter
         $match = null;
         preg_match('(^\d+-\d+-\d+|\d+:\d+(:\d+)?$)', trim($value), $match);
         return ($match && ':' === @$match[0][2]) ? Datatype::TIME : Datatype::DATE;
+    }
+
+    public function serialize()
+    {
+        return serialize(array(
+            'caster' => $this->caster,
+            'srcTimezone' => $this->srcTimezone,
+            'dstTimezone' => $this->dstTimezone,
+            'formatDatetime' => $this->formatDatetime,
+            'formatDate' => $this->formatDate,
+            'formattime' => $this->formatTime
+        ));
+    }
+
+    public function unserialize($serialized)
+    {
+        foreach (unserialize($serialized) as $property => $value) {
+            $this->{$property} = $value;
+        }
     }
 }
