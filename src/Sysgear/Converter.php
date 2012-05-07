@@ -116,25 +116,25 @@ class Converter implements \Serializable
     }
 
     /**
-     * Process a records.
+     * Cast field types in records.
      *
      * @param array $records
      * @param array $types
      */
-    public function processRecords(array &$records, array $types)
+    public function castRecords(array &$records, array $types)
     {
         foreach ($records as &$record) {
-            $this->processRecord($record, $types);
+            $this->castRecord($record, $types);
         }
     }
 
     /**
-     * Process a record.
+     * Cast fields in record.
      *
      * @param array $record
      * @param array $types
      */
-    public function processRecord(array &$record, array $types)
+    public function castRecord(array &$record, array $types)
     {
         foreach ($record as $field => &$value) {
             $value = $this->caster->cast(@$types[$field], $value);

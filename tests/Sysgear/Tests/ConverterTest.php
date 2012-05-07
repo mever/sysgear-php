@@ -25,20 +25,20 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('2012-05-03T17:16:17+02:00', $ref);
     }
 
-    public function testProcessRecord()
+    public function testCastRecord()
     {
         $record = array('abc', '123', '03-05-2012 15:16:17');
         $types = array(Datatype::STRING, Datatype::INT, Datatype::DATETIME);
 
         $converter = new Converter();
-        $converter->processRecord($record, $types);
+        $converter->castRecord($record, $types);
 
         $timezone = new \DateTimeZone('UTC');
         $expectedRecord = array('abc', 123, new \DateTime('03-05-2012 15:16:17', $timezone));
         $this->assertEquals($expectedRecord, $record);
     }
 
-    public function testProcessRecord_otherTimezone()
+    public function testCastRecord_otherTimezone()
     {
         $record = array('abc', '123', '03-05-2012 15:16:17');
         $types = array(Datatype::STRING, Datatype::INT, Datatype::DATETIME);
@@ -46,7 +46,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
         $timezone = new \DateTimeZone('Europe/Amsterdam');
         $converter = new Converter();
         $converter->setTimezoneSrc($timezone);
-        $converter->processRecord($record, $types);
+        $converter->castRecord($record, $types);
 
         $expectedRecord = array('abc', 123, new \DateTime('03-05-2012 15:16:17', $timezone));
         $this->assertEquals($expectedRecord, $record);
