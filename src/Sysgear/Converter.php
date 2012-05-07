@@ -189,6 +189,7 @@ class Converter
                     $value = null;
 
                 } elseif ($value instanceof \DateTime) {
+                    $value->setTimezone($this->dstTimezone);
                     $value = $value->format($this->formatDatetime);
 
                 } elseif (Datatype::DATETIME === $this->getDateTimeType($value)) {

@@ -52,6 +52,36 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedRecord, $record);
     }
 
+    public function testFormatValue_datetimeObj_as_datetime()
+    {
+        $converter = new Converter();
+        $converter->setTimezoneDest(new \DateTimeZone('America/Los_Angeles'));
+
+        $value = new \DateTime('2012-05-07 05:28:00', new \DateTimeZone('Zulu'));
+        $converter->formatValue($value, Datatype::DATETIME);
+        $this->assertEquals('2012-05-06T22:28:00-07:00', $value);
+    }
+
+    public function testFormatValue_datetimeObj_as_date()
+    {
+        $converter = new Converter();
+        $converter->setTimezoneDest(new \DateTimeZone('America/Los_Angeles'));
+
+        $value = new \DateTime('2012-05-07 05:28:00', new \DateTimeZone('Zulu'));
+        $converter->formatValue($value, Datatype::DATE);
+        $this->assertEquals('2012-05-07', $value);
+    }
+
+    public function testFormatValue_datetimeObj_as_time()
+    {
+        $converter = new Converter();
+        $converter->setTimezoneDest(new \DateTimeZone('America/Los_Angeles'));
+
+        $value = new \DateTime('2012-05-07 05:28:00', new \DateTimeZone('Zulu'));
+        $converter->formatValue($value, Datatype::TIME);
+        $this->assertEquals('05:28:00', $value);
+    }
+
     public function testFormatRecords_datetime_as_datetime()
     {
         $converter = new Converter();
