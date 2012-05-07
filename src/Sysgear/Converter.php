@@ -295,17 +295,18 @@ class Converter implements \Serializable
             'dstTimezone' => $this->dstTimezone->getName(),
             'formatDatetime' => $this->formatDatetime,
             'formatDate' => $this->formatDate,
-            'formattime' => $this->formatTime
+            'formatTime' => $this->formatTime
         ));
     }
 
     public function unserialize($serialized)
     {
-        $properties = (object) unserialize($serialized);
-        $this->caster = unserialize($properties);
-
-        foreach ($properties as $property => $value) {
-            $this->{$property} = $value;
-        }
+        $properties = unserialize($serialized);
+        $this->caster = $properties['caster'];
+        $this->srcTimezone = new \DateTimeZone($properties['srcTimezone']);
+        $this->dstTimezone = new \DateTimeZone($properties['dstTimezone']);
+        $this->formatDatetime = $properties['formatDatetime'];
+        $this->formatDate = $properties['formatDate'];
+        $this->formatTime = $properties['formatTime'];
     }
 }
