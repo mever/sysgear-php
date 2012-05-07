@@ -348,4 +348,29 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
         $str = $converter->formatDate($date, Datatype::TIME);
         $this->assertEquals('002200', $str);
     }
+
+    public function testSerialize()
+    {
+        $converter = new Converter();
+
+        $this->assertEquals('C:17:"Sysgear\Converter":385:{a:6:{s:6:"caster";'.
+            'C:29:"Sysgear\Converter\BuildCaster":148:{a:2:{i:0;a:4:{i:0;s:15:"return (int) $v";'.
+            'i:5;s:17:"return (float) $v";i:8;s:17:"return (float) $v";i:4;s:29:"return new \DateTime($v, $tz)";'.
+            '}i:1;N;}}s:11:"srcTimezone";s:3:"UTC";s:11:"dstTimezone";s:16:"Europe/Amsterdam";s:14:'.
+            '"formatDatetime";s:13:"Y-m-d\TH:i:sP";s:10:"formatDate";s:5:"Y-m-d";s:10:'.
+            '"formattime";s:5:"H:i:s";}}', serialize($converter));
+    }
+
+    public function testSerialize_withTimezoneSrc()
+    {
+        $converter = new Converter();
+        $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
+
+        $this->assertEquals('C:17:"Sysgear\Converter":421:{a:6:{s:6:"caster";'.
+            'C:29:"Sysgear\Converter\BuildCaster":170:{a:2:{i:0;a:4:{i:0;s:15:"return (int) $v";'.
+            'i:5;s:17:"return (float) $v";i:8;s:17:"return (float) $v";i:4;s:29:"return new \DateTime($v, $tz)";'.
+            '}i:1;s:16:"Europe/Amsterdam";}}s:11:"srcTimezone";s:16:"Europe/Amsterdam";s:11:"dstTimezone";'.
+            's:16:"Europe/Amsterdam";s:14:"formatDatetime";s:13:"Y-m-d\TH:i:sP";s:10:"formatDate";'.
+            's:5:"Y-m-d";s:10:"formattime";s:5:"H:i:s";}}', serialize($converter));
+    }
 }

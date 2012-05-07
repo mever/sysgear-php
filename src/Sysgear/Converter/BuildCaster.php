@@ -137,13 +137,15 @@ class BuildCaster implements CasterInterface
 
     public function serialize()
     {
-        return serialize(array($this->castMethods, $this->timezone));
+        return serialize(array(
+            $this->castMethods,
+            (null === $this->timezone) ? null : $this->timezone->getName()));
     }
 
     public function unserialize($serialized)
     {
         $properties = unserialize($serialized);
         $this->castMethods = $properties[0];
-        $this->timezone = $properties[1];
+        $this->timezone = (null === @$properties[1]) ? null : new \DateTimeZone($properties[1]);
     }
 }

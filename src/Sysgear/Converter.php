@@ -291,8 +291,8 @@ class Converter implements \Serializable
     {
         return serialize(array(
             'caster' => $this->caster,
-            'srcTimezone' => $this->srcTimezone,
-            'dstTimezone' => $this->dstTimezone,
+            'srcTimezone' => $this->srcTimezone->getName(),
+            'dstTimezone' => $this->dstTimezone->getName(),
             'formatDatetime' => $this->formatDatetime,
             'formatDate' => $this->formatDate,
             'formattime' => $this->formatTime
@@ -301,7 +301,10 @@ class Converter implements \Serializable
 
     public function unserialize($serialized)
     {
-        foreach (unserialize($serialized) as $property => $value) {
+        $properties = (object) unserialize($serialized);
+        $this->caster = unserialize($properties);
+
+        foreach ($properties as $property => $value) {
             $this->{$property} = $value;
         }
     }

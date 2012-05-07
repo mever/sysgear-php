@@ -98,4 +98,26 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $date = new \DateTime('2012-05-03 16:46:24');
         $this->assertEquals($date, $builder->cast(Datatype::DATETIME, '2012-05-03 16:46:24'));
     }
+
+    public function testSerialize()
+    {
+        $builder = new BuildCaster();
+        $this->assertEquals('C:29:"Sysgear\Converter\BuildCaster":22:{a:2:{i:0;a:0:{}i:1;N;}}', serialize($builder));
+    }
+
+    public function testSerialize_withTypeCaster()
+    {
+        $builder = new BuildCaster();
+        $builder->add(Datatype::INT, 'return (int) $v');
+
+        $this->assertEquals('C:29:"Sysgear\Converter\BuildCaster":49:{a:2:{i:0;a:1:'.
+            '{i:0;s:15:"return (int) $v";}i:1;N;}}', serialize($builder));
+    }
+
+    public function testSerialize_withTimezone()
+    {
+        $builder = new BuildCaster();
+        $builder->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
+        $this->assertEquals('C:29:"Sysgear\Converter\BuildCaster":44:{a:2:{i:0;a:0:{}i:1;s:16:"Europe/Amsterdam";}}', serialize($builder));
+    }
 }
