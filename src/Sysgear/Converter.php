@@ -59,7 +59,7 @@ class Converter implements \Serializable
      */
     public function __construct(CasterInterface $caster = null)
     {
-        $this->srcTimezone = new \DateTimeZone('Zulu');
+        $this->srcTimezone = new \DateTimeZone('UTC');
         $this->dstTimezone = new \DateTimeZone(date_default_timezone_get());
 
         if (null === $caster) {

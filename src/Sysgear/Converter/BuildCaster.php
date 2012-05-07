@@ -114,7 +114,7 @@ class BuildCaster implements CasterInterface
     protected function build()
     {
         if (null === $this->timezone) {
-            $this->timezone = new \DateTimeZone('Zulu');
+            $this->timezone = new \DateTimeZone('UTC');
         }
 
         $switchClause = '';

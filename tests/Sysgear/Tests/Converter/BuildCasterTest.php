@@ -67,7 +67,7 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
     {
         $builder = new BuildCaster();
         $builder->useDefaultTypes();
-        $date = new \DateTime('2012-05-03 16:46:24', new \DateTimeZone('Zulu'));
+        $date = new \DateTime('2012-05-03 16:46:24', new \DateTimeZone('UTC'));
         $this->assertEquals($date, $builder->cast(Datatype::DATETIME, '2012-05-03 16:46:24'));
     }
 
@@ -76,7 +76,7 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $builder = new BuildCaster();
         $builder->add(Datatype::DATETIME, 'return new \\DateTime($v, $tz)');
 
-        $date = new \DateTime('2012-05-03 16:46:24', new \DateTimeZone('Zulu'));
+        $date = new \DateTime('2012-05-03 16:46:24', new \DateTimeZone('UTC'));
         $this->assertEquals($date, $builder->cast(Datatype::DATETIME, '2012-05-03 16:46:24'));
     }
 

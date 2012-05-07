@@ -33,7 +33,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
         $converter = new Converter();
         $converter->processRecord($record, $types);
 
-        $timezone = new \DateTimeZone('Zulu');
+        $timezone = new \DateTimeZone('UTC');
         $expectedRecord = array('abc', 123, new \DateTime('03-05-2012 15:16:17', $timezone));
         $this->assertEquals($expectedRecord, $record);
     }
@@ -57,7 +57,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
         $converter = new Converter();
         $converter->setTimezoneDest(new \DateTimeZone('America/Los_Angeles'));
 
-        $value = new \DateTime('2012-05-07 05:28:00', new \DateTimeZone('Zulu'));
+        $value = new \DateTime('2012-05-07 05:28:00', new \DateTimeZone('UTC'));
         $converter->formatValue($value, Datatype::DATETIME);
         $this->assertEquals('2012-05-06T22:28:00-07:00', $value);
     }
@@ -67,7 +67,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
         $converter = new Converter();
         $converter->setTimezoneDest(new \DateTimeZone('America/Los_Angeles'));
 
-        $value = new \DateTime('2012-05-07 05:28:00', new \DateTimeZone('Zulu'));
+        $value = new \DateTime('2012-05-07 05:28:00', new \DateTimeZone('UTC'));
         $converter->formatValue($value, Datatype::DATE);
         $this->assertEquals('2012-05-07', $value);
     }
@@ -77,7 +77,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
         $converter = new Converter();
         $converter->setTimezoneDest(new \DateTimeZone('America/Los_Angeles'));
 
-        $value = new \DateTime('2012-05-07 05:28:00', new \DateTimeZone('Zulu'));
+        $value = new \DateTime('2012-05-07 05:28:00', new \DateTimeZone('UTC'));
         $converter->formatValue($value, Datatype::TIME);
         $this->assertEquals('05:28:00', $value);
     }
@@ -86,7 +86,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
         $records = array(
                 array('abc', '2011-01-1 16:13:00', 123, null),
                 array('d7a', '2011-09-29 16:2:00', 489, null),
@@ -109,7 +109,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
         $records = array(
                 array('abc', '2011-01-1 16:13:00', 123, null),
                 array('d7a', '2011-09-29 16:2:00', 489, null),
@@ -132,7 +132,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
         $records = array(
                 array('abc', '2011-01-1 16:13:00', 123, null),
                 array('d7a', '2011-09-29 16:2:00', 489, null),
@@ -159,7 +159,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
         $records = array(
                 array('abc', '0001-02-03', 123, null),
                 array('d7a', '2011-09-29', 489, null),
@@ -176,7 +176,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
         $records = array(
         array('abc', '0001-02-03', 123, null),
         array('d7a', '2011-09-29', 489, null),
@@ -204,7 +204,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
         $records = array(
                 array('abc', '0001-02-03', 123, null),
                 array('d7a', '2011-09-29', 489, null),
@@ -225,7 +225,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
         $records = array(
                 array('abc', '23:13:00', 123, null),
                 array('d7a', '16:21:46', 489, null),
@@ -245,7 +245,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
         $records = array(
                 array('abc', '23:13:00', 123, null),
                 array('d7a', '16:21:46', 489, null),
@@ -261,7 +261,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
         $records = array(
                 array('abc', '23:13:00', 123, null),
                 array('d7a', '16:21:46', 489, null),
@@ -284,7 +284,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
 
         $date = new \DateTime('2012-05-03 00:00:00');
         $str = $converter->formatDate($date, Datatype::DATETIME);
@@ -295,7 +295,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
         $converter->formatDatetime = 'm#d$Y iHs';
 
         $date = new \DateTime('2012-05-03 00:00:00');
@@ -307,7 +307,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
 
         $date = new \DateTime('2012-05-03 00:00:00');
         $str = $converter->formatDate($date, Datatype::DATE);
@@ -318,7 +318,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
         $converter->formatDate = 'm#d$Y';
 
         $date = new \DateTime('2012-05-03 00:00:00');
@@ -330,7 +330,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
 
         $date = new \DateTime('2012-05-03 00:00:00');
         $str = $converter->formatDate($date, Datatype::TIME);
@@ -341,7 +341,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     {
         $converter = new Converter();
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
-        $converter->setTimezoneDest(new \DateTimeZone('Zulu'));
+        $converter->setTimezoneDest(new \DateTimeZone('UTC'));
         $converter->formatTime = 'iHs';
 
         $date = new \DateTime('2012-05-03 00:00:00');
