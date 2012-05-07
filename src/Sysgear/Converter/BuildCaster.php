@@ -106,6 +106,7 @@ class BuildCaster implements CasterInterface
         $this->add(Datatype::FLOAT, 'return (float) $v');
         $this->add(Datatype::NUMBER, 'return (float) $v');
         $this->add(Datatype::DATETIME, 'return new \\DateTime($v, $tz)');
+        $this->add(Datatype::DATE, '$date = new \\DateTime($v); return $date->format("Y-m-d")');
     }
 
     /**
