@@ -123,6 +123,15 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($date, $builder->cast(Datatype::DATETIME, '2012-05-03 16:46:24'));
     }
 
+    public function testCast_castTime()
+    {
+        $builder = new BuildCaster();
+        $builder->useDefaultTypes();
+        $this->assertEquals('16:06:45', $builder->cast(Datatype::TIME, '16:06:45'));
+        $this->assertNull($builder->cast(Datatype::TIME, ''));
+        $this->assertNull($builder->cast(Datatype::TIME, null));
+    }
+
     public function testSerialize()
     {
         $builder = new BuildCaster();
