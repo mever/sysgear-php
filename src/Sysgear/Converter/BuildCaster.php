@@ -102,11 +102,12 @@ class BuildCaster implements CasterInterface
      */
     public function useDefaultTypes()
     {
-        $this->add(Datatype::INT, 'return (int) $v');
-        $this->add(Datatype::FLOAT, 'return (float) $v');
-        $this->add(Datatype::NUMBER, 'return (float) $v');
-        $this->add(Datatype::DATETIME, 'return new \\DateTime($v, $tz)');
-        $this->add(Datatype::DATE, '$date = new \\DateTime($v); return $date->format("Y-m-d")');
+        $this->add(Datatype::INT, 'return ("" === $v || null === $v) ? null : (int) $v');
+        $this->add(Datatype::FLOAT, 'return ("" === $v || null === $v) ? null : (float) $v');
+        $this->add(Datatype::NUMBER, 'return ("" === $v || null === $v) ? null : (float) $v');
+        $this->add(Datatype::DATETIME, 'if (empty($v)) {return null;} return new \\DateTime($v, $tz)');
+        $this->add(Datatype::DATE, 'if (empty($v)) {return null;} $date = new \\DateTime($v); '.
+            'return $date->format("Y-m-d")');
     }
 
     /**

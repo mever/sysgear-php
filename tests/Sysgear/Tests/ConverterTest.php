@@ -351,26 +351,22 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
 
     public function testSerialize()
     {
-        $converter = new Converter();
+        $caster = $this->getMock('Sysgear\Converter\CasterInterface');
+        $converter = new Converter($caster);
 
-        $this->assertEquals('C:17:"Sysgear\Converter":453:{a:6:{s:6:"caster";C:29:"'.
-            'Sysgear\Converter\BuildCaster":216:{a:2:{i:0;a:5:{i:0;s:15:"return (int) $v";'.
-            'i:5;s:17:"return (float) $v";i:8;s:17:"return (float) $v";i:4;s:29:"'.
-            'return new \DateTime($v, $tz)";i:2;s:56:"$date = new \DateTime($v); return $date->format("Y-m-d")"'.
-            ';}i:1;N;}}s:11:"srcTimezone";s:3:"UTC";s:11:"dstTimezone";s:16:"Europe/Amsterdam";'.
+        $this->assertEquals('C:17:"Sysgear\Converter":196:{a:6:{s:6:"caster";N;'.
+            's:11:"srcTimezone";s:3:"UTC";s:11:"dstTimezone";s:16:"Europe/Amsterdam";'.
             's:14:"formatDatetime";s:13:"Y-m-d\TH:i:sP";s:10:"formatDate";s:5:"Y-m-d";s:10:'.
             '"formatTime";s:5:"H:i:s";}}', serialize($converter));
     }
 
     public function testSerialize_withTimezoneSrc()
     {
-        $converter = new Converter();
+        $caster = $this->getMock('Sysgear\Converter\CasterInterface');
+        $converter = new Converter($caster);
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
 
-        $this->assertEquals('C:17:"Sysgear\Converter":489:{a:6:{s:6:"caster";C:29:"'.
-            'Sysgear\Converter\BuildCaster":238:{a:2:{i:0;a:5:{i:0;s:15:"return (int) $v";i:5;s:17:'.
-            '"return (float) $v";i:8;s:17:"return (float) $v";i:4;s:29:"return new \DateTime($v, $tz)";'.
-            'i:2;s:56:"$date = new \DateTime($v); return $date->format("Y-m-d")";}i:1;s:16:"Europe/Amsterdam";}}'.
+        $this->assertEquals('C:17:"Sysgear\Converter":210:{a:6:{s:6:"caster";N;'.
             's:11:"srcTimezone";s:16:"Europe/Amsterdam";s:11:"dstTimezone";s:16:"Europe/Amsterdam";'.
             's:14:"formatDatetime";s:13:"Y-m-d\TH:i:sP";s:10:"formatDate";s:5:"Y-m-d";s:10:'.
             '"formatTime";s:5:"H:i:s";}}', serialize($converter));
