@@ -60,6 +60,65 @@ class CursorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array(31, 32, 33), $cursor->getNext());
     }
 
+    public function testGetNext_withCount()
+    {
+        $records = array(
+            array(11, 12, 13),
+            array(21, 22, 23),
+            array(31, 32, 33)
+        );
+
+        $cursor = new Cursor(function($pointer) use ($records) {
+            return $records[$pointer];
+        }, 2);
+
+        $this->assertEquals(array(11, 12, 13), $cursor->getNext());
+        $this->assertEquals(array(21, 22, 23), $cursor->getNext());
+        $this->assertEquals(array(31, 32, 33), $cursor->getNext());
+    }
+
+    public function testGetNext_traversable_endByReturningNull()
+    {
+        $records = array(
+            array(11, 12, 13),
+            array(21, 22, 23),
+            array(31, 32, 33),
+            null
+        );
+
+        $cursor = new Cursor(function($pointer) use ($records) {
+            return $records[$pointer];
+        });
+
+        $actualRecords = array();
+        foreach ($cursor as $record) {
+            $actualRecords[] = $record;
+        }
+
+        unset($records[3]);
+        $this->assertEquals($records, $actualRecords);
+    }
+
+    public function testGetNext_traversable_endBySpecifingCount()
+    {
+        $records = array(
+            array(11, 12, 13),
+            array(21, 22, 23),
+            array(31, 32, 33)
+        );
+
+        $cursor = new Cursor(function($pointer) use ($records) {
+            return $records[$pointer];
+        }, 3);
+
+        $actualRecords = array();
+        foreach ($cursor as $record) {
+            $actualRecords[] = $record;
+        }
+
+        $this->assertEquals($records, $actualRecords);
+    }
+
     public function testNext()
     {
         $records = array(

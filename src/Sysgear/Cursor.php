@@ -12,7 +12,7 @@
 
 namespace Sysgear;
 
-class Cursor
+class Cursor implements \Iterator
 {
     protected $callback;
     protected $count;
@@ -42,14 +42,54 @@ class Cursor
     }
 
     /**
-     * Advances the cursor to the next result.
+     * Returns the current element.
      *
-     * @return \Application\WmsBundle\Contract\Iface\Cursor
+     * @return array
+     */
+    public function current()
+    {
+        $callback = $this->callback;
+        return $callback($this->pointer);
+    }
+
+    /**
+     * Return the pointer.
+     *
+     * @return integer
+     */
+    public function key()
+    {
+        return $this->pointer;
+    }
+
+    /**
+     * Advances the cursor to the next result.
      */
     public function next()
     {
         $this->pointer++;
-        return $this;
+    }
+
+    /**
+     * This operation is not supported!
+     */
+    public function rewind()
+    {
+        // NOT SUPPORTED FOR CURSORS
+    }
+
+    /**
+     * Checks if current position is valid.
+     *
+     * @return boolean
+     */
+    public function valid()
+    {
+        if (null === $this->count) {
+            return (null !== $this->current());
+        } else {
+            return ($this->pointer < $this->count);
+        }
     }
 
     /**
