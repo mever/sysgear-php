@@ -71,6 +71,18 @@ class Converter implements \Serializable
     }
 
     /**
+     * Set caster.
+     *
+     * @param CasterInterface $caster
+     * @return \Sysgear\Converter
+     */
+    public function setCaster(CasterInterface $caster)
+    {
+        $this->caster = $caster;
+        return $this;
+    }
+
+    /**
      * Set source timzone. This is the timezone from which data is formatted / cast.
      *
      * @param \DateTimeZone $timezone
