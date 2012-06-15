@@ -12,11 +12,11 @@
 
 namespace Sysgear\Converter;
 
+use Sysgear\Datatype;
+
 /**
  * Dynamically build a type caster.
  */
-use Sysgear\Datatype;
-
 class BuildCaster implements CasterInterface
 {
     /**
