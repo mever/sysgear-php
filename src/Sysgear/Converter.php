@@ -181,7 +181,7 @@ class Converter implements \Serializable
     {
         $newRecord = array();
         foreach ($record as $field => $value) {
-            $newRecord[] = $this->process($value, @$types[$field]);
+            $newRecord[$field] = $this->process($value, @$types[$field]);
         }
 
         return $newRecord;
@@ -196,7 +196,7 @@ class Converter implements \Serializable
      */
     public function process($value, $type)
     {
-        return $this->formatter->format($type, $this->caster->cast($type, $value));
+        return $this->formatter->format($this->caster->cast($type, $value), $type);
     }
 
     /**

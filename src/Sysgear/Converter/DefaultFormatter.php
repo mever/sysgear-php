@@ -18,13 +18,30 @@ class DefaultFormatter implements FormatterInterface
 {
     public function format($value, $type = null)
     {
-        if (Datatype::isNumber($type)) {
-            return (float) $value;
-
-        } elseif ($value instanceof \DateTime) {
-            return $value->format(\DateTime::W3C);
+        if (null === $value) {
+            return null;
         }
 
-        return $value;
+        switch ($type) {
+            case Datatype::DATETIME:
+                $value->setTimezone(new \DateTimeZone('UTC'));
+                return $value->format(\DateTime::W3C);
+
+            case Datatype::DATE:
+                return $value->format('Y-m-d');
+
+            case Datatype::TIME:
+                return $value->format('H:i:s');
+
+            case Datatype::NUMBER:
+            case Datatype::FLOAT:
+                return (float) $value;
+
+            case Datatype::INT:
+                return (int) $value;
+
+            default:
+                return (string) $value;
+        }
     }
 }
