@@ -25,7 +25,7 @@ class DefaultFormatter implements FormatterInterface
         switch ($type) {
             case Datatype::DATETIME:
                 $value->setTimezone(new \DateTimeZone('UTC'));
-                return $value->format(\DateTime::W3C);
+                return $value->format('Y-m-d\TH:i:s\Z');
 
             case Datatype::DATE:
                 return $value->format('Y-m-d');

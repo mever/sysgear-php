@@ -61,7 +61,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
     public function testProcess_datetime()
     {
         $converter = new Converter();
-        $this->assertEquals('2012-07-02T16:19:45+00:00', $converter->process('02-07-2012 16:19:45', Datatype::DATETIME));
+        $this->assertEquals('2012-07-02T14:19:45Z', $converter->process('02-07-2012 16:19:45+02:00', Datatype::DATETIME));
     }
 
     public function testFormatValue_datetimeObj_as_datetime()
