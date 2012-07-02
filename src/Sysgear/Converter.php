@@ -171,6 +171,19 @@ class Converter implements \Serializable
     }
 
     /**
+     * Process records.
+     *
+     * @param array $records
+     * @param array $types
+     */
+    public function processRecords(array &$records, array $types)
+    {
+        foreach ($records as &$record) {
+            $record = $this->processRecord($record, $types);
+        }
+    }
+
+    /**
      * Process record.
      *
      * @param array $record
