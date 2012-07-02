@@ -171,7 +171,7 @@ class Converter implements \Serializable
     }
 
     /**
-     * Serialize record.
+     * Process record.
      *
      * @param array $record
      * @param array $types
@@ -188,7 +188,7 @@ class Converter implements \Serializable
     }
 
     /**
-     * Serialize value.
+     * Process value.
      *
      * @param mixed $value
      * @param integer $type
@@ -196,7 +196,7 @@ class Converter implements \Serializable
      */
     public function process($value, $type)
     {
-        return $this->formatter->process($type, $this->caster->cast($type, $value));
+        return $this->formatter->format($type, $this->caster->cast($type, $value));
     }
 
     /**
