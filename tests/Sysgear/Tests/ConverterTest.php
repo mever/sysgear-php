@@ -354,8 +354,9 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
         $caster = $this->getMock('Sysgear\Converter\CasterInterface');
         $converter = new Converter($caster);
 
-        $this->assertEquals('C:17:"Sysgear\Converter":196:{a:6:{s:6:"caster";N;'.
-            's:11:"srcTimezone";s:3:"UTC";s:11:"dstTimezone";s:16:"Europe/Amsterdam";'.
+        $this->assertEquals('C:17:"Sysgear\Converter":258:{a:7:{s:6:"caster";N;'.
+            's:9:"formatter";O:34:"Sysgear\Converter\DefaultFormatter":0:{}s:11:'.
+            '"srcTimezone";s:3:"UTC";s:11:"dstTimezone";s:16:"Europe/Amsterdam";'.
             's:14:"formatDatetime";s:13:"Y-m-d\TH:i:sP";s:10:"formatDate";s:5:"Y-m-d";s:10:'.
             '"formatTime";s:5:"H:i:s";}}', serialize($converter));
     }
@@ -366,8 +367,9 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
         $converter = new Converter($caster);
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
 
-        $this->assertEquals('C:17:"Sysgear\Converter":210:{a:6:{s:6:"caster";N;'.
-            's:11:"srcTimezone";s:16:"Europe/Amsterdam";s:11:"dstTimezone";s:16:"Europe/Amsterdam";'.
+        $this->assertEquals('C:17:"Sysgear\Converter":272:{a:7:{s:6:"caster";N;'.
+            's:9:"formatter";O:34:"Sysgear\Converter\DefaultFormatter":0:{}s:11:'.
+            '"srcTimezone";s:16:"Europe/Amsterdam";s:11:"dstTimezone";s:16:"Europe/Amsterdam";'.
             's:14:"formatDatetime";s:13:"Y-m-d\TH:i:sP";s:10:"formatDate";s:5:"Y-m-d";s:10:'.
             '"formatTime";s:5:"H:i:s";}}', serialize($converter));
     }

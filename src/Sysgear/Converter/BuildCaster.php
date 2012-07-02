@@ -74,7 +74,7 @@ class BuildCaster implements CasterInterface
     }
 
     /**
-     * Add cast code.
+     * Set cast code.
      *
      * The given code MAY consist of multiple statements. The last statment
      * MUST always return the new type. The given code can use the following local
@@ -87,7 +87,7 @@ class BuildCaster implements CasterInterface
      * @throws \LogicException
      * @return \Sysgear\Converter\CasterBuilder
      */
-    public function add($type, $code)
+    public function set($type, $code)
     {
         if (null !== $this->caster) {
             throw new \LogicException("The caster is already build");
@@ -98,16 +98,30 @@ class BuildCaster implements CasterInterface
     }
 
     /**
+     * Add cast code.
+     *
+     * @deprecated Use "set" instead.
+     * @param integer $type
+     * @param string $code
+     * @throws \LogicException
+     * @return \Sysgear\Converter\CasterBuilder
+     */
+    public function add($type, $code)
+    {
+        return $this->set($type, $code);
+    }
+
+    /**
      * Add default PHP types.
      */
     public function useDefaultTypes()
     {
-        $this->add(Datatype::INT, 'return ("" === $v || null === $v) ? null : (int) $v');
-        $this->add(Datatype::FLOAT, 'return ("" === $v || null === $v) ? null : (float) $v');
-        $this->add(Datatype::NUMBER, 'return ("" === $v || null === $v) ? null : (float) $v');
-        $this->add(Datatype::DATETIME, 'if (empty($v)) {return null;} return new \\DateTime($v, $tz)');
-        $this->add(Datatype::TIME, 'if (empty($v)) {return null;} return $v');
-        $this->add(Datatype::DATE, 'if (empty($v)) {return null;} $date = new \\DateTime($v); '.
+        $this->set(Datatype::INT, 'return ("" === $v || null === $v) ? null : (int) $v');
+        $this->set(Datatype::FLOAT, 'return ("" === $v || null === $v) ? null : (float) $v');
+        $this->set(Datatype::NUMBER, 'return ("" === $v || null === $v) ? null : (float) $v');
+        $this->set(Datatype::DATETIME, 'if (empty($v)) {return null;} return new \\DateTime($v, $tz)');
+        $this->set(Datatype::TIME, 'if (empty($v)) {return null;} return $v');
+        $this->set(Datatype::DATE, 'if (empty($v)) {return null;} $date = new \\DateTime($v); '.
             'return $date->format("Y-m-d")');
     }
 

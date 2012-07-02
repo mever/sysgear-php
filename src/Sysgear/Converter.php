@@ -12,6 +12,8 @@
 
 namespace Sysgear;
 
+use Sysgear\Converter\FormatterInterface;
+use Sysgear\Converter\DefaultFormatter;
 use Sysgear\Converter\CasterInterface;
 use Sysgear\Converter\BuildCaster;
 
@@ -33,6 +35,11 @@ class Converter implements \Serializable
     protected $caster;
 
     /**
+     * @var \Sysgear\Converter\FormatterInterface
+     */
+    protected $formatter;
+
+    /**
      * Source timezone. This is the timezone of current values.
      *
      * Default: date_default_timezone_get
@@ -48,6 +55,9 @@ class Converter implements \Serializable
      */
     protected $dstTimezone;
 
+    /**
+     * @deprecated
+     */
     public $formatDatetime = \DATE_W3C;
     public $formatDate = 'Y-m-d';
     public $formatTime = 'H:i:s';
@@ -56,8 +66,9 @@ class Converter implements \Serializable
      * Create a new converter.
      *
      * @param CasterInterface $caster
+     * @param FormatterInterface $formatter
      */
-    public function __construct(CasterInterface $caster = null)
+    public function __construct(CasterInterface $caster = null, FormatterInterface $formatter = null)
     {
         $this->srcTimezone = new \DateTimeZone('UTC');
         $this->dstTimezone = new \DateTimeZone(date_default_timezone_get());
@@ -67,6 +78,12 @@ class Converter implements \Serializable
             $this->caster->useDefaultTypes();
         } else {
             $this->caster = $caster;
+        }
+
+        if (null === $formatter) {
+            $this->formatter = new DefaultFormatter();
+        } else {
+            $this->formatter = $formatter;
         }
     }
 
@@ -154,8 +171,38 @@ class Converter implements \Serializable
     }
 
     /**
+     * Serialize record.
+     *
+     * @param array $record
+     * @param array $types
+     * @return array
+     */
+    public function processRecord(array $record, array $types)
+    {
+        $newRecord = array();
+        foreach ($record as $field => $value) {
+            $newRecord[] = $this->process($value, @$types[$field]);
+        }
+
+        return $newRecord;
+    }
+
+    /**
+     * Serialize value.
+     *
+     * @param mixed $value
+     * @param integer $type
+     * @return mixed
+     */
+    public function process($value, $type)
+    {
+        return $this->formatter->process($type, $this->caster->cast($type, $value));
+    }
+
+    /**
      * Format records.
      *
+     * @deprecated
      * @param array $records Two dimensional array of rows and columns
      * @param array $dataTypes Date types to format indexed by column index
      */
@@ -169,6 +216,7 @@ class Converter implements \Serializable
     /**
      * Format record.
      *
+     * @deprecated
      * @param array $record Array of columns
      * @param array $dataTypes Date types to format indexed by column index
      */
@@ -182,6 +230,7 @@ class Converter implements \Serializable
     /**
      * Format value.
      *
+     * @deprecated
      * @param array $value Value to format
      * @param array $dataType Date type to format to
      */
@@ -259,6 +308,7 @@ class Converter implements \Serializable
     /**
      * Format a specific date.
      *
+     * @deprecated
      * @param \DateTime $date
      * @param integer $dataType
      * @return string
@@ -285,6 +335,7 @@ class Converter implements \Serializable
     /**
      * Determine if $value is a datetime, date or time.
      *
+     * @deprecated
      * @param string $value
      * @return integer Datetime, date or time contant
      */
@@ -303,6 +354,7 @@ class Converter implements \Serializable
     {
         return serialize(array(
             'caster' => $this->caster,
+            'formatter' => $this->formatter,
             'srcTimezone' => $this->srcTimezone->getName(),
             'dstTimezone' => $this->dstTimezone->getName(),
             'formatDatetime' => $this->formatDatetime,
@@ -315,6 +367,7 @@ class Converter implements \Serializable
     {
         $properties = unserialize($serialized);
         $this->caster = $properties['caster'];
+        $this->formatter = $properties['formatter'];
         $this->srcTimezone = new \DateTimeZone($properties['srcTimezone']);
         $this->dstTimezone = new \DateTimeZone($properties['dstTimezone']);
         $this->formatDatetime = $properties['formatDatetime'];

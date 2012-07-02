@@ -89,7 +89,7 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
     public function testCast_castDatatime_default_zulu()
     {
         $builder = new BuildCaster();
-        $builder->add(Datatype::DATETIME, 'return new \\DateTime($v, $tz)');
+        $builder->set(Datatype::DATETIME, 'return new \\DateTime($v, $tz)');
 
         $date = new \DateTime('2012-05-03 16:46:24', new \DateTimeZone('UTC'));
         $this->assertEquals($date, $builder->cast(Datatype::DATETIME, '2012-05-03 16:46:24'));
@@ -98,7 +98,7 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
     public function testCast_castDatatime_EuropeAmsterdam()
     {
         $builder = new BuildCaster();
-        $builder->add(Datatype::DATETIME, 'return new \\DateTime($v, $tz)');
+        $builder->set(Datatype::DATETIME, 'return new \\DateTime($v, $tz)');
         $builder->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
 
         $date = new \DateTime('2012-05-03 16:46:24');
@@ -117,7 +117,7 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
     public function testCast_castDatatime_twoStatments()
     {
         $builder = new BuildCaster();
-        $builder->add(Datatype::DATETIME, '$date = new \\DateTime($v); return $date');
+        $builder->set(Datatype::DATETIME, '$date = new \\DateTime($v); return $date');
 
         $date = new \DateTime('2012-05-03 16:46:24');
         $this->assertEquals($date, $builder->cast(Datatype::DATETIME, '2012-05-03 16:46:24'));
@@ -141,7 +141,7 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
     public function testSerialize_withTypeCaster()
     {
         $builder = new BuildCaster();
-        $builder->add(Datatype::INT, 'return (int) $v');
+        $builder->set(Datatype::INT, 'return (int) $v');
 
         $this->assertEquals('C:29:"Sysgear\Converter\BuildCaster":49:{a:2:{i:0;a:1:'.
             '{i:0;s:15:"return (int) $v";}i:1;N;}}', serialize($builder));
