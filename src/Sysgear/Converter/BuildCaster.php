@@ -120,9 +120,11 @@ class BuildCaster implements CasterInterface
         $this->set(Datatype::FLOAT, 'return ("" === $v || null === $v) ? null : (float) $v');
         $this->set(Datatype::NUMBER, 'return ("" === $v || null === $v) ? null : (float) $v');
         $this->set(Datatype::DATETIME, 'if (empty($v)) {return null;} return new \\DateTime($v, $tz)');
-        $this->set(Datatype::TIME, 'if (empty($v)) {return null;} return $v');
-        $this->set(Datatype::DATE, 'if (empty($v)) {return null;} $date = new \\DateTime($v); '.
-            'return $date->format("Y-m-d")');
+        $this->set(Datatype::DATE, 'if (empty($v)) {return null;} return '.
+            'new \\DateTime($v . "00:00:00", new \\DateTimeZone("UTC"));');
+
+        $this->set(Datatype::TIME, 'if (empty($v)) {return null;} return '.
+            'new \\DateTime("01-01-1970 " . $v, new \\DateTimeZone("UTC"))');
     }
 
     /**
