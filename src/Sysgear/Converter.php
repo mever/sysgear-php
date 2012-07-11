@@ -18,14 +18,21 @@ use Sysgear\Converter\CasterInterface;
 use Sysgear\Converter\BuildCaster;
 
 /**
- * Utility to convert and format values with certain data types.
+ * Utility to cast and format values from one system to the next.
  *
- * Parsing and formatting is weak typed, dateTime
- * values can be formatted as datetime, date and time.
+ * There are three concepts:
+ * - casting: Interpreting a mixed PHP value with a specific type and turn it into a homogeneous PHP type.
+ * - formatting: Get a homogeneous PHP type and format it as a string.
+ * - processing: Cast and format a mixed PHP type.
  *
- * One must take into account that not all types can be cast. For example,
- * date and time can never be cast to a datetime type. Date cannot
- * supply time information and time cannot supply date information.
+ * The separation between casting and formatting is so each system can choose to support specific
+ * types to cast into without formatting it. Secondly, one can choose to stick with a casting schema
+ * and altering the format to form diffrent representations. This allows the utility to be used as:
+ *
+ * A. A utility to help convert types from one system to the next, i.e. casting.
+ * B. A utility to help represent data from a system, i.e. formatting.
+ *
+ * Or C; both A and B, i.e. processing.
  */
 class Converter implements \Serializable
 {
@@ -168,6 +175,18 @@ class Converter implements \Serializable
         foreach ($record as $field => &$value) {
             $value = $this->caster->cast(@$types[$field], $value);
         }
+    }
+
+    /**
+     * Cast a specific value.
+     *
+     * @param mixed $value
+     * @param integer $type
+     * @return mixed
+     */
+    public function cast($value, $type)
+    {
+        return $this->caster->cast($type, $value);
     }
 
     /**
