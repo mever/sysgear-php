@@ -29,6 +29,18 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('2012-05-03 15:55:12', $builder->cast(999, '2012-05-03 15:55:12'));
     }
 
+    public function testCast_castString()
+    {
+        $builder = new BuildCaster();
+        $builder->useDefaultTypes();
+
+        $this->assertSame('15', $builder->cast(Datatype::STRING, 0xF));
+        $this->assertSame('123', $builder->cast(Datatype::STRING, 123));
+        $this->assertSame('0', $builder->cast(Datatype::STRING, '0'));
+        $this->assertSame('', $builder->cast(Datatype::STRING, ''));
+        $this->assertNull($builder->cast(Datatype::STRING, null));
+    }
+
     public function testCast_castInt()
     {
         $builder = new BuildCaster();

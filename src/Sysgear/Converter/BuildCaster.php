@@ -116,6 +116,7 @@ class BuildCaster implements CasterInterface
      */
     public function useDefaultTypes()
     {
+        $this->set(Datatype::STRING, 'return (null === $v) ? null : (string) $v');
         $this->set(Datatype::INT, 'return ("" === $v || null === $v) ? null : (int) $v');
         $this->set(Datatype::FLOAT, 'return ("" === $v || null === $v) ? null : (float) $v');
         $this->set(Datatype::NUMBER, 'return ("" === $v || null === $v) ? null : (float) $v');
