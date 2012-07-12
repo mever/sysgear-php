@@ -17,11 +17,11 @@ interface CasterInterface extends \Serializable
     /**
      * Cast value with $type to a more specific type.
      *
-     * @param integer $type
      * @param mixed $value
+     * @param integer $type
      * @return mixed
      */
-    public function cast($type, $value);
+    public function cast($value, $type);
 
     /**
      * Set the timzone of data to cast.

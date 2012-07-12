@@ -173,7 +173,7 @@ class Converter implements \Serializable
     public function castRecord(array &$record, array $types)
     {
         foreach ($record as $field => &$value) {
-            $value = $this->caster->cast(@$types[$field], $value);
+            $value = $this->caster->cast($value, @$types[$field]);
         }
     }
 
@@ -186,7 +186,7 @@ class Converter implements \Serializable
      */
     public function cast($value, $type)
     {
-        return $this->caster->cast($type, $value);
+        return $this->caster->cast($value, $type);
     }
 
     /**
@@ -228,7 +228,7 @@ class Converter implements \Serializable
      */
     public function process($value, $type)
     {
-        return $this->formatter->format($this->caster->cast($type, $value), $type);
+        return $this->formatter->format($this->caster->cast($value, $type), $type);
     }
 
     /**

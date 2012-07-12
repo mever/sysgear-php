@@ -50,7 +50,7 @@ class DynamicCaster implements CasterInterface
      * (non-PHPdoc)
      * @see \Sysgear\Converter\CasterInterface::cast()
      */
-    public function cast($type, $value)
+    public function cast($value, $type)
     {
         if (isset($this->casters[$type])) {
             $castFunc = $this->casters[$type];

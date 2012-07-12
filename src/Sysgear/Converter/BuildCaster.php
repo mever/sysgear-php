@@ -42,7 +42,7 @@ class BuildCaster implements CasterInterface
      * (non-PHPdoc)
      * @see Sysgear\Converter.CasterInterface::cast()
      */
-    public function cast($type, $value)
+    public function cast($value, $type)
     {
         if (! $this->castMethods) {
             return $value;
@@ -52,7 +52,7 @@ class BuildCaster implements CasterInterface
             $this->build();
         }
 
-        return $this->caster->cast($type, $value, $this->timezone);
+        return $this->caster->cast($value, $type, $this->timezone);
     }
 
     /**
@@ -145,7 +145,7 @@ class BuildCaster implements CasterInterface
         $className = 'GeneratedCaster_' . sha1($switchClause);
         if (! class_exists($className)) {
             $class = "class {$className} {\n".
-                "public function cast(\$type, \$v, \$tz) {\nswitch(\$type) {\n{$switchClause}".
+                "public function cast(\$v, \$type, \$tz) {\nswitch(\$type) {\n{$switchClause}".
                 "default: return \$v;\n}}}";
 
             eval($class);

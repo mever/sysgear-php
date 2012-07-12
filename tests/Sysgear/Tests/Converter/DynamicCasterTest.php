@@ -23,6 +23,6 @@ class DynamicCasterTest extends \PHPUnit_Framework_TestCase
             return number_format($value, 0, '.', '-');
         });
 
-        $this->assertEquals('123-456-789', $caster->cast(Datatype::INT, 123456789.1012));
+        $this->assertEquals('123-456-789', $caster->cast(123456789.1012, Datatype::INT));
     }
 }

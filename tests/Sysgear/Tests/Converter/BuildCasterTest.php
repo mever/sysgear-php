@@ -19,14 +19,14 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
     public function testCast_noCastMethods_noDefaultTypes()
     {
         $builder = new BuildCaster();
-        $this->assertEquals('2012-05-03 15:55:12', $builder->cast(Datatype::DATETIME, '2012-05-03 15:55:12'));
+        $this->assertEquals('2012-05-03 15:55:12', $builder->cast('2012-05-03 15:55:12', Datatype::DATETIME));
     }
 
     public function testCast_noCastMethods()
     {
         $builder = new BuildCaster();
         $builder->useDefaultTypes();
-        $this->assertEquals('2012-05-03 15:55:12', $builder->cast(999, '2012-05-03 15:55:12'));
+        $this->assertEquals('2012-05-03 15:55:12', $builder->cast('2012-05-03 15:55:12', 999));
     }
 
     public function testCast_castString()
@@ -34,11 +34,11 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $builder = new BuildCaster();
         $builder->useDefaultTypes();
 
-        $this->assertSame('15', $builder->cast(Datatype::STRING, 0xF));
-        $this->assertSame('123', $builder->cast(Datatype::STRING, 123));
-        $this->assertSame('0', $builder->cast(Datatype::STRING, '0'));
-        $this->assertSame('', $builder->cast(Datatype::STRING, ''));
-        $this->assertNull($builder->cast(Datatype::STRING, null));
+        $this->assertSame('15', $builder->cast(0xF, Datatype::STRING));
+        $this->assertSame('123', $builder->cast(123, Datatype::STRING));
+        $this->assertSame('0', $builder->cast('0', Datatype::STRING));
+        $this->assertSame('', $builder->cast('', Datatype::STRING));
+        $this->assertNull($builder->cast(null, Datatype::STRING));
     }
 
     public function testCast_castInt()
@@ -46,10 +46,10 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $builder = new BuildCaster();
         $builder->useDefaultTypes();
 
-        $this->assertTrue(123 === $builder->cast(Datatype::INT, '123'));
-        $this->assertTrue(0 === $builder->cast(Datatype::INT, '0'));
-        $this->assertNull($builder->cast(Datatype::INT, ''));
-        $this->assertNull($builder->cast(Datatype::INT, null));
+        $this->assertSame(123, $builder->cast('123', Datatype::INT));
+        $this->assertSame(0, $builder->cast('0', Datatype::INT));
+        $this->assertNull($builder->cast('', Datatype::INT));
+        $this->assertNull($builder->cast(null, Datatype::INT));
     }
 
     public function testCast_castInt_float()
@@ -57,10 +57,10 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $builder = new BuildCaster();
         $builder->useDefaultTypes();
 
-        $this->assertTrue(123 === $builder->cast(Datatype::INT, '123.45'));
-        $this->assertTrue(0 === $builder->cast(Datatype::INT, '0.0'));
-        $this->assertNull($builder->cast(Datatype::INT, ''));
-        $this->assertNull($builder->cast(Datatype::INT, null));
+        $this->assertSame(123, $builder->cast('123.45', Datatype::INT));
+        $this->assertSame(0, $builder->cast('0.0', Datatype::INT));
+        $this->assertNull($builder->cast('', Datatype::INT));
+        $this->assertNull($builder->cast(null, Datatype::INT));
     }
 
     public function testCast_castNumber()
@@ -68,12 +68,11 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $builder = new BuildCaster();
         $builder->useDefaultTypes();
 
-        $this->assertTrue((float) 123 === $builder->cast(Datatype::NUMBER, '123.00'));
-        $this->assertTrue((float) 123 === $builder->cast(Datatype::NUMBER, '123'));
-        $this->assertTrue((int) 123 !== $builder->cast(Datatype::NUMBER, '123'));
-        $this->assertTrue(0.0 === $builder->cast(Datatype::NUMBER, '0'));
-        $this->assertNull($builder->cast(Datatype::NUMBER, ''));
-        $this->assertNull($builder->cast(Datatype::NUMBER, null));
+        $this->assertSame((float) 123, $builder->cast('123.00', Datatype::NUMBER));
+        $this->assertSame((float) 123, $builder->cast('123', Datatype::NUMBER));
+        $this->assertSame((float) 0, $builder->cast('0', Datatype::NUMBER));
+        $this->assertNull($builder->cast('', Datatype::NUMBER));
+        $this->assertNull($builder->cast(null, Datatype::NUMBER));
     }
 
     public function testCast_castFloat()
@@ -81,11 +80,11 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $builder = new BuildCaster();
         $builder->useDefaultTypes();
 
-        $this->assertTrue(123.45 === $builder->cast(Datatype::FLOAT, '123.45'));
-        $this->assertTrue(0.0 === $builder->cast(Datatype::FLOAT, '0.0'));
-        $this->assertTrue(0.0 === $builder->cast(Datatype::FLOAT, '0'));
-        $this->assertNull($builder->cast(Datatype::FLOAT, ''));
-        $this->assertNull($builder->cast(Datatype::FLOAT, null));
+        $this->assertSame(123.45, $builder->cast('123.45', Datatype::FLOAT));
+        $this->assertSame(0.0, $builder->cast('0.0', Datatype::FLOAT));
+        $this->assertSame(0.0, $builder->cast('0', Datatype::FLOAT));
+        $this->assertNull($builder->cast('', Datatype::FLOAT));
+        $this->assertNull($builder->cast(null, Datatype::FLOAT));
     }
 
     public function testCast_castDatatime()
@@ -93,9 +92,9 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $builder = new BuildCaster();
         $builder->useDefaultTypes();
         $date = new \DateTime('2012-05-03 16:46:24', new \DateTimeZone('UTC'));
-        $this->assertEquals($date, $builder->cast(Datatype::DATETIME, '2012-05-03 16:46:24'));
-        $this->assertNull($builder->cast(Datatype::DATETIME, ''));
-        $this->assertNull($builder->cast(Datatype::DATETIME, null));
+        $this->assertEquals($date, $builder->cast('2012-05-03 16:46:24', Datatype::DATETIME));
+        $this->assertNull($builder->cast('', Datatype::DATETIME));
+        $this->assertNull($builder->cast(null, Datatype::DATETIME));
     }
 
     public function testCast_castDatatime_default_zulu()
@@ -104,7 +103,7 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $builder->set(Datatype::DATETIME, 'return new \\DateTime($v, $tz)');
 
         $date = new \DateTime('2012-05-03 16:46:24', new \DateTimeZone('UTC'));
-        $this->assertEquals($date, $builder->cast(Datatype::DATETIME, '2012-05-03 16:46:24'));
+        $this->assertEquals($date, $builder->cast('2012-05-03 16:46:24', Datatype::DATETIME));
     }
 
     public function testCast_castDatatime_EuropeAmsterdam()
@@ -114,7 +113,7 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $builder->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
 
         $date = new \DateTime('2012-05-03 16:46:24');
-        $this->assertEquals($date, $builder->cast(Datatype::DATETIME, '2012-05-03 16:46:24'));
+        $this->assertEquals($date, $builder->cast('2012-05-03 16:46:24', Datatype::DATETIME));
     }
 
     public function testCast_castDate()
@@ -123,9 +122,9 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $builder->useDefaultTypes();
 
         $date = new \DateTime('2012-05-07 00:00:00', new \DateTimeZone('UTC'));
-        $this->assertEquals($date, $builder->cast(Datatype::DATE, '07-05-2012'));
-        $this->assertNull($builder->cast(Datatype::DATE, ''));
-        $this->assertNull($builder->cast(Datatype::DATE, null));
+        $this->assertEquals($date, $builder->cast('07-05-2012', Datatype::DATE));
+        $this->assertNull($builder->cast('', Datatype::DATE));
+        $this->assertNull($builder->cast(null, Datatype::DATE));
     }
 
     public function testCast_castDatatime_twoStatments()
@@ -134,7 +133,7 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $builder->set(Datatype::DATETIME, '$date = new \\DateTime($v); return $date');
 
         $date = new \DateTime('2012-05-03 16:46:24');
-        $this->assertEquals($date, $builder->cast(Datatype::DATETIME, '2012-05-03 16:46:24'));
+        $this->assertEquals($date, $builder->cast('2012-05-03 16:46:24', Datatype::DATETIME));
     }
 
     public function testCast_castTime()
@@ -143,9 +142,9 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $builder->useDefaultTypes();
 
         $date = new \DateTime('01-01-1970 16:06:45', new \DateTimeZone('UTC'));
-        $this->assertEquals($date, $builder->cast(Datatype::TIME, '16:06:45'));
-        $this->assertNull($builder->cast(Datatype::TIME, ''));
-        $this->assertNull($builder->cast(Datatype::TIME, null));
+        $this->assertEquals($date, $builder->cast('16:06:45', Datatype::TIME));
+        $this->assertNull($builder->cast('', Datatype::TIME));
+        $this->assertNull($builder->cast(null, Datatype::TIME));
     }
 
     public function testSerialize()
