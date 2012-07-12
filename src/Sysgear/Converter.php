@@ -21,9 +21,9 @@ use Sysgear\Converter\BuildCaster;
  * Utility to cast and format values from one system to the next.
  *
  * There are three concepts:
- * - casting: Interpreting a mixed PHP value with a specific type and turn it into a homogeneous PHP type.
- * - formatting: Get a homogeneous PHP type and format it as a string.
- * - processing: Cast and format a mixed PHP type.
+ * - casting: Interpreting a value with a specific type (A) and turn it into a homogeneous type (B).
+ * - formatting: Get a homogeneous type (B) and format it as a string.
+ * - processing: Cast and format a type.
  *
  * The separation between casting and formatting is so each system can choose to support specific
  * types to cast into without formatting it. Secondly, one can choose to stick with a casting schema
@@ -39,7 +39,12 @@ class Converter implements \Serializable
     /**
      * @var \Sysgear\Converter\CasterInterface
      */
-    protected $caster;
+    protected $srcCaster;
+
+    /**
+     * @var \Sysgear\Converter\CasterInterface
+     */
+    protected $dstCaster;
 
     /**
      * @var \Sysgear\Converter\FormatterInterface
@@ -81,12 +86,11 @@ class Converter implements \Serializable
         $this->dstTimezone = new \DateTimeZone(date_default_timezone_get());
 
         if (null === $caster) {
-            $this->caster = new BuildCaster();
-            $this->caster->useDefaultTypes();
-        } else {
-            $this->caster = $caster;
+            $caster = new BuildCaster();
+            $caster->useDefaultTypes();
         }
 
+        $this->setSrcCaster($caster);
         if (null === $formatter) {
             $this->formatter = new DefaultFormatter();
         } else {
@@ -95,15 +99,66 @@ class Converter implements \Serializable
     }
 
     /**
-     * Set caster.
+     * Set source caster.
      *
      * @param CasterInterface $caster
      * @return \Sysgear\Converter
      */
-    public function setCaster(CasterInterface $caster)
+    public function setSrcCaster(CasterInterface $caster)
     {
-        $this->caster = $caster;
+        $this->srcCaster = $caster;
         return $this;
+    }
+
+    /**
+     * Set destination caster.
+     *
+     * @param CasterInterface $caster
+     * @return \Sysgear\Converter
+     */
+    public function setDstCaster(CasterInterface $caster)
+    {
+        $this->dstCaster = $caster;
+        return $this;
+    }
+
+    /**
+     * Convert source $value to destination of type.
+     *
+     * @param mixed $value
+     * @param integer $type
+     * @return mixed
+     */
+    public function convert($value, $type)
+    {
+        $value = $this->srcCaster->cast($value, $type);
+        return (null === $this->dstCaster) ? $value : $this->dstCaster->cast($value, $type);
+    }
+
+    /**
+     * Convert record.
+     *
+     * @param array $record
+     * @param array $types
+     * @return array
+     */
+    public function convertRecord(array $record, array $types)
+    {
+        $newRecord = array();
+        $dstCaster = $this->dstCaster;
+        if (null === $dstCaster) {
+            foreach ($record as $idx => $value) {
+                $newRecord[] = $this->srcCaster->cast($value, $types[$idx]);
+            }
+
+        } else {
+            foreach ($record as $idx => $value) {
+                $type = $types[$idx];
+                $newRecord[] = $dstCaster->cast($this->srcCaster->cast($value, $type), $type);
+            }
+        }
+
+        return $newRecord;
     }
 
     /**
@@ -115,7 +170,7 @@ class Converter implements \Serializable
     public function setTimezoneSrc(\DateTimeZone $timezone)
     {
         $this->srcTimezone = $timezone;
-        $this->caster->setTimezone($timezone);
+        $this->srcCaster->setTimezone($timezone);
         return $this;
     }
 
@@ -173,7 +228,7 @@ class Converter implements \Serializable
     public function castRecord(array &$record, array $types)
     {
         foreach ($record as $field => &$value) {
-            $value = $this->caster->cast($value, @$types[$field]);
+            $value = $this->srcCaster->cast($value, @$types[$field]);
         }
     }
 
@@ -186,7 +241,7 @@ class Converter implements \Serializable
      */
     public function cast($value, $type)
     {
-        return $this->caster->cast($value, $type);
+        return $this->srcCaster->cast($value, $type);
     }
 
     /**
@@ -228,7 +283,7 @@ class Converter implements \Serializable
      */
     public function process($value, $type)
     {
-        return $this->formatter->format($this->caster->cast($value, $type), $type);
+        return $this->formatter->format($this->srcCaster->cast($value, $type), $type);
     }
 
     /**
@@ -385,7 +440,7 @@ class Converter implements \Serializable
     public function serialize()
     {
         return serialize(array(
-            'caster' => $this->caster,
+            'srcCaster' => $this->srcCaster,
             'formatter' => $this->formatter,
             'srcTimezone' => $this->srcTimezone->getName(),
             'dstTimezone' => $this->dstTimezone->getName(),
@@ -398,7 +453,7 @@ class Converter implements \Serializable
     public function unserialize($serialized)
     {
         $properties = unserialize($serialized);
-        $this->caster = $properties['caster'];
+        $this->srcCaster = $properties['srcCaster'];
         $this->formatter = $properties['formatter'];
         $this->srcTimezone = new \DateTimeZone($properties['srcTimezone']);
         $this->dstTimezone = new \DateTimeZone($properties['dstTimezone']);

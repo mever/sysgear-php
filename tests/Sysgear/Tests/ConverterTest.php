@@ -25,6 +25,68 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('2012-05-03T17:16:17+02:00', $ref);
     }
 
+    public function testConvert()
+    {
+        $converter = new Converter();
+
+        $mockSrcCaster = $this->getMock('Sysgear\Converter\CasterInterface',
+            array('cast', 'setTimezone', 'serialize', 'unserialize'));
+
+        $mockSrcCaster->expects($this->once())->method('cast')
+            ->will($this->returnCallback(function($v) {return (string) $v;}));
+
+        $converter->setSrcCaster($mockSrcCaster);
+
+        $this->assertSame('123', $converter->convert(123, Datatype::STRING));
+    }
+
+    public function testConvert_withDstCaster()
+    {
+        $converter = new Converter();
+
+        $mockSrcCaster = $this->getMock('Sysgear\Converter\CasterInterface',
+            array('cast', 'setTimezone', 'serialize', 'unserialize'));
+
+        $mockSrcCaster->expects($this->once())->method('cast')
+            ->will($this->returnCallback(function($v) {return (string) $v;}));
+
+        $mockDstCaster = $this->getMock('Sysgear\Converter\CasterInterface',
+            array('cast', 'setTimezone', 'serialize', 'unserialize'));
+
+        $mockDstCaster->expects($this->once())->method('cast')
+            ->will($this->returnCallback(function($v) {return strtoupper($v);}));
+
+        $converter->setDstCaster($mockDstCaster);
+        $converter->setSrcCaster($mockSrcCaster);
+
+        $this->assertSame('123ABC', $converter->convert('123abc', Datatype::STRING));
+    }
+
+    public function testConvertRecord()
+    {
+        $record = array('abc', '123', '03-05-2012 15:16:17');
+        $types = array(Datatype::STRING, Datatype::INT, Datatype::DATETIME);
+
+        $converter = new Converter();
+
+        $timezone = new \DateTimeZone('UTC');
+        $expectedRecord = array('abc', 123, new \DateTime('03-05-2012 15:16:17', $timezone));
+        $this->assertEquals($expectedRecord, $converter->convertRecord($record, $types));
+    }
+
+    public function testConvertRecord_otherTimezone()
+    {
+        $record = array('abc', '123', '03-05-2012 15:16:17');
+        $types = array(Datatype::STRING, Datatype::INT, Datatype::DATETIME);
+
+        $timezone = new \DateTimeZone('Europe/Amsterdam');
+        $converter = new Converter();
+        $converter->setTimezoneSrc($timezone);
+
+        $expectedRecord = array('abc', 123, new \DateTime('03-05-2012 15:16:17', $timezone));
+        $this->assertEquals($expectedRecord, $converter->convertRecord($record, $types));
+    }
+
     public function testCastRecord()
     {
         $record = array('abc', '123', '03-05-2012 15:16:17');
@@ -366,7 +428,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
         $caster = $this->getMock('Sysgear\Converter\CasterInterface');
         $converter = new Converter($caster);
 
-        $this->assertEquals('C:17:"Sysgear\Converter":258:{a:7:{s:6:"caster";N;'.
+        $this->assertEquals('C:17:"Sysgear\Converter":261:{a:7:{s:9:"srcCaster";N;'.
             's:9:"formatter";O:34:"Sysgear\Converter\DefaultFormatter":0:{}s:11:'.
             '"srcTimezone";s:3:"UTC";s:11:"dstTimezone";s:16:"Europe/Amsterdam";'.
             's:14:"formatDatetime";s:13:"Y-m-d\TH:i:sP";s:10:"formatDate";s:5:"Y-m-d";s:10:'.
@@ -379,7 +441,7 @@ class ConverterTest extends \PHPUnit_Framework_TestCase
         $converter = new Converter($caster);
         $converter->setTimezoneSrc(new \DateTimeZone('Europe/Amsterdam'));
 
-        $this->assertEquals('C:17:"Sysgear\Converter":272:{a:7:{s:6:"caster";N;'.
+        $this->assertEquals('C:17:"Sysgear\Converter":275:{a:7:{s:9:"srcCaster";N;'.
             's:9:"formatter";O:34:"Sysgear\Converter\DefaultFormatter":0:{}s:11:'.
             '"srcTimezone";s:16:"Europe/Amsterdam";s:11:"dstTimezone";s:16:"Europe/Amsterdam";'.
             's:14:"formatDatetime";s:13:"Y-m-d\TH:i:sP";s:10:"formatDate";s:5:"Y-m-d";s:10:'.
