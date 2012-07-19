@@ -17,11 +17,11 @@ class Client
         $this->gearmanClient->addServer();
     }
 
-    public function doBackground($name, Job $job)
+    public function doBackground(Job $job)
     {
-        $jobHandle = $this->gearmanClient->doBackground($name, serialize($job));
+        $jobHandle = $this->gearmanClient->doBackground($job->getName(), serialize($job));
         if (\GEARMAN_SUCCESS !== $this->gearmanClient->returnCode()) {
-            throw new \Exception('Gearman return unsuccessful code: ' . $this->gearmanClient->returnCode());
+            throw new \RuntimeException('Gearman return unsuccessful code: ' . $this->gearmanClient->returnCode());
         }
     }
 }

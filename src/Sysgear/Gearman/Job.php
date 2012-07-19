@@ -13,6 +13,11 @@ class Job
         $this->parameters = $parameters;
     }
 
+    public function getName()
+    {
+        return $this->name;
+    }
+
     public function setParameter($key, $value)
     {
         $this->parameters[$key] = $value;
