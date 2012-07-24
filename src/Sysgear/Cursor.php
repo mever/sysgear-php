@@ -17,6 +17,7 @@ class Cursor implements \Iterator
     protected $callback;
     protected $count;
     protected $pointer = 0;
+    protected $record;
 
     /**
      * Creates a new cursor.
@@ -48,8 +49,12 @@ class Cursor implements \Iterator
      */
     public function current()
     {
-        $callback = $this->callback;
-        return $callback($this->pointer);
+        if (null === $this->record) {
+            $callback = $this->callback;
+            $this->record = $callback($this->pointer);
+        }
+
+        return $this->record;
     }
 
     /**
@@ -67,6 +72,7 @@ class Cursor implements \Iterator
      */
     public function next()
     {
+        $this->record = null;
         $this->pointer++;
     }
 

@@ -135,4 +135,21 @@ class CursorTest extends \PHPUnit_Framework_TestCase
         $cursor->next();
         $this->assertEquals(array(31, 32, 33), $cursor->getNext());
     }
+
+    public function testIterator()
+    {
+        $records = array(
+            array(11, 12, 13),
+            array(21, 22, 23),
+            array(31, 32, 33)
+        );
+
+        $pointer = 0;
+        $cursor = new Cursor(function() use ($records, &$pointer) {
+            return @$records[$pointer++];
+        });
+
+        $array = iterator_to_array($cursor);
+        $this->assertSame($records, $array);
+    }
 }
