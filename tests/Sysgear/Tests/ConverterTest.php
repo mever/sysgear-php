@@ -32,9 +32,11 @@ class ConverterTest extends TestCase
         $caster = $this->getMock('Sysgear\Converter\CasterInterface');
 
         $converter = new Converter($caster);
-        $this->assertInstanceOf('Sysgear\Converter\DefaultFormatter', $this->getProp($converter, 'formatter'));
         $this->assertSame($caster, $this->getProp($converter, 'srcCaster'));
         $this->assertNull($this->getProp($converter, 'dstCaster'));
+
+        $formatter = $this->getProp($converter, 'formatter');
+        $this->assertInstanceOf('Sysgear\Converter\FormatCollection', $formatter->getFormats());
     }
 
     public function testContructor_caster_formatter()

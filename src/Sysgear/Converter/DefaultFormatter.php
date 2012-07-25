@@ -14,7 +14,7 @@ namespace Sysgear\Converter;
 
 use Sysgear\Datatype;
 
-class DefaultFormatter implements FormatterInterface
+class DefaultFormatter extends AbstractFormatter
 {
     public function format($value, $type = null)
     {
@@ -25,13 +25,11 @@ class DefaultFormatter implements FormatterInterface
         switch ($type) {
             case Datatype::DATETIME:
                 $value->setTimezone(new \DateTimeZone('UTC'));
-                return $value->format('Y-m-d\TH:i:s\Z');
+                return $value->format($this->formats->get(Datatype::DATETIME));
 
             case Datatype::DATE:
-                return $value->format('Y-m-d');
-
             case Datatype::TIME:
-                return $value->format('H:i:s');
+                return $value->format($this->formats->get($type));
 
             case Datatype::NUMBER:
             case Datatype::FLOAT:

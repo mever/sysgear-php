@@ -14,6 +14,7 @@ namespace Sysgear;
 
 use Sysgear\Converter\FormatterInterface;
 use Sysgear\Converter\DefaultFormatter;
+use Sysgear\Converter\FormatCollection;
 use Sysgear\Converter\CasterInterface;
 use Sysgear\Converter\DefaultCaster;
 
@@ -73,7 +74,8 @@ class Converter implements \Serializable
 
         $this->srcCaster = $caster;
         if (null === $formatter) {
-            $this->formatter = new DefaultFormatter();
+            $formats = new FormatCollection();
+            $this->formatter = new DefaultFormatter($formats);
         } else {
             $this->formatter = $formatter;
         }
@@ -89,6 +91,28 @@ class Converter implements \Serializable
     {
         $this->dstCaster = $caster;
         return $this;
+    }
+
+    /**
+     * Set formatter.
+     *
+     * @param FormatterInterface $formatter
+     * @return \Sysgear\Converter
+     */
+    public function setFormatter(FormatterInterface $formatter)
+    {
+        $this->formatter = $formatter;
+        return $this;
+    }
+
+    /**
+     * Get formatter.
+     *
+     * @return \Sysgear\Converter\FormatterInterface
+     */
+    public function getFormatter()
+    {
+        return $this->formatter;
     }
 
     /**
