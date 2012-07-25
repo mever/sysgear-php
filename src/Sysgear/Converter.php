@@ -28,10 +28,13 @@ use Sysgear\Converter\DefaultCaster;
  * * It can format the values to string.
  *
  * It has serveral functions:
- * * casting - cast foreign types to PHP types
- * * formatting - format PHP types to PHP strings
- * * processing - cast foreign types A to foreign types B (specified by "setForeignCaster")
- * * convertering - cast foreign types A and format them
+ * * casting       Cast foreign types to PHP types
+ * * formatting    Format PHP types to PHP strings for display
+ * * convertering  Cast foreign types A to PHP types or B types if specified by "setForeignCaster".
+ *                 This can be used to fetch data from source A and store it in source B.
+ * * processing    First, all values are casted to PHP types. Then when a foreign caster is given
+ *                 use it to convert all PHP types to the foreign type system. Else, when no foreign
+ *                 caster is given, format PHP types.
  *
  * Additional notes to the developer of this package:
  * Type system A is "srcCaster"
@@ -87,7 +90,7 @@ class Converter implements \Serializable
      * @param CasterInterface $caster
      * @return \Sysgear\Converter
      */
-    public function setForeignCaster(CasterInterface $caster)
+    public function setForeignCaster(CasterInterface $caster = null)
     {
         $this->dstCaster = $caster;
         return $this;
@@ -154,48 +157,6 @@ class Converter implements \Serializable
     }
 
     /**
-     * Format records.
-     *
-     * @param array $records Two dimensional array of rows and columns
-     * @param array $types Datatypes to format indexed by column index
-     */
-    public function formatRecords(array &$records, array $types = array())
-    {
-        foreach ($records as &$record) {
-            $record = $this->formatRecord($record, $types);
-        }
-    }
-
-    /**
-     * Format record.
-     *
-     * @deprecated
-     * @param array $record Array of columns
-     * @param array $types Datatypes to format indexed by column index
-     */
-    public function formatRecord(array &$record, array $types = array())
-    {
-        $newRecord = array();
-        foreach ($record as $idx => $value) {
-            $newRecord[$idx] = $this->formatValue($value, @$types[$idx]);
-        }
-
-        return $newRecord;
-    }
-
-    /**
-     * Format value.
-     *
-     * @param mixed $value Value to format
-     * @param array $dataType Datatype to format
-     * @return mixed
-     */
-    public function format($value, $type = null)
-    {
-        return $this->formatter->format($value, $type);
-    }
-
-    /**
      * Process records.
      *
      * @param array $records
@@ -234,7 +195,12 @@ class Converter implements \Serializable
      */
     public function process($value, $type)
     {
-        return $this->formatter->format($this->srcCaster->cast($value, $type), $type);
+        $phpType = $this->srcCaster->cast($value, $type);
+        if (null === $this->dstCaster) {
+            return $this->formatter->format($phpType, $type);
+        } else {
+            return $this->dstCaster->cast($phpType, $type);
+        }
     }
 
     /**
@@ -293,7 +259,6 @@ class Converter implements \Serializable
     {
         return serialize(array(
             'srcCaster' => $this->srcCaster,
-            'dstCaster' => $this->dstCaster,
             'formatter' => $this->formatter
         ));
     }
@@ -302,7 +267,6 @@ class Converter implements \Serializable
     {
         $properties = unserialize($serialized);
         $this->srcCaster = $properties['srcCaster'];
-        $this->dstCaster = $properties['dstCaster'];
         $this->formatter = $properties['formatter'];
     }
 }
