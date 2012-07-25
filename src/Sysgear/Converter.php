@@ -15,64 +15,49 @@ namespace Sysgear;
 use Sysgear\Converter\FormatterInterface;
 use Sysgear\Converter\DefaultFormatter;
 use Sysgear\Converter\CasterInterface;
-use Sysgear\Converter\BuildCaster;
+use Sysgear\Converter\DefaultCaster;
 
 /**
- * Utility to cast and format values from one system to the next.
+ * This component can be used to converter and format types and data.
  *
- * There are three concepts:
- * - casting: Interpreting a value with a specific type (A) and turn it into a homogeneous type (B).
- * - formatting: Get a homogeneous type (B) and format it as a string.
- * - processing: Cast and format a type.
+ * It can cast values from a foreign type system (A) to the PHP type system.
  *
- * The separation between casting and formatting is so each system can choose to support specific
- * types to cast into without formatting it. Secondly, one can choose to stick with a casting schema
- * and altering the format to form diffrent representations. This allows the utility to be used as:
+ * Additionally it can perform two independent actions after that:
+ * * It can cast it again to another foreign type system (B).
+ * * It can format the values to string.
  *
- * A. A utility to help convert types from one system to the next, i.e. casting.
- * B. A utility to help represent data from a system, i.e. formatting.
+ * It has serveral functions:
+ * * casting - cast foreign types to PHP types
+ * * formatting - format PHP types to PHP strings
+ * * processing - cast foreign types A to foreign types B (specified by "setForeignCaster")
+ * * convertering - cast foreign types A and format them
  *
- * Or C; both A and B, i.e. processing.
+ * Additional notes to the developer of this package:
+ * Type system A is "srcCaster"
+ * Type system B is optional "dstCaster"
  */
 class Converter implements \Serializable
 {
     /**
+     * Cast foreign type system to PHP native types.
+     *
      * @var \Sysgear\Converter\CasterInterface
      */
     protected $srcCaster;
 
     /**
+     * Optional caster to cast PHP native types to a foreign type system.
+     *
      * @var \Sysgear\Converter\CasterInterface
      */
     protected $dstCaster;
 
     /**
+     * Format values from the PHP type system to string.
+     *
      * @var \Sysgear\Converter\FormatterInterface
      */
     protected $formatter;
-
-    /**
-     * Source timezone. This is the timezone of current values.
-     *
-     * Default: date_default_timezone_get
-     *
-     * @var \DateTimeZone
-     */
-    protected $srcTimezone;
-
-    /**
-     * Destination timezone. This is the timezone you cast values to.
-     *
-     * @var \DateTimeZone
-     */
-    protected $dstTimezone;
-
-    /**
-     * @deprecated
-     */
-    public $formatDatetime = \DATE_W3C;
-    public $formatDate = 'Y-m-d';
-    public $formatTime = 'H:i:s';
 
     /**
      * Create a new converter.
@@ -82,15 +67,11 @@ class Converter implements \Serializable
      */
     public function __construct(CasterInterface $caster = null, FormatterInterface $formatter = null)
     {
-        $this->srcTimezone = new \DateTimeZone('UTC');
-        $this->dstTimezone = new \DateTimeZone(date_default_timezone_get());
-
         if (null === $caster) {
-            $caster = new BuildCaster();
-            $caster->useDefaultTypes();
+            $caster = new DefaultCaster();
         }
 
-        $this->setSrcCaster($caster);
+        $this->srcCaster = $caster;
         if (null === $formatter) {
             $this->formatter = new DefaultFormatter();
         } else {
@@ -99,111 +80,15 @@ class Converter implements \Serializable
     }
 
     /**
-     * Set source caster.
+     * Set a caster to cast types to a foreign type system.
      *
      * @param CasterInterface $caster
      * @return \Sysgear\Converter
      */
-    public function setSrcCaster(CasterInterface $caster)
-    {
-        $this->srcCaster = $caster;
-        return $this;
-    }
-
-    /**
-     * Set destination caster.
-     *
-     * @param CasterInterface $caster
-     * @return \Sysgear\Converter
-     */
-    public function setDstCaster(CasterInterface $caster)
+    public function setForeignCaster(CasterInterface $caster)
     {
         $this->dstCaster = $caster;
         return $this;
-    }
-
-    /**
-     * Convert source $value to destination of type.
-     *
-     * @param mixed $value
-     * @param integer $type
-     * @return mixed
-     */
-    public function convert($value, $type)
-    {
-        $value = $this->srcCaster->cast($value, $type);
-        return (null === $this->dstCaster) ? $value : $this->dstCaster->cast($value, $type);
-    }
-
-    /**
-     * Convert record.
-     *
-     * @param array $record
-     * @param array $types
-     * @return array
-     */
-    public function convertRecord(array $record, array $types)
-    {
-        $newRecord = array();
-        $dstCaster = $this->dstCaster;
-        if (null === $dstCaster) {
-            foreach ($record as $idx => $value) {
-                $newRecord[] = $this->srcCaster->cast($value, $types[$idx]);
-            }
-
-        } else {
-            foreach ($record as $idx => $value) {
-                $type = $types[$idx];
-                $newRecord[] = $dstCaster->cast($this->srcCaster->cast($value, $type), $type);
-            }
-        }
-
-        return $newRecord;
-    }
-
-    /**
-     * Set source timzone. This is the timezone from which data is formatted / cast.
-     *
-     * @param \DateTimeZone $timezone
-     * @return \Sysgear\Converter
-     */
-    public function setTimezoneSrc(\DateTimeZone $timezone)
-    {
-        $this->srcTimezone = $timezone;
-        $this->srcCaster->setTimezone($timezone);
-        return $this;
-    }
-
-    /**
-     * Return source timezone.
-     *
-     * @return \DateTimeZone
-     */
-    public function getTimezoneSrc()
-    {
-        return $this->srcTimezone;
-    }
-
-    /**
-     * Set destination timzone. This is the timezone to which data needs to be formatted / cast.
-     *
-     * @param \DateTimeZone $timezone
-     * @return \Sysgear\Converter
-     */
-    public function setTimezoneDest(\DateTimeZone $timezone)
-    {
-        $this->dstTimezone = $timezone;
-        return $this;
-    }
-
-    /**
-     * Return destination timezone.
-     *
-     * @return \DateTimeZone
-     */
-    public function getTimezoneDest()
-    {
-        return $this->dstTimezone;
     }
 
     /**
@@ -245,6 +130,48 @@ class Converter implements \Serializable
     }
 
     /**
+     * Format records.
+     *
+     * @param array $records Two dimensional array of rows and columns
+     * @param array $types Datatypes to format indexed by column index
+     */
+    public function formatRecords(array &$records, array $types = array())
+    {
+        foreach ($records as &$record) {
+            $record = $this->formatRecord($record, $types);
+        }
+    }
+
+    /**
+     * Format record.
+     *
+     * @deprecated
+     * @param array $record Array of columns
+     * @param array $types Datatypes to format indexed by column index
+     */
+    public function formatRecord(array &$record, array $types = array())
+    {
+        $newRecord = array();
+        foreach ($record as $idx => $value) {
+            $newRecord[$idx] = $this->formatValue($value, @$types[$idx]);
+        }
+
+        return $newRecord;
+    }
+
+    /**
+     * Format value.
+     *
+     * @param mixed $value Value to format
+     * @param array $dataType Datatype to format
+     * @return mixed
+     */
+    public function format($value, $type = null)
+    {
+        return $this->formatter->format($value, $type);
+    }
+
+    /**
      * Process records.
      *
      * @param array $records
@@ -267,8 +194,8 @@ class Converter implements \Serializable
     public function processRecord(array $record, array $types)
     {
         $newRecord = array();
-        foreach ($record as $field => $value) {
-            $newRecord[$field] = $this->process($value, @$types[$field]);
+        foreach ($record as $idx => $value) {
+            $newRecord[$idx] = $this->process($value, @$types[$idx]);
         }
 
         return $newRecord;
@@ -287,166 +214,63 @@ class Converter implements \Serializable
     }
 
     /**
-     * Format records.
+     * Convert records.
      *
-     * @deprecated
-     * @param array $records Two dimensional array of rows and columns
-     * @param array $dataTypes Date types to format indexed by column index
+     * @param array $records
+     * @param array $types
      */
-    public function formatRecords(array &$records, array $dataTypes)
+    public function convertRecords(array &$records, array $types)
     {
         foreach ($records as &$record) {
-            $this->formatRecord($record, $dataTypes);
+            $record = $this->convertRecord($record, $types);
         }
     }
 
     /**
-     * Format record.
+     * Convert record.
      *
-     * @deprecated
-     * @param array $record Array of columns
-     * @param array $dataTypes Date types to format indexed by column index
+     * @param array $record
+     * @param array $types
+     * @return array
      */
-    public function formatRecord(array &$record, array $dataTypes)
+    public function convertRecord(array $record, array $types)
     {
-        foreach ($record as $i => &$field) {
-            $this->formatValue($field, @$dataTypes[$i]);
+        $newRecord = array();
+        $dstCaster = $this->dstCaster;
+        if (null === $dstCaster) {
+            foreach ($record as $idx => $value) {
+                $newRecord[] = $this->srcCaster->cast($value, $types[$idx]);
+            }
+
+        } else {
+            foreach ($record as $idx => $value) {
+                $type = $types[$idx];
+                $newRecord[] = $dstCaster->cast($this->srcCaster->cast($value, $type), $type);
+            }
         }
+
+        return $newRecord;
     }
 
     /**
-     * Format value.
+     * Convert source $value to destination of type.
      *
-     * @deprecated
-     * @param array $value Value to format
-     * @param array $dataType Date type to format to
+     * @param mixed $value
+     * @param integer $type
+     * @return mixed
      */
-    public function formatValue(&$value, $dataType)
+    public function convert($value, $type)
     {
-        if (null === $value) {
-            return;
-        }
-
-        switch ($dataType) {
-            case Datatype::DATE:
-                if (empty($value)) {
-                    $value = null;
-
-                } elseif ($value instanceof \DateTime) {
-                    $value = $value->format($this->formatDate);
-
-                } elseif (Datatype::TIME !== $this->getDateTimeType($value)) {
-                    $date = new \DateTime($value, $this->srcTimezone);
-                    $value = $date->format($this->formatDate);
-
-                } else {
-                    throw new \LogicException('Trying to format, something that looks like a ' .
-                        Datatype::toDesc($this->getDateTimeType($value)) . ', as date');
-                }
-                break;
-
-            case Datatype::DATETIME:
-                if (empty($value)) {
-                    $value = null;
-
-                } elseif ($value instanceof \DateTime) {
-                    $value->setTimezone($this->dstTimezone);
-                    $value = $value->format($this->formatDatetime);
-
-                } elseif (Datatype::DATETIME === $this->getDateTimeType($value)) {
-                    $date = new \DateTime($value, $this->srcTimezone);
-                    $date->setTimezone($this->dstTimezone);
-                    $value = $date->format($this->formatDatetime);
-
-                } else {
-                    throw new \LogicException('Trying to format, something that looks like a ' .
-                        Datatype::toDesc($this->getDateTimeType($value)) . ', as datetime');
-                }
-                break;
-
-            case Datatype::TIME:
-                if (empty($value)) {
-                    $value = null;
-
-                } elseif ($value instanceof \DateTime) {
-                    $value = $value->format($this->formatTime);
-
-                } else {
-                    $dt = $this->getDateTimeType($value);
-                    if (Datatype::DATE !== $dt) {
-                        $date = new \DateTime($value, $this->srcTimezone);
-
-                        // only change timezone if datetime is supplied, this
-                        // should prevent unexpected DST calculations.
-                        if (Datatype::DATETIME === $dt) {
-                            $date->setTimezone($this->dstTimezone);
-                        }
-                        $value = $date->format($this->formatTime);
-
-                    } else {
-                        throw new \LogicException('Trying to format, something that looks like a ' .
-                            Datatype::toDesc($dt) . ', as time');
-                    }
-                }
-                break;
-        }
-    }
-
-    /**
-     * Format a specific date.
-     *
-     * @deprecated
-     * @param \DateTime $date
-     * @param integer $dataType
-     * @return string
-     */
-    public function formatDate(\DateTime $date, $dataType = Datatype::DATETIME)
-    {
-        switch ($dataType) {
-            case Datatype::DATE:
-                $format = $this->formatDate;
-                break;
-
-            case Datatype::TIME:
-                $format = $this->formatTime;
-                break;
-
-            default:
-                $format = $this->formatDatetime;
-                break;
-        }
-
-        return $date->setTimezone($this->dstTimezone)->format($format);
-    }
-
-    /**
-     * Determine if $value is a datetime, date or time.
-     *
-     * @deprecated
-     * @param string $value
-     * @return integer Datetime, date or time contant
-     */
-    protected function getDateTimeType($value)
-    {
-        if (strlen($value) > 10) {
-            return Datatype::DATETIME;
-        }
-
-        $match = null;
-        preg_match('(^\d+-\d+-\d+|\d+:\d+(:\d+)?$)', trim($value), $match);
-        return ($match && ':' === @$match[0][2]) ? Datatype::TIME : Datatype::DATE;
+        $value = $this->srcCaster->cast($value, $type);
+        return (null === $this->dstCaster) ? $value : $this->dstCaster->cast($value, $type);
     }
 
     public function serialize()
     {
         return serialize(array(
             'srcCaster' => $this->srcCaster,
-            'formatter' => $this->formatter,
-            'srcTimezone' => $this->srcTimezone->getName(),
-            'dstTimezone' => $this->dstTimezone->getName(),
-            'formatDatetime' => $this->formatDatetime,
-            'formatDate' => $this->formatDate,
-            'formatTime' => $this->formatTime
+            'dstCaster' => $this->dstCaster,
+            'formatter' => $this->formatter
         ));
     }
 
@@ -454,11 +278,7 @@ class Converter implements \Serializable
     {
         $properties = unserialize($serialized);
         $this->srcCaster = $properties['srcCaster'];
+        $this->dstCaster = $properties['dstCaster'];
         $this->formatter = $properties['formatter'];
-        $this->srcTimezone = new \DateTimeZone($properties['srcTimezone']);
-        $this->dstTimezone = new \DateTimeZone($properties['dstTimezone']);
-        $this->formatDatetime = $properties['formatDatetime'];
-        $this->formatDate = $properties['formatDate'];
-        $this->formatTime = $properties['formatTime'];
     }
 }
