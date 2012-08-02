@@ -52,7 +52,6 @@ class TestCase extends \PHPUnit_Framework_TestCase
     protected function setProp($object, $name, $value, $class = null)
     {
         $refProperty = new \ReflectionProperty(($class ?: $object), $name);
-        $refProperty = new \ReflectionProperty($class, $name);
         $refProperty->setAccessible(true);
         return $refProperty->setValue($object, $value);
     }
