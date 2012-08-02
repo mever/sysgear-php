@@ -31,11 +31,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
      *
      * @param object $object
      * @param string $name
+     * @param string $class Set this if you need to access private members
      * @return mixed
      */
-    protected function getProp($object, $name)
+    protected function getProp($object, $name, $class = null)
     {
-        $refProperty = new \ReflectionProperty($object, $name);
+        $refProperty = new \ReflectionProperty(($class ?: $object), $name);
         $refProperty->setAccessible(true);
         return $refProperty->getValue($object);
     }
@@ -46,10 +47,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
      * @param object $object
      * @param string $name
      * @param mixed $value
+     * @param string $class Set this if you need to access private members
      */
-    protected function setProp($object, $name, $value)
+    protected function setProp($object, $name, $value, $class = null)
     {
-        $refProperty = new \ReflectionProperty($object, $name);
+        $refProperty = new \ReflectionProperty(($class ?: $object), $name);
+        $refProperty = new \ReflectionProperty($class, $name);
         $refProperty->setAccessible(true);
         return $refProperty->setValue($object, $value);
     }
@@ -57,14 +60,23 @@ class TestCase extends \PHPUnit_Framework_TestCase
     /**
      * Execute a protected or private method for unit testing.
      *
+     * When executing a private method supply
+     * the $method as an array: array("class_name", "method_name").
+     *
      * @param object $object
-     * @param string $method
+     * @param string|array $method
      * @param mixed $var...
      * @return mixed
      */
     protected function exec($object, $method)
     {
-        $refMethod = new \ReflectionMethod($object, $method);
+        if (is_array($method)) {
+            list($class, $method) = $method;
+        } else {
+            $class = $object;
+        }
+
+        $refMethod = new \ReflectionMethod($class, $method);
         $refMethod->setAccessible(true);
         $arguments = func_get_args();
         array_shift($arguments);
