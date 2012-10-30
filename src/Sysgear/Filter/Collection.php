@@ -91,23 +91,35 @@ class Collection extends Filter implements Countable, IteratorAggregate, ArrayAc
             } else {
 
                 $operator = $filter->getOperator();
+                $sqlOperator = \Sysgear\Operator::toSqlComparison($operator);
                 $value = $filter->getValue();
 
-                // build left comparison expression
-                switch ($operator) {
-                case \Sysgear\Operator::STR_START_WITH: $right = $connection->quote($value . '%'); break;
-                case \Sysgear\Operator::STR_END_WITH: $right = $connection->quote('%' . $value); break;
-                case \Sysgear\Operator::LIKE: $right = $connection->quote('%' . $value . '%'); break;
-                default: $right = $connection->quote($value);
+                if (is_array($value)) {
+                    $inClause = array();
+                    foreach ($value as $val) {
+                        $inClause[] = $connection->quote($val);
+                    }
+                    $sqlOperator = 'in';
+                    $right = '(' . join(',', $inClause) . ')';
+
+                } else {
+
+                    // build left comparison expression
+                    switch ($operator) {
+                        case \Sysgear\Operator::STR_START_WITH: $right = $connection->quote($value . '%'); break;
+                        case \Sysgear\Operator::STR_END_WITH: $right = $connection->quote('%' . $value); break;
+                        case \Sysgear\Operator::LIKE: $right = $connection->quote('%' . $value . '%'); break;
+                        default: $right = $connection->quote($value);
+                    }
                 }
 
                 // build complete comparison expresssion
                 $left = $connection->quoteIdentifier($filter->getField()) . ' ';
-                return $left . \Sysgear\Operator::toSqlComparison($operator) . ' ' . $right;
+                return $left . $sqlOperator . ' ' . $right;
             }
         };
 
-        return 'WHERE ' . $this->compileString($compiler);
+        return ' WHERE ' . $this->compileString($compiler);
     }
 
     /**
