@@ -21,20 +21,18 @@ class BackupCollector extends AbstractObjectCollector
     const MERGE_ONLY = 2;
 
     /**
-     * When true only collect data from the first
-     * implementor of the backupable interface, start search from super- to subclass.
+     * When true only collect data from the implementor of the
+     * backupable interface. E.i. only collect properties declared in the
+     * class implementing the backupable interface. Also derive the node name
+     * from this class.
+     *
+     * If multiple classes in the inheritance chain implement the interface, the
+     * last parent implementing the interface is picked. Start searching the last
+     * subclass and work up the parent chain.
      *
      * @var boolean
      */
     protected $onlyImplementor = false;
-
-    /**
-     * When true use the class name from the first implementor of the
-     * backupable interface, start search from super- to subclass.
-     *
-     * @var boolean
-     */
-    protected $implClassName = false;
 
     /**
      * List of composite fields to merge. First element is
@@ -74,10 +72,6 @@ class BackupCollector extends AbstractObjectCollector
                 $this->onlyImplementor = (boolean) $value;
                 break;
 
-            case 'implClassName':
-                $this->implClassName = (boolean) $value;
-                break;
-
             case 'merge':
                 $merge = (array) $value;
                 array_unshift($merge, self::MERGE_FLAG);
@@ -111,8 +105,7 @@ class BackupCollector extends AbstractObjectCollector
         }
 
         // determine node name
-        $name = (null === $this->node) ?
-            Util::getShortClassName($this->getClassName($object)) : $this->node->getName();
+        $name = (null === $this->node) ? $this->getNodeName($object) : $this->node->getName();
 
         // setup path (first time setup)
         if (null !== $this->inventoryManager && null === $this->currentPath) {
@@ -131,7 +124,7 @@ class BackupCollector extends AbstractObjectCollector
 
             // create new node
             $this->node = new Node('object', $name);
-            $this->node->setMetadata('class', $this->getClassName($object));
+            $this->node->setMetadata('class', $this->getClass($object));
             $this->addedObjects[$objHash] = $this->node;
 
             // merge mode enabled, include only fields that can be used to restore this backup
@@ -151,10 +144,8 @@ class BackupCollector extends AbstractObjectCollector
             }
 
             // collect data to populate the node with
-            $refClass = new \ReflectionClass(($this->onlyImplementor) ?
-                $this->getFirstClassnameImplementing($object, '\\Sysgear\\Backup\\BackupableInterface') : $object);
-
-            foreach ($refClass->getProperties() as $property) {
+            $refClass = new \ReflectionClass($this->getClass($object));
+            foreach ($this->getProperties($refClass) as $property) {
                 $property->setAccessible(true);
                 if ($this->filterProperty($property)) {
 
@@ -199,11 +190,15 @@ class BackupCollector extends AbstractObjectCollector
         }
 
         if ($this->onlyImplementor) {
-            $className = $this->getFirstClassnameImplementing(
-                $property->getDeclaringClass()->getName(),
-                '\\Sysgear\\Backup\\BackupableInterface');
-
+            $className = $this->getClass($property->getDeclaringClass()->getName());
             if ($property->getDeclaringClass()->getName() !== $className) {
+                return false;
+            }
+        }
+
+        if ($this->skipInterfaces) {
+            $ifaces = $property->getDeclaringClass()->getInterfaceNames();
+            if (array_intersect($ifaces, $this->skipInterfaces)) {
                 return false;
             }
         }
@@ -269,7 +264,7 @@ class BackupCollector extends AbstractObjectCollector
 
                     if (null !== $propertyPath) {
                         $elemPath = clone $propertyPath;
-                        $elemPath->add(NodePath::NODE, Util::getShortClassName($this->getClassName($val)), $count);
+                        $elemPath->add(NodePath::NODE, $this->getNodeName($val), $count);
                         $count++;
 
                         if (! $this->inventoryManager->isAllowed($elemPath)) {
@@ -324,25 +319,42 @@ class BackupCollector extends AbstractObjectCollector
     }
 
     /**
-     * Return the class name of $backupable
+     * Return the class of $object
      *
-     * TODO: fix getClassName and getNodeName
-     *
-     * @param \Sysgear\Backup\BackupableInterface $backupable
+     * @param object|string $object Class name or class instance.
      * @return string Fully qualified class name
      */
-    protected function getClassName(BackupableInterface $backupable)
+    protected function getClass($object)
     {
-        if (null !== $this->className) {
-            return $this->className;
-        }
-
-        if ($this->implClassName || $this->onlyImplementor) {
-            return $this->getFirstClassnameImplementing($backupable,
+        if ($this->onlyImplementor) {
+            return $this->getFirstClassnameImplementing($object,
                 '\\Sysgear\\Backup\\BackupableInterface');
 
         } else {
-            return get_class($backupable);
+            return parent::getClass($object);
         }
+    }
+
+    /**
+     * Get properties of reflection class. Include inherited properties.
+     *
+     * @param \ReflectionClass $reflClass
+     * @return \ReflectionProperty[]
+     */
+    protected function getProperties(\ReflectionClass $reflClass)
+    {
+        $properties = array();
+        $reflParent = $reflClass->getParentClass();
+        if ($reflParent) {
+            foreach ($this->getProperties($reflParent) as $name => $prop) {
+                $properties[$name] = $prop;
+            }
+        }
+
+        foreach ($reflClass->getProperties() as $prop) {
+            $properties[$prop->getName()] = $prop;
+        }
+
+        return $properties;
     }
 }

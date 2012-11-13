@@ -44,11 +44,16 @@ abstract class AbstractObjectCollector extends AbstractCollector
     protected $doNotDescent = array();
 
     /**
-     * Name of class to collect.
+     * Use this option to skip subclasses which implement certain interfaces. It can
+     * be used to skip collecting from subclassses that implement an interface. E.g.
+     * the Doctrine proxy wrapper.
      *
-     * @var string
+     * @var string[]
      */
-    protected $className;
+    protected $skipInterfaces = array(
+        'Doctrine\Common\Persistence\Proxy',
+        'Doctrine\ORM\Proxy\Proxy'
+    );
 
     /**
      * Set option.
@@ -73,10 +78,6 @@ abstract class AbstractObjectCollector extends AbstractCollector
 
             case "onlyInclude":
                 $this->onlyInclude = (null === $value) ? null : (array) $value;
-                break;
-
-            case "className":
-                $this->className = (string) $value;
                 break;
 
             default:
@@ -116,9 +117,36 @@ abstract class AbstractObjectCollector extends AbstractCollector
      * @param object|string $object May be a class name
      * @return string
      */
-    protected function getNodeName($object)
+    protected function getNodeName($class)
     {
-        return Util::getShortClassName($object);
+        if (is_object($class)) {
+            $class = $this->getClass($class);
+        }
+
+        return Util::getShortClassName($class);
+    }
+
+    /**
+     * Return the class name of the node to collect.
+     *
+     * @param object|string $object Class name or class instance.
+     * @return string
+     */
+    protected function getClass($object)
+    {
+        $class = (is_object($object) ? get_class($object) : $object);
+        if ($this->skipInterfaces) {
+            while (false !== $class) {
+                if (array_intersect(class_implements($class), $this->skipInterfaces)) {
+                    $class = get_parent_class($class);
+
+                } else {
+                    break;
+                }
+            }
+        }
+
+        return $class;
     }
 
     /**
@@ -140,6 +168,7 @@ abstract class AbstractObjectCollector extends AbstractCollector
             $previousClass = $class;
             $class = get_parent_class($class);
         }
+
         return $previousClass;
     }
 }

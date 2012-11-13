@@ -41,7 +41,7 @@ class NodePath
      */
     public function __construct($encodedPath = '')
     {
-        $this->encodedPath = $encodedPath;
+        $this->encodedPath = (string) $encodedPath;
     }
 
     /**
