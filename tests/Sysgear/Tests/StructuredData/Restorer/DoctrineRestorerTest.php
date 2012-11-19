@@ -32,60 +32,8 @@ class DoctrineRestorerTest extends TestCase
     {
         $node = new Node('dummy');
 
-        $restorer = new DoctrineRestorer(array('mergeMode' => DoctrineRestorer::MM_INSERT));
+        $restorer = new DoctrineRestorer();
         $restorer->restore($node);
-    }
-
-    public function testCreateRecord_attributeFields()
-    {
-        $metadata = $this->getMock('Doctrine\ORM\Mapping\ClassMetadata', array('hasField', 'getColumnName'));
-        $metadata->expects($this->exactly(2))->method('getColumnName')->will($this->returnArgument(0));
-        $metadata->expects($this->exactly(2))->method('hasField')->will($this->returnValue(true));
-
-        $restorer = $this->getMock('Sysgear\StructuredData\Restorer\DoctrineRestorer',
-            array('getMetadata', 'processRecord'));
-        $restorer->expects($this->once())->method('getMetadata')->will($this->returnValue($metadata));
-        $restorer->expects($this->once())->method('processRecord');
-
-        $node = new Node('object', 'user');
-        $node->setProperty('name', new NodeProperty('string', 'jan'));
-        $node->setProperty('age', new NodeProperty('integer', 24));
-        $record = self::getMethod($restorer, 'createRecord')->invokeArgs($restorer, array($node));
-
-        $this->assertEquals(array('name' => 'jan', 'age' => 24), $record);
-    }
-
-    public function testCreateRecord_manyToOne()
-    {
-        $employerNode = new Node('object', 'company');
-        $employerNode->setProperty('id', new NodeProperty('integer', 4));
-
-        $mapping = array(
-            'isOwningSide' => true, 'joinColumns' => array(
-                array('name' => 'employer_id', 'referencedColumnName' => 'id')
-            )
-        );
-
-        $hasField = function($field) {
-            return ('id' === $field) ? true : false;
-        };
-
-        $metadata = $this->getMock('Doctrine\ORM\Mapping\ClassMetadata', array(
-            'hasField', 'getAssociationMapping', 'getColumnName'));
-        $metadata->expects($this->exactly(1))->method('getAssociationMapping')->will($this->returnValue($mapping));
-        $metadata->expects($this->exactly(2))->method('hasField')->will($this->returnCallback($hasField));
-        $metadata->expects($this->exactly(1))->method('getColumnName')->will($this->returnArgument(0));
-
-        $restorer = $this->getMock('Sysgear\StructuredData\Restorer\DoctrineRestorer',
-            array('getMetadata', 'processRecord'));
-        $restorer->expects($this->exactly(2))->method('getMetadata')->will($this->returnValue($metadata));
-        $restorer->expects($this->exactly(2))->method('processRecord');
-
-        $node = new Node('object', 'user');
-        $node->setProperty('employer', $employerNode);
-        $record = self::getMethod($restorer, 'createRecord')->invokeArgs($restorer, array($node));
-
-        $this->assertEquals(array('employer_id' => 4), $record);
     }
 
     /**

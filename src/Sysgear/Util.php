@@ -66,4 +66,43 @@ class Util
         $pos = strrpos($fullClassname, '\\');
         return (false === $pos) ? $fullClassname : substr($fullClassname, $pos + 1);
     }
+
+    /**
+     * Creates a new class instance without invoking the constructor.
+     *
+     * @param string $class
+     * @return object
+     */
+    public static function createInstanceWithoutConstructor($class)
+    {
+        $reflector = new \ReflectionClass($class);
+        if (PHP_VERSION_ID >= 50400) {
+            return $reflector->newInstanceWithoutConstructor();
+        }
+
+        $properties = $reflector->getProperties();
+        $defaults = $reflector->getDefaultProperties();
+
+        $serealized = "O:" . strlen($class) . ":\"$class\":".count($properties) .':{';
+        foreach ($properties as $property) {
+            $name = $property->getName();
+            if ($property->isProtected()) {
+                $name = chr(0) . '*' .chr(0) .$name;
+
+            } elseif($property->isPrivate()) {
+                $name = chr(0)  . $class.  chr(0).$name;
+            }
+
+            $serealized .= serialize($name);
+            if(array_key_exists($property->getName(),$defaults) ){
+                $serealized .= serialize($defaults[$property->getName()]);
+
+            } else {
+                $serealized .= serialize(null);
+            }
+        }
+
+        $serealized .= "}";
+        return unserialize($serealized);
+    }
 }

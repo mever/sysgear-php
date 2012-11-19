@@ -129,6 +129,7 @@ class BackupTest extends TestCase
   /* -removed: date field */ .'
   <content type="object" class="Sysgear\Tests\Backup\IgnorePropertiesUser">
     <id type="integer" value="1"/>
+    <name type="string" value="piet"/>
     <roles type="list"/>
     <sessions type="list"/>
   </content>
@@ -182,8 +183,6 @@ class BackupTest extends TestCase
 <backup xmlns:xlink="http://www.w3.org/1999/xlink" type="container">'
   /* -removed: date field */ .'
   <content type="object" class="Sysgear\Tests\Backup\ProxyCompany">
-    <shouldBeIgnored1 type="boolean" value="1"/>
-    <shouldBeIgnored2 type="boolean" value="1"/>
     <id type="integer" value="1"/>
     <name type="string" value="rts"/>
     <locale type="object" class="Sysgear\Tests\Backup\Locale">
@@ -211,8 +210,10 @@ class BackupTest extends TestCase
       </Role>
     </functions>
     <employees type="list">
-      <User xlink:href="#element(/1/2/6/1/3/1)"/>
+      <User xlink:href="#element(/1/2/4/1/3/1)"/>
     </employees>
+    <shouldBeIgnored1 type="boolean" value="1"/>
+    <shouldBeIgnored2 type="boolean" value="1"/>
   </content>
 </backup>', $string);
     }
