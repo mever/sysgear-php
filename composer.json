@@ -1,0 +1,10 @@
+{
+    "name": "sysgear/php",
+    "description": "Sysgear PHP Library",
+    "autoload": {
+        "psr-0": { "": "src/" }
+    },
+    "require": {
+        "php": ">=5.3.3"
+    }
+}
