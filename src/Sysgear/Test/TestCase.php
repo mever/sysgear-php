@@ -23,6 +23,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
      */
     public function mock($class, array $methods = null)
     {
+        if (interface_exists($class)) {
+            $methods = array_merge($this->getAbstractMethodNames($class), $methods);
+        }
+
         return $this->getMock($class, $methods, array(), '', false);
     }
 
@@ -150,5 +154,22 @@ class TestCase extends \PHPUnit_Framework_TestCase
         }
 
         return new $className($mock);
+    }
+
+    /**
+     * Find abstract method names.
+     *
+     * @param string $class
+     * @return string[]
+     */
+    protected function getAbstractMethodNames($class)
+    {
+        $names = array();
+        $reflClass = new \ReflectionClass($class);
+        foreach ($reflClass->getMethods(\ReflectionMethod::IS_ABSTRACT) as $method) {
+            $names[] = $method->getName();
+        }
+
+        return $names;
     }
 }
