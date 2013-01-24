@@ -157,7 +157,7 @@ class ObjectRestorer extends AbstractRestorer
         }
 
         $refClass = new \ReflectionClass($class);
-        if (\PHP_VERSION_ID > 50400) {
+        if (\PHP_VERSION_ID >= 50400) {
             return $refClass->newInstanceWithoutConstructor();
 
         } else {
