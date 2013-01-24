@@ -23,8 +23,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
      */
     public function mock($class, array $methods = null)
     {
-        if (interface_exists($class)) {
-            $methods = array_merge($this->getAbstractMethodNames($class), $methods);
+        if (null !== $methods && interface_exists($class)) {
+            foreach ($this->getAbstractMethodNames($class) as $name) {
+                if (! in_array($name, $methods, true)) {
+                    $methods[] = $name;
+                }
+            }
         }
 
         return $this->getMock($class, $methods, array(), '', false);
