@@ -62,7 +62,9 @@ class DoctrineRestorer extends AbstractRestorer
         }
 
         $this->list = array();
-        return $this->restoreNode($node);
+        $this->restoreNode($node);
+        $this->entityManager->flush();
+        return $this->list;
     }
 
     /**
@@ -74,26 +76,28 @@ class DoctrineRestorer extends AbstractRestorer
     protected function restoreNode(Node $node)
     {
         // node already merged
-        $oid = spl_object_hash($node);
-        if (array_key_exists($oid, $this->list)) {
-            return $this->list[$oid];
+        $hash = spl_object_hash($node);
+        if (array_key_exists($hash, $this->list)) {
+            return $this->list[$hash];
         }
 
         if ($this->isInsert($node)) {
             $deferredProperties = array();
-            $partialEntity = $this->buildEntity($node, $deferredProperties);
-            $entity = $this->entityManager->merge($partialEntity);
-            $this->list[$oid] = $entity;
-
-            foreach ($deferredProperties as $name => $prop) {
-                $this->setProperty($entity, $name, $prop[0], $prop[1]);
+            $entity = $this->createEntity($node, $deferredProperties);
+            $this->insertEntity($entity, $node);
+            foreach ($deferredProperties as $name => $propDesc) {
+                list($prop, $insert) = $propDesc;
+                $this->setProperty($entity, $name, $prop, $insert);
             }
 
-            $this->entityManager->flush();
+            return $entity;
 
         } else {
             $entity = $this->findEntity($node);
-            $this->list[$oid] = $entity;
+            $this->list[$hash] = $entity;
+            if (null === $entity) {
+                $this->logMissing($node);
+            }
         }
 
         return $entity;
@@ -117,34 +121,21 @@ class DoctrineRestorer extends AbstractRestorer
      * @param array $deferredProperties
      * @return object Entity
      */
-    protected function buildEntity(Node $node, array &$deferredProperties)
+    protected function createEntity(Node $node, array &$deferredProperties)
     {
-        $entity = Util::createInstanceWithoutConstructor($this->getClass($node));
-        $metadata = $this->entityManager->getClassMetadata($this->getClass($node));
+        // create entity and put it on the list
+        $className = $this->getClass($node);
+        $entity = Util::createInstanceWithoutConstructor($className);
+        $this->list[spl_object_hash($node)] = $entity;
+
+        $metadata = $this->entityManager->getClassMetadata($className);
         $idFields = $metadata->isIdGeneratorIdentity() ? $metadata->getIdentifierFieldNames() : array();
 
         $mergeFields = json_decode($node->getMeta('merge', '[]'));
         foreach ($node->getProperties() as $name => $prop) {
             if (! in_array($name, $idFields, true)) {
-                $propInsert = (! in_array($name, $mergeFields, true));
-
-                // updating the inverse side
-                if ($prop instanceof NodeCollection && $metadata->isAssociationInverseSide($name)) {
-                    $targetField = $metadata->getAssociationMappedByTargetField($name);
-                    foreach ($prop as $child) {
-                        $child->setProperty($targetField, $node);
-                    }
-                }
-
-                // add deferred properties to the deferred list
-                if ($this->isDeferredProperty($metadata, $name)) {
-                    $deferredProperties[$name] = array($prop, $propInsert);
-
-                } else {
-
-                    // set all other properties directly
-                    $this->setProperty($entity, $name, $prop, $propInsert);
-                }
+                $insert = (! in_array($name, $mergeFields, true));
+                $this->createEntityProperty($node, $metadata, $entity, $name, $prop, $deferredProperties, $insert);
             }
         }
 
@@ -152,22 +143,74 @@ class DoctrineRestorer extends AbstractRestorer
     }
 
     /**
-     * Accept metadata and a property name and return if the property
-     * can be deferred.
+     * Create an entity property. If the propery is not mandatory and an assocciation
+     * push it on the $deferredProperties array.
      *
+     * @param Node $node
      * @param ClassMetadata $metadata
-     * @param string $propertyName
-     * @return boolean
+     * @param object $entity
+     * @param string $name
+     * @param NodeInterface $prop
+     * @param array $deferredProperties
+     * @param boolean $insert
      */
-    protected function isDeferredProperty(ClassMetadata $metadata, $propertyName)
+    protected function createEntityProperty(Node $node, ClassMetadata $metadata, $entity, $name, NodeInterface $prop, array &$deferredProperties, $insert)
     {
-        $defer = false;
-        if ($metadata->hasAssociation($propertyName)) {
-            $mapping = $metadata->getAssociationMapping($propertyName);
-            $defer = ! $mapping['isOwningSide'];
+        // set a primitive property (e.g.: string, int, datetime) or
+        // more complex native php objects, arrays or anything else than Doctrine assocciations.
+        if ($prop instanceof NodeProperty) {
+            $this->setProperty($entity, $name, $prop, $insert);
+            return;
         }
 
-        return $defer;
+        // update inverse side of assocciation properties
+        if ($metadata->isAssociationInverseSide($name)) {
+            $targetName = $metadata->getAssociationMappedByTargetField($name);
+            if ($prop instanceof Node) {
+                $prop->setProperty($targetName, $node);
+
+            } elseif ($prop instanceof NodeCollection) {
+                foreach ($prop as $child) {
+                    $child->setProperty($targetName, $node);
+                }
+            }
+        }
+
+        // set a X-to-one or X-to-many assocciation
+        if ($this->isAssociationMandatory($metadata, $name)) {
+            $this->setProperty($entity, $name, $prop, $insert);
+        } else {
+            $deferredProperties[$name] = array($prop, $insert);
+        }
+    }
+
+    /**
+     * Return true if given name is a mandatory assocciation. Or false when not.
+     *
+     * @param ClassMetadata $metadata
+     * @param string $associationName
+     * @throws \LogicException
+     * @return boolean
+     */
+    protected function isAssociationMandatory(ClassMetadata $metadata, $associationName)
+    {
+        if ($metadata->hasAssociation($associationName)) {
+            $mapping = $metadata->getAssociationMapping($associationName);
+            $joinColumns = @$mapping['joinColumns'];
+            $isOwning = (null !== $joinColumns);
+            if ($isOwning) {
+                foreach ($joinColumns as $column) {
+                    if (! @$column['nullable']) {
+                        return true;
+                    }
+                }
+            }
+
+        } else {
+            throw new \LogicException("{$associationName} is not an association of {$metadata->getName()}");
+        }
+
+        return false;
     }
 
     /**
@@ -181,10 +224,10 @@ class DoctrineRestorer extends AbstractRestorer
     protected function setProperty($entity, $name, NodeInterface $valueNode, $insert = false)
     {
         $reflObject = new \ReflectionObject($entity);
-        $prop = $this->getProperty($reflObject, $name);
-        if (null !== $prop) {
-            $prop->setAccessible(true);
-            $prop->setValue($entity, $this->getValue($valueNode, $insert));
+        $reflProp = $this->getInheritedReflectionProperty($reflObject, $name);
+        if (null !== $reflProp) {
+            $reflProp->setAccessible(true);
+            $reflProp->setValue($entity, $this->getValue($valueNode, $insert));
         }
     }
 
@@ -273,7 +316,7 @@ class DoctrineRestorer extends AbstractRestorer
      * @param string $name
      * @return \ReflectionProperty
      */
-    protected function getProperty(\ReflectionClass $reflClass, $name)
+    protected function getInheritedReflectionProperty(\ReflectionClass $reflClass, $name)
     {
         if ($reflClass->hasProperty($name)) {
             return $reflClass->getProperty($name);
@@ -281,7 +324,7 @@ class DoctrineRestorer extends AbstractRestorer
         } else {
             $reflParent = $reflClass->getParentClass();
             if ($reflParent) {
-                return $this->getProperty($reflParent, $name);
+                return $this->getInheritedReflectionProperty($reflParent, $name);
             }
         }
     }
@@ -300,5 +343,78 @@ class DoctrineRestorer extends AbstractRestorer
         }
 
         return $class;
+    }
+
+    protected function insertEntity($entity, Node $describeNode = null)
+    {
+        $this->entityManager->persist($entity);
+        $this->entityManager->flush($entity);
+
+        $logger = $this->logger;
+        if (null !== $logger) {
+            if (method_exists($entity, '__toString')) {
+                $desc = (string) $entity;
+
+            } else {
+                $desc = get_class($entity) . ': ';
+                if (null !== $describeNode) {
+                    $desc .= json_encode($this->getDescFields($describeNode));
+                }
+            }
+            $logger("insert new entity {$desc}", 'debug');
+        }
+    }
+
+    /**
+     * Log a missing node.
+     *
+     * @param Node $node
+     */
+    protected function logMissing(Node $node)
+    {
+        $logger = $this->logger;
+        if (null !== $logger) {
+            $logger("could not find {$node->getMeta('class')}: " . json_encode($this->getDescFields($node, true)), 'warning');
+        }
+    }
+
+    /**
+     * Return an array with discriptive fields for the given node.
+     *
+     * @param Node $node
+     * @return array
+     */
+    protected function getDescFields(Node $node, $onlyMergeField = false)
+    {
+        $mergeFields = $onlyMergeField ? json_decode($node->getMeta('merge-fields', '[]'), true) : null;
+
+        $fields = array();
+        foreach ($node->getProperties() as $name => $prop) {
+            if ($prop instanceof NodeProperty && (null === $mergeFields || in_array($name, $mergeFields, true))) {
+                $fields[$name] = $prop->getValue();
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Get identity fields from entity.
+     *
+     * @param object $entity
+     * @return array
+     */
+    protected function getIdentity($entity)
+    {
+        $identity = array();
+        $reflClass = new \ReflectionClass($entity);
+        $metadata = $this->entityManager->getClassMetadata(get_class($entity));
+        foreach ($metadata->getIdentifierFieldNames() as $field) {
+            $reflProp = $reflClass->getProperty($field);
+            $reflProp->setAccessible(true);
+            $identity[$field] = $reflProp->getValue($entity);
+        }
+
+        return $identity;
     }
 }

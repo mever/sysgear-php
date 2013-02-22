@@ -140,15 +140,13 @@ class BackupTool
         $restoredObject = null;
         $restorerOptions = array_merge($this->restorerOptions, $restorerOptions);
         if (array_key_exists('entityManager', $restorerOptions)) {
-            $entityManager = $restorerOptions['entityManager'];
-
-            $restorer = new DoctrineRestorer(array('entityManager' => $entityManager));
-            $entityManager->transactional(function() use ($restorer, $contentNode, &$restoredObject) {
+            $restorer = new DoctrineRestorer($restorerOptions);
+            $restorerOptions['entityManager']->transactional(function() use ($restorer, $contentNode, &$restoredObject) {
                 $restoredObject = $restorer->restore($contentNode);
             });
         }
 
-        if (true === @$restorerOptions['reconstruct']) {
+        if (null === $restoredObject && true === @$restorerOptions['reconstruct']) {
             $restorer = new BackupRestorer($restorerOptions);
             return $restorer->restore($contentNode, $object);
         } else {
