@@ -12,6 +12,8 @@
 
 namespace Sysgear\Test;
 
+use Sysgear\Util;
+
 class TestCase extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -95,10 +97,14 @@ class TestCase extends \PHPUnit_Framework_TestCase
     /**
      * Wrap a mock object into a serializable wrapper.
      *
+     * When no interfaces are specified use the SPL Serializable interface.
+     *
      * @param \PHPUnit_Framework_MockObject_MockObject $mock
+     * @param $interfaces array
+     * @param $extends string FQCN (Fully-Qualified Class Name)
      * @return \Serializable
      */
-    protected function getSerializableMock(\PHPUnit_Framework_MockObject_MockObject $mock, array $interfaces = null)
+    protected function getSerializableMock(\PHPUnit_Framework_MockObject_MockObject $mock, array $interfaces = null, $extends = null)
     {
         $mockedClassname = get_class($mock);
         if (null === $interfaces) {
@@ -131,33 +137,34 @@ class TestCase extends \PHPUnit_Framework_TestCase
             ksort($params);
             $methods[] = "public function {$name}(" . join(',', $params) . ") {\n" .
                 "\t\$arguments = func_get_args();\n".
-                "\treturn call_user_func_array(array(\$this->mock, __FUNCTION__), \$arguments);\n}\n";
+                "\treturn call_user_func_array(array(\$this->__mock, __FUNCTION__), \$arguments);\n}\n";
         }
 
         // build serializable class
         $className = 'Serialized_' . $mockedClassname;
         if (! class_exists($className)) {
+            $extends = (null === $extends) ? '' : " {$extends}";
             $class = "
-            class {$className} implements " . join(', ', $interfaces) . " {\n".
-                "protected \$mock;\n".
+            class {$className}{$extends} implements " . join(', ', $interfaces) . " {\n".
+                "public \$__mock;\n".
                 "protected static \$instances = array();\n".
-                "public function __construct(PHPUnit_Framework_MockObject_MockObject \$mock) {\n".
-                    "\t\$this->mock = \$mock;\n".
-                "}\npublic function serialize() {\n".
+                "public function serialize() {\n".
                     "\t\$id = (string) count(self::\$instances);\n".
-                    "\tself::\$instances[\$id] = \$this->mock;\n".
+                    "\tself::\$instances[\$id] = \$this->__mock;\n".
                     "\treturn \$id;\n}".
                 "\npublic function unserialize(\$id) {\n".
-                    "\t\$this->mock = self::\$instances[\$id];\n".
+                    "\t\$this->__mock = self::\$instances[\$id];\n".
                 "}\npublic function __call(\$name, \$arguments) {\n".
-                    "\treturn call_user_func_array(array(\$this->mock, \$name), \$arguments);\n".
+                    "\treturn call_user_func_array(array(\$this->__mock, \$name), \$arguments);\n".
                 "}\n" . join('', $methods) . "\n".
             "}";
 
             eval($class);
         }
 
-        return new $className($mock);
+        $instance = Util::createInstanceWithoutConstructor($className);
+        $instance->__mock = $mock;
+        return $instance;
     }
 
     /**
