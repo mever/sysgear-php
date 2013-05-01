@@ -46,7 +46,15 @@ class TestCase extends \PHPUnit_Framework_TestCase
      */
     protected function getProp($object, $name, $class = null)
     {
-        $refProperty = new \ReflectionProperty(($class ?: $object), $name);
+        if (null === $class) {
+            if ($object instanceof \PHPUnit_Framework_MockObject_MockObject) {
+                $class = get_parent_class($object);
+            } else {
+                $class = get_class($object);
+            }
+        }
+
+        $refProperty = new \ReflectionProperty($class, $name);
         $refProperty->setAccessible(true);
         return $refProperty->getValue($object);
     }
@@ -61,7 +69,15 @@ class TestCase extends \PHPUnit_Framework_TestCase
      */
     protected function setProp($object, $name, $value, $class = null)
     {
-        $refProperty = new \ReflectionProperty(($class ?: $object), $name);
+        if (null === $class) {
+            if ($object instanceof \PHPUnit_Framework_MockObject_MockObject) {
+                $class = get_parent_class($object);
+            } else {
+                $class = get_class($object);
+            }
+        }
+
+        $refProperty = new \ReflectionProperty($class, $name);
         $refProperty->setAccessible(true);
         return $refProperty->setValue($object, $value);
     }
