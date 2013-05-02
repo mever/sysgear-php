@@ -44,7 +44,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      * @param string $class Set this if you need to access private members
      * @return mixed
      */
-    protected function getProp($object, $name, $class = null)
+    public function getProp($object, $name, $class = null)
     {
         if (null === $class) {
             if ($object instanceof \PHPUnit_Framework_MockObject_MockObject) {
@@ -67,7 +67,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      * @param mixed $value
      * @param string $class Set this if you need to access private members
      */
-    protected function setProp($object, $name, $value, $class = null)
+    public function setProp($object, $name, $value, $class = null)
     {
         if (null === $class) {
             if ($object instanceof \PHPUnit_Framework_MockObject_MockObject) {
@@ -93,7 +93,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      * @param mixed $var...
      * @return mixed
      */
-    protected function exec($object, $method)
+    public function exec($object, $method)
     {
         if (is_array($method)) {
             list($class, $method) = $method;
@@ -120,7 +120,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      * @param $extends string FQCN (Fully-Qualified Class Name)
      * @return \Serializable
      */
-    protected function getSerializableMock(\PHPUnit_Framework_MockObject_MockObject $mock, array $interfaces = null, $extends = null)
+    public function getSerializableMock(\PHPUnit_Framework_MockObject_MockObject $mock, array $interfaces = null, $extends = null)
     {
         $mockedClassname = get_class($mock);
         if (null === $interfaces) {
