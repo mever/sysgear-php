@@ -131,7 +131,7 @@ class DoctrineRestorer extends AbstractRestorer
         $metadata = $this->entityManager->getClassMetadata($className);
         $idFields = $metadata->isIdGeneratorIdentity() ? $metadata->getIdentifierFieldNames() : array();
 
-        $mergeFields = json_decode($node->getMeta('merge', '[]'));
+        $mergeFields = json_decode($node->getMeta('merge', '[]'), true);
         foreach ($node->getProperties() as $name => $prop) {
             if (! in_array($name, $idFields, true)) {
                 $insert = (! in_array($name, $mergeFields, true));
@@ -301,8 +301,11 @@ class DoctrineRestorer extends AbstractRestorer
             if ($value instanceof NodeProperty) {
                 $criteria[$field] = $value->getValue();
 
+            } elseif ($value instanceof Node) {
+                $criteria[$field] = $this->getIdentity($this->findEntity($value));
+
             } else {
-                throw new \RuntimeException("This is not supported!");
+                throw new \RuntimeException("Finding an entity with a collection property '{$field}' is not implemented!");
             }
         }
 
