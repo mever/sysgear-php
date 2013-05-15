@@ -130,13 +130,11 @@ class BackupCollector extends AbstractObjectCollector
             // merge mode enabled, include only fields that can be used to restore this backup
             if (null !== $this->merging && is_array(@$options['mergeFields'])) {
 
+                $this->node->setMetadata('merge-fields', json_encode($options['mergeFields']));
                 if (self::MERGE_ONLY === $this->merging) {
                     $this->onlyInclude = $options['mergeFields'];
                     $this->followCompositeNodes = true;
                     $this->doNotDescent = array();
-
-                } else {
-                    $this->node->setMetadata('merge-fields', json_encode($options['mergeFields']));
                 }
 
             } elseif (null !== $this->merge) {
