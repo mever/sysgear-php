@@ -60,7 +60,12 @@ class XmlImporter extends AbstractImporter
         // check if reference
         $href = $domNode->getAttributeNS('http://www.w3.org/1999/xlink', 'href');
         if ('' !== $href) {
-            return $this->references[$href];
+            $ref = @$this->references[$href];
+            if (null === $ref) {
+                throw new \RuntimeException("Node '{$sequence}' points to not existing node: {$href}");
+            }
+
+            return $ref;
         }
 
         // collect node attributes
@@ -122,7 +127,7 @@ class XmlImporter extends AbstractImporter
                 break;
 
             default:
-                throw ImporterException::couldNotDetermineNodeType($nodeType);
+                throw ImporterException::couldNotDetermineNodeType($nodeType, $sequence);
         }
 
         return $node;
