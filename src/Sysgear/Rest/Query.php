@@ -213,32 +213,6 @@ class Query
     }
 
     /**
-     * Build partial object expressions.
-     *
-     * @return string
-     */
-    protected function buildPartialSelect()
-    {
-        $partialFieldSets = array();
-        foreach ($this->select as $field) {
-            $parts = explode('.', $field, 2);
-            if (isset($fields[$parts[0]])) {
-                $partialFieldSets[$parts[0]] = array($parts[1]);
-
-            } else {
-                $partialFieldSets[$parts[0]][] = $parts[1];
-            }
-        }
-
-        $partialObjectExpressions = array();
-        foreach ($partialFieldSets as $alias => $fields) {
-            $partialObjectExpressions[] = "partial {$alias}.{" . join(',', $fields) . '}';
-        }
-
-        return join(',', $partialObjectExpressions);
-    }
-
-    /**
      * Normalize fields.
      *
      * @param string[] $fields
