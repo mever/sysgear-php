@@ -205,7 +205,7 @@ class Query
 
                 // build complete comparison expresssion
                 $left = $that->normalizeFields(array($filter->getField()));
-                return reset($left) . $sqlOperator . ' ' . $right;
+                return reset($left) . " {$sqlOperator} " . $right;
             }
         };
 

@@ -112,7 +112,7 @@ class BuildCasterTest extends \PHPUnit_Framework_TestCase
         $builder->set(Datatype::DATETIME, 'return new \\DateTime($v, $tz)');
         $builder->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
 
-        $date = new \DateTime('2012-05-03 16:46:24');
+        $date = new \DateTime('2012-05-03 16:46:24', new \DateTimeZone('Europe/Amsterdam'));
         $this->assertEquals($date, $builder->cast('2012-05-03 16:46:24', Datatype::DATETIME));
     }
 
