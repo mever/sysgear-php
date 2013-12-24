@@ -11,7 +11,9 @@
 
 namespace Sysgear\Dql;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManager,
+    Doctrine\ORM\QueryBuilder;
+
 use Sysgear\Filter\Collection;
 
 class Query
@@ -29,7 +31,7 @@ class Query
     /**
      * @var array
      */
-    protected $select;
+    protected $selects;
 
     /**
      * @var \Doctrine\ORM\EntityManager
@@ -45,6 +47,11 @@ class Query
      * @var array
      */
     protected $limit;
+
+    /**
+     * @var array
+     */
+    protected $joins = array();
 
     /**
      * Create rest query tool.
@@ -76,7 +83,7 @@ class Query
             $select = $this->normalizeFields($select);
         }
 
-        $this->select = $select;
+        $this->selects = $select;
     }
 
     /**
@@ -115,21 +122,18 @@ class Query
     {
         $queryBuilder = $this->entityManager->createQueryBuilder();
         $queryBuilder->from($this->entityClass, '_');
-        if (null === $this->select) {
-            $queryBuilder->select('_');
 
-        } else {
-            $aliases = array();
-            foreach ($this->select as $field) {
-                list($alias) = explode('.', $field, 2);
-                $aliases[$alias] = $alias;
-            }
-
-            $queryBuilder->select(join(',', $aliases));
-        }
-
+        // first build where clause, as it can determine
+        // the select and joins involved.
         if (null !== $this->filters && ! $this->filters->isEmpty()) {
             $queryBuilder->where($this->toWhereClause($this->filters));
+        }
+
+        // if we have joins make sure we can iterate, thus distinct
+        $queryBuilder->select((0 === count($this->joins) ? '' : 'DISTINCT ') . '_');
+
+        foreach ($this->joins as $spec) {
+            $queryBuilder->innerJoin($spec['join'], $spec['alias']);
         }
 
         if ($this->orderBy) {
@@ -171,8 +175,14 @@ class Query
     {
         $that = $this;
         $connection = $this->entityManager->getConnection();
-        $compiler = function($type, $filter) use ($that, $connection) {
+        $selectAliases = array();
+        $joins =& $this->joins;
+        foreach ($this->selects as $field) {
+            list($alias) = explode('.', $field, 2);
+            $selectAliases[] = $alias;
+        }
 
+        $compiler = function($type, $filter) use ($that, $connection, $selectAliases, &$joins) {
             if ($type === Collection::COMPILE_COL) {
 
                 // return left, operator and right parts
@@ -203,9 +213,18 @@ class Query
                     }
                 }
 
+                // get left operand
+                $left = $that->normalizeField($filter->getField());
+
+                // add join if a field in the filter traverses a relation
+                $pos = strpos($left, '.');
+                if (false !== $pos && ! in_array(substr($left, 0, $pos), $selectAliases, true)) {
+                    $field = substr($left, 0, $pos);
+                    $joins[] = array('join' => '_.' . $field, 'alias' => $field);
+                }
+
                 // build complete comparison expresssion
-                $left = $that->normalizeFields(array($filter->getField()));
-                return reset($left) . " {$sqlOperator} " . $right;
+                return "{$left} {$sqlOperator} {$right}";
             }
         };
 
@@ -221,16 +240,28 @@ class Query
     public function normalizeFields($fields)
     {
         foreach ($fields as &$field) {
-            if (preg_match('/^([a-z][a-z0-9_]*\\.)?[a-z][a-z_0-9]*$/i', $field, $matches)) {
-                if (1 === count($matches)) {
-                    $field = "_.{$field}";
-                }
-            } else {
-                self::assertField($field);
-            }
+            $field = $this->normalizeField($field);
         }
 
         return $fields;
+    }
+
+    /**
+     * Normalize field.
+     *
+     * @param string $field
+     * @return string
+     */
+    public function normalizeField($field) {
+        if (preg_match('/^([a-z][a-z0-9_]*\\.)?[a-z][a-z_0-9]*$/i', $field, $matches)) {
+            if (1 === count($matches)) {
+                return "_.{$field}";
+            }
+        } else {
+            self::assertField($field);
+        }
+
+        return $field;
     }
 
     /**
