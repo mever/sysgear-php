@@ -9,13 +9,13 @@
 * file that was distributed with this source code.
 */
 
-namespace Sysgear\Tests\Rest;
+namespace Sysgear\Tests\Dql;
 
 use Sysgear\Test\TestCase;
 
 class Query extends TestCase
 {
-    const C = 'Sysgear\Rest\Query';
+    const C = 'Sysgear\Dql\Query';
 
     public function test_assertField_alphaNum()
     {

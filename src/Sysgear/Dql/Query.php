@@ -9,7 +9,7 @@
 * file that was distributed with this source code.
 */
 
-namespace Sysgear\Rest;
+namespace Sysgear\Dql;
 
 use Doctrine\ORM\EntityManager;
 use Sysgear\Filter\Collection;
