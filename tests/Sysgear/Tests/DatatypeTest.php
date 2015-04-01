@@ -15,6 +15,18 @@ use Sysgear\Datatype;
 
 class DatatypeTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * Return if we're currently in DST.
+     *
+     * @param $timezone string
+     * @return bool
+     */
+    public function isDst($timezone)
+    {
+        $date = new \DateTime('now', new \DateTimeZone($timezone));
+        return ('1' === $date->format('I'));
+    }
+
     /*
      * Test static method: toDesc
      */
@@ -316,9 +328,8 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
         );
 
         Datatype::castDatesInRecords('Europe/Amsterdam', $records, array(1 => Datatype::TIME));
-        $dst = ('1' === date('I'));
 
-        if ($dst) {
+        if ($this->isDst('Europe/Amsterdam')) {
             $this->assertSame(array(
                 array('abc', '14:13:00', 123, null),
                 array('d7a', '14:02:00', 489, null),
