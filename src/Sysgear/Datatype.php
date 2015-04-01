@@ -2,8 +2,6 @@
 
 namespace Sysgear;
 
-use Doctrine\ORM\EntityManager;
-
 class Datatype
 {
     const INT           = 0;
@@ -25,7 +23,8 @@ class Datatype
     /**
      * Show datatype as human readable string.
      *
-     * @param integer $dt
+     * @param $dt integer
+     * @return string
      */
     public static function toDesc($dt)
     {
@@ -35,6 +34,8 @@ class Datatype
                 return strtolower($name);
             }
         }
+
+        return '[unknown]';
     }
 
     /**
@@ -76,48 +77,6 @@ class Datatype
             case self::NUMBER: return 'BIGINT';
             case self::STRING: return "VARCHAR({$length})";
             default:           return 'TEXT';
-        }
-    }
-
-    /**
-     * Return a oracle bind type (int constant).
-     *
-     * @param int $dt
-     * @return int
-     */
-    public static function toOracleBind($dt)
-    {
-        switch ($dt)
-        {
-            case self::BOOL:
-            case self::INT:
-            case self::NUMBER:
-            case self::FLOAT:
-                return SQLT_INT;
-                break;
-
-            case self::STRING:
-                return SQLT_CHR;
-                break;
-
-            default:
-                throw new \LogicException('This datatype is not supported!');
-                break;
-        }
-    }
-
-    /**
-     * Convert Oracle datatype to sysgear datatype.
-     *
-     * @param string $oracleType
-     * @return integer
-     */
-    public static function fromOracle($oracleType)
-    {
-        switch ($oracleType) {
-        case 'NUMBER':  return self::NUMBER;
-        case 'DATE':    return self::DATETIME;
-        default:        return self::STRING;
         }
     }
 
@@ -300,7 +259,8 @@ class Datatype
     /**
      * Return true if a given datatype is numeric.
      *
-     * @param integer $datatype
+     * @param $datatype integer
+     * @return bool
      */
     public static function isNumber($datatype)
     {

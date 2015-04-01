@@ -90,57 +90,6 @@ class DatatypeTest extends \PHPUnit_Framework_TestCase
 
 
     /*
-     * Test static method: toOracleBind
-     */
-
-    public function testToOracleBind_bool() {
-        $this->assertSame(\SQLT_INT, Datatype::toOracleBind(Datatype::BOOL));
-    }
-
-    public function testToOracleBind_int() {
-        $this->assertSame(\SQLT_INT, Datatype::toOracleBind(Datatype::INT));
-    }
-
-    public function testToOracleBind_number() {
-        $this->assertSame(\SQLT_INT, Datatype::toOracleBind(Datatype::NUMBER));
-    }
-
-    public function testToOracleBind_float() {
-        $this->assertSame(\SQLT_INT, Datatype::toOracleBind(Datatype::FLOAT));
-    }
-
-    public function testToOracleBind_string() {
-        $this->assertSame(\SQLT_CHR, Datatype::toOracleBind(Datatype::STRING));
-    }
-
-    /**
-     * @expectedException LogicException
-     */
-    public function testToOracleBind_default() {
-        Datatype::toOracleBind(-1);
-    }
-
-
-
-    /*
-     * Test static method: fromOracle
-     */
-
-    public function testFromOracle_number() {
-        $this->assertSame(Datatype::NUMBER, Datatype::fromOracle('NUMBER'));
-    }
-
-    public function testFromOracle_date() {
-        $this->assertSame(Datatype::DATETIME, Datatype::fromOracle('DATE'));
-    }
-
-    public function testFromOracle_default() {
-        $this->assertSame(Datatype::STRING, Datatype::fromOracle(-1));
-    }
-
-
-
-    /*
      * Test static method: getPrintableString
      */
 
