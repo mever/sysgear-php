@@ -4,8 +4,8 @@ namespace Sysgear\Gearman;
 
 class Job
 {
-    protected $name;
-    protected $parameters = array();
+    private $name;
+    private $parameters = array();
 
     public function __construct($name, array $parameters = array())
     {
@@ -18,14 +18,27 @@ class Job
         return $this->name;
     }
 
-    public function setParameter($key, $value)
+    public function setParameter($name, $value)
     {
-        $this->parameters[$key] = $value;
+        $this->parameters[$name] = $value;
     }
 
-    public function getParameter($key, $default = null)
+    public function hasParameter($name)
     {
-        return (array_key_exists($key, $this->parameters)) ? $this->parameters[$key] : $default;
+        return array_key_exists($name, $this->parameters);
+    }
+
+    public function getParameter($name, $default = null)
+    {
+        if (array_key_exists($name, $this->parameters)) {
+            return $this->parameters[$name];
+        } else {
+            if (func_num_args() === 1) {
+                throw new \InvalidArgumentException("No parameter named '{$name}' found");
+            }
+
+            return $default;
+        }
     }
 
     public function getParameters()

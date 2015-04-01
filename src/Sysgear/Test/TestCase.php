@@ -159,7 +159,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         // build serializable class
         $className = 'Serialized_' . $mockedClassname;
         if (! class_exists($className)) {
-            $extends = (null === $extends) ? '' : " {$extends}";
+            $extends = (null === $extends) ? '' : " extends {$extends}";
             $class = "
             class {$className}{$extends} implements " . join(', ', $interfaces) . " {\n".
                 "public \$__mock;\n".
