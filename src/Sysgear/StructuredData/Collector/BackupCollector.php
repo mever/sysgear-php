@@ -21,7 +21,7 @@ class BackupCollector extends AbstractObjectCollector
     const MERGE_ONLY = 2;
 
     /**
-     * When true only collect data from the implementor of the
+     * When true only collect data from the implementer of the
      * backupable interface. E.i. only collect properties declared in the
      * class implementing the backupable interface. Also derive the node name
      * from this class.
@@ -32,7 +32,7 @@ class BackupCollector extends AbstractObjectCollector
      *
      * @var boolean
      */
-    protected $onlyImplementor = false;
+    protected $onlyImplementer = false;
 
     /**
      * List of composite fields to merge. First element is
@@ -68,8 +68,8 @@ class BackupCollector extends AbstractObjectCollector
     protected function _setOption($key, $value)
     {
         switch ($key) {
-            case 'onlyImplementor':
-                $this->onlyImplementor = (boolean) $value;
+            case 'onlyImplementer':
+                $this->onlyImplementer = (boolean) $value;
                 break;
 
             case 'merge':
@@ -187,7 +187,7 @@ class BackupCollector extends AbstractObjectCollector
             return false;
         }
 
-        if ($this->onlyImplementor) {
+        if ($this->onlyImplementer) {
             $className = $this->getClass($property->getDeclaringClass()->getName());
             if ($property->getDeclaringClass()->getName() !== $className) {
                 return false;
@@ -312,7 +312,7 @@ class BackupCollector extends AbstractObjectCollector
             $collector->merging = $this->merge[0];
         }
 
-        $backupable->collectStructedData($collector);
+        $backupable->collectStructuredData($collector);
         return $collector->getNode();
     }
 
@@ -324,8 +324,8 @@ class BackupCollector extends AbstractObjectCollector
      */
     protected function getClass($object)
     {
-        if ($this->onlyImplementor) {
-            return $this->getFirstClassnameImplementing($object,
+        if ($this->onlyImplementer) {
+            return $this->getFirstClassNameImplementing($object,
                 '\\Sysgear\\Backup\\BackupableInterface');
 
         } else {

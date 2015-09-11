@@ -33,11 +33,11 @@ class TestCase extends \PHPUnit_Framework_TestCase
     protected function createClassBackupableInterface()
     {
         $ns = '\\Sysgear\\StructuredData\\Collector\\BackupCollector';
-        $m1 = "public function collectStructedData({$ns} \$col, array \$options = array())\n".
+        $m1 = "public function collectStructuredData({$ns} \$col, array \$options = array())\n".
             '{$col->fromObject($this, $options);}';
 
         $ns = '\\Sysgear\\StructuredData\\Restorer\\BackupRestorer';
-        $m2 = "public function restoreStructedData({$ns} \$res)\n".
+        $m2 = "public function restoreStructuredData({$ns} \$res)\n".
             '{$remaining = $res->toObject($this);'."\n".
             'foreach ($remaining as $name => $value) {$this->{$name} = $value;}}';
 

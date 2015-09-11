@@ -2,11 +2,11 @@
 
 namespace Sysgear\Backup;
 
-use Sysgear\StructuredData\Collector\BackupCollector;
-use Sysgear\StructuredData\Restorer\BackupRestorer;
+use Sysgear\StructuredData\Collector\BackupCollector,
+    Sysgear\StructuredData\Restorer\BackupRestorer;
 
 /**
- * Implementations of this interface can be backupped if it is passed
+ * Implementations of this interface can be backed up if it is passed
  * a BackupCollector and restored when passed a BackupRestorer.
  *
  * @author (c) Martijn Evers <martijn4evers@gmail.com>
@@ -14,17 +14,17 @@ use Sysgear\StructuredData\Restorer\BackupRestorer;
 interface BackupableInterface
 {
     /**
-     * Collect structed data using a backup collector.
+     * Collect structured data using a backup collector.
      *
-     * @param \Sysgear\StructuredData\Collector\BackupCollector $backupDataCollector
+     * @param BackupCollector $backupDataCollector
      * @param mixed[] $options Map of options for the collector instance.
      */
-    public function collectStructedData(BackupCollector $backupDataCollector, array $options = array());
+    public function collectStructuredData(BackupCollector $backupDataCollector, array $options = array());
 
     /**
-     * Restore structed data using a backup restorer.
+     * Restore structured data using a backup restorer.
      *
-     * @param Sysgear\StructuredData\Restorer\BackupRestorer $backupDataRestorer
+     * @param BackupRestorer $backupDataRestorer
      */
-    public function restoreStructedData(BackupRestorer $backupDataRestorer);
+    public function restoreStructuredData(BackupRestorer $backupDataRestorer);
 }

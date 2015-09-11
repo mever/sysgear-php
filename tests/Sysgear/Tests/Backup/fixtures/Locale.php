@@ -21,7 +21,7 @@ class Locale implements BackupableInterface
     /**
      * {@inheritDoc}
      */
-    public function collectStructedData(BackupCollector $backupDataCollector, array $options = array())
+    public function collectStructuredData(BackupCollector $backupDataCollector, array $options = array())
     {
         $backupDataCollector->fromObject($this);
     }
@@ -29,7 +29,7 @@ class Locale implements BackupableInterface
     /**
      * {@inheritDoc}
      */
-    public function restoreStructedData(BackupRestorer $backupDataRestorer)
+    public function restoreStructuredData(BackupRestorer $backupDataRestorer)
     {
         $backupDataRestorer->toObject($this);
     }

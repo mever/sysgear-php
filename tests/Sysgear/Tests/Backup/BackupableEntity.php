@@ -20,7 +20,7 @@ class BackupableEntity implements BackupableInterface
     /**
      * {@inheritDoc}
      */
-    public function collectStructedData(BackupCollector $backupDataCollector, array $options = array())
+    public function collectStructuredData(BackupCollector $backupDataCollector, array $options = array())
     {
         $options['className'] = get_class($this);
         $backupDataCollector->fromObject($this, $options);
@@ -29,7 +29,7 @@ class BackupableEntity implements BackupableInterface
     /**
      * {@inheritDoc}
      */
-    public function restoreStructedData(BackupRestorer $backupDataRestorer)
+    public function restoreStructuredData(BackupRestorer $backupDataRestorer)
     {
         $remaining = $backupDataRestorer->toObject($this);
         foreach ($remaining as $name => $value) {

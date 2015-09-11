@@ -26,6 +26,7 @@ class BackupRestorer extends ObjectRestorer
     protected $name;
 
     /**
+     * TODO: find out what $object is supposed to do
      * {@inheritdoc}
      */
     public function restore(Node $node, $object = null)
@@ -41,7 +42,7 @@ class BackupRestorer extends ObjectRestorer
     /**
      * Restore data to object.
      *
-     * @param \StdClass $object
+     * @param object $object
      * @return array Return a list of remaining properties, those that could not
      *               be set because the restorer was not able to access the
      *               modifiers of the $object.
@@ -79,7 +80,7 @@ class BackupRestorer extends ObjectRestorer
         if ($object instanceof BackupableInterface) {
             $restorer = $this->getRestorer();
             $restorer->node = $node;
-            $object->restoreStructedData($restorer);
+            $object->restoreStructuredData($restorer);
         }
 
         return $object;

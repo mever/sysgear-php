@@ -106,7 +106,7 @@ class BackupTool
     }
 
     /**
-     * Backup collection of stuctured data from $object.
+     * Backup collection of structured data from $object.
      *
      * @param \Sysgear\Backup\BackupableInterface $object
      * @param array $collectorOptions
@@ -116,7 +116,7 @@ class BackupTool
     {
         $collectorOptions = array_merge($this->collectorOptions, $collectorOptions);
         $collector = new BackupCollector($collectorOptions);
-        $object->collectStructedData($collector);
+        $object->collectStructuredData($collector);
 
         $node = $this->writeContent($collector->getNode());
         $this->exporter->setNode($node);
@@ -124,11 +124,12 @@ class BackupTool
     }
 
     /**
-     * Restore collection of structed data to $object.
+     * Restore collection of structured data to $object.
      *
      * @param array $restorerOptions
      * @param BackupableInterface $object
      * @return BackupableInterface
+     * @throws Exception
      */
     public function restore(array $restorerOptions = array(), BackupableInterface $object = null)
     {

@@ -29,7 +29,7 @@ class IgnorePropertiesUser extends User
     /**
      * {@inheritDoc}
      */
-    public function collectStructedData(BackupCollector $backupDataCollector, array $options = array())
+    public function collectStructuredData(BackupCollector $backupDataCollector, array $options = array())
     {
         $backupDataCollector->fromObject($this, array(
             'ignore' => array('employer', 'password')));
@@ -46,7 +46,7 @@ class DoNotScanAndIgnorePropertiesUser extends User
     /**
      * {@inheritDoc}
      */
-    public function collectStructedData(BackupCollector $backupDataCollector, array $options = array())
+    public function collectStructuredData(BackupCollector $backupDataCollector, array $options = array())
     {
         $backupDataCollector->fromObject($this, array(
             'doNotDescent' => array('employer', 'roles'),

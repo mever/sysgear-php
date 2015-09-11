@@ -8,7 +8,7 @@ abstract class AbstractObjectCollector extends AbstractCollector
 {
     /**
      * Each object which is collected is put on this list. That
-     * way we prevent infinit loops in recursive collections.
+     * way we prevent infinite loops in recursive collections.
      *
      * @var array
      */
@@ -45,7 +45,7 @@ abstract class AbstractObjectCollector extends AbstractCollector
 
     /**
      * Use this option to skip subclasses which implement certain interfaces. It can
-     * be used to skip collecting from subclassses that implement an interface. E.g.
+     * be used to skip collecting from sub-classes that implement an interface. E.g.
      * the Doctrine proxy wrapper.
      *
      * @var string[]
@@ -64,10 +64,6 @@ abstract class AbstractObjectCollector extends AbstractCollector
     protected function _setOption($key, $value)
     {
         switch ($key) {
-            case 'followNodes':
-                $this->followNodes = (boolean) $value;
-                break;
-
             case "doNotDescent":
                 $this->doNotDescent = (array) $value;
                 break;
@@ -89,6 +85,7 @@ abstract class AbstractObjectCollector extends AbstractCollector
      * Return true if property can be collected, else return false.
      *
      * @param \ReflectionProperty $property
+     * @return boolean
      */
     protected function filterProperty(\ReflectionProperty $property)
     {
@@ -112,9 +109,9 @@ abstract class AbstractObjectCollector extends AbstractCollector
     }
 
     /**
-     * Return the node name which represents this $object.
+     * Return the node name which represents this $class.
      *
-     * @param object|string $object May be a class name
+     * @param object|string $class May be a class name
      * @return string
      */
     protected function getNodeName($class)
@@ -153,10 +150,11 @@ abstract class AbstractObjectCollector extends AbstractCollector
      * Works its way up upon the inheritance tree from sub to super class and returns
      * the name of the first class implementing the given $interface.
      *
-     * @param object|class $object Object or classname
+     * @param object|class $object Object or class name
      * @param string $interface
+     * @return string
      */
-    protected function getFirstClassnameImplementing($object, $interface)
+    protected function getFirstClassNameImplementing($object, $interface)
     {
         // Fetches the oldest parent name which implements the backupable interface.
         $previousClass = $class = (is_object($object) ? get_class($object) : $object);

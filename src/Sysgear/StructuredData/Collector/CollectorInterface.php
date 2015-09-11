@@ -2,8 +2,6 @@
 
 namespace Sysgear\StructuredData\Collector;
 
-use Sysgear\StructuredData\Exporter\ExporterInterface;
-
 /**
  * Responsible for collecting data.
  *
@@ -21,7 +19,7 @@ interface CollectorInterface
     /**
      * Collect data from object.
      *
-     * @param \StdClass $object
+     * @param object $object
      * @param mixed[] $options Map of instance options
      * @return \Sysgear\StructuredData\Node
      */
