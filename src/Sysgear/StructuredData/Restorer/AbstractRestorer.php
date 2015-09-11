@@ -38,8 +38,7 @@ abstract class AbstractRestorer implements RestorerInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Restorer.RestorerInterface::setOption()
+     * {@inheritdoc}
      */
     public function setOption($key, $value)
     {

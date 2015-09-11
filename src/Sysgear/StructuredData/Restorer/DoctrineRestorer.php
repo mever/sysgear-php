@@ -6,7 +6,6 @@ use Sysgear\StructuredData\NodeInterface,
     Sysgear\StructuredData\NodeCollection,
     Sysgear\StructuredData\NodeProperty,
     Sysgear\StructuredData\Node,
-    Sysgear\StructuredData\NodePath,
     Sysgear\Util;
 
 use Doctrine\ORM\EntityManager;
@@ -16,7 +15,7 @@ use Doctrine\DBAL\Types\Type;
 class DoctrineRestorer extends AbstractRestorer
 {
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
     protected $entityManager;
 
@@ -44,8 +43,7 @@ class DoctrineRestorer extends AbstractRestorer
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Restorer.RestorerInterface::restore()
+     * {@inheritdoc}
      */
     public function restore(Node $node, $entityManager = null)
     {
@@ -223,11 +221,11 @@ class DoctrineRestorer extends AbstractRestorer
      */
     protected function setProperty($entity, $name, NodeInterface $valueNode, $insert = false)
     {
-        $reflObject = new \ReflectionObject($entity);
-        $reflProp = $this->getInheritedReflectionProperty($reflObject, $name);
-        if (null !== $reflProp) {
-            $reflProp->setAccessible(true);
-            $reflProp->setValue($entity, $this->getValue($valueNode, $insert));
+        $rObject = new \ReflectionObject($entity);
+        $rProp = $this->getInheritedReflectionProperty($rObject, $name);
+        if (null !== $rProp) {
+            $rProp->setAccessible(true);
+            $rProp->setValue($entity, $this->getValue($valueNode, $insert));
         }
     }
 

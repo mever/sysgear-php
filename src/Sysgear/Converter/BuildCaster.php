@@ -39,8 +39,7 @@ class BuildCaster implements CasterInterface
     protected $timezone;
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\Converter.CasterInterface::cast()
+     * {@inheritdoc}
      */
     public function cast($value, $type)
     {
@@ -56,8 +55,7 @@ class BuildCaster implements CasterInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\Converter.CasterInterface::setTimezone()
+     * {@inheritdoc}
      */
     public function setTimezone(\DateTimeZone $timezone)
     {

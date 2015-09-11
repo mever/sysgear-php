@@ -38,8 +38,7 @@ abstract class AbstractExporter implements ExporterInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Exporter.ExporterInterface::setNode()
+     * {@inheritdoc}
      */
     public function setNode(Node $node)
     {

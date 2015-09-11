@@ -94,8 +94,7 @@ class BackupCollector extends AbstractObjectCollector
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Collector.CollectorInterface::fromObject()
+     * {@inheritdoc}
      */
     public function fromObject($object, array $options = array())
     {
@@ -180,6 +179,7 @@ class BackupCollector extends AbstractObjectCollector
      * Return true if property can be collected, else return false.
      *
      * @param \ReflectionProperty $property
+     * @return boolean
      */
     protected function filterProperty(\ReflectionProperty $property)
     {
@@ -195,8 +195,8 @@ class BackupCollector extends AbstractObjectCollector
         }
 
         if ($this->skipInterfaces) {
-            $ifaces = $property->getDeclaringClass()->getInterfaceNames();
-            if (array_intersect($ifaces, $this->skipInterfaces)) {
+            $interfaces = $property->getDeclaringClass()->getInterfaceNames();
+            if (array_intersect($interfaces, $this->skipInterfaces)) {
                 return false;
             }
         }
@@ -221,7 +221,7 @@ class BackupCollector extends AbstractObjectCollector
             $this->descentLevel -= 1;
         }
 
-        // scan BackupableInterface implmentation
+        // scan BackupableInterface implementation
         if ($value instanceof BackupableInterface) {
 
             // check path
@@ -287,7 +287,7 @@ class BackupCollector extends AbstractObjectCollector
      *
      * @param \Sysgear\Backup\BackupableInterface $backupable
      * @param boolean $doNotDescent
-     * @param NodePath $path preseeding path
+     * @param NodePath $path preceding path
      * @param string $name
      * @return \Sysgear\StructuredData\NodeInterface
      */
@@ -336,20 +336,20 @@ class BackupCollector extends AbstractObjectCollector
     /**
      * Get properties of reflection class. Include inherited properties.
      *
-     * @param \ReflectionClass $reflClass
+     * @param \ReflectionClass $rClass
      * @return \ReflectionProperty[]
      */
-    protected function getProperties(\ReflectionClass $reflClass)
+    protected function getProperties(\ReflectionClass $rClass)
     {
         $properties = array();
-        $reflParent = $reflClass->getParentClass();
-        if ($reflParent) {
-            foreach ($this->getProperties($reflParent) as $name => $prop) {
+        $rParent = $rClass->getParentClass();
+        if ($rParent) {
+            foreach ($this->getProperties($rParent) as $name => $prop) {
                 $properties[$name] = $prop;
             }
         }
 
-        foreach ($reflClass->getProperties() as $prop) {
+        foreach ($rClass->getProperties() as $prop) {
             $properties[$prop->getName()] = $prop;
         }
 

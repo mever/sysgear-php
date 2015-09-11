@@ -21,8 +21,7 @@ class ObjectRestorer extends AbstractRestorer
     protected $referenceCandidates = array();
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Restorer.RestorerInterface::restore()
+     * {@inheritdoc}
      */
     public function restore(Node $node, $object = null)
     {
@@ -32,7 +31,6 @@ class ObjectRestorer extends AbstractRestorer
         }
 
         // add this object as possible reference and restore properties
-        $remainingProperties = array();
         $this->createReferenceCandidate($object);
         $refClass = new \ReflectionClass($object);
         foreach ($this->node->getProperties() as $name => $node) {
@@ -164,7 +162,7 @@ class ObjectRestorer extends AbstractRestorer
             $properties = $refClass->getProperties();
             $defaults = $refClass->getDefaultProperties();
 
-            $serealized = "O:" . strlen($class) . ":\"$class\":".count($properties) .':{';
+            $serialized = "O:" . strlen($class) . ":\"$class\":".count($properties) .':{';
             foreach ($properties as $property){
                 $name = $property->getName();
                 if($property->isProtected()){
@@ -172,15 +170,15 @@ class ObjectRestorer extends AbstractRestorer
                 } elseif($property->isPrivate()){
                     $name = chr(0)  . $class.  chr(0).$name;
                 }
-                $serealized .= serialize($name);
+                $serialized .= serialize($name);
                 if(array_key_exists($property->getName(),$defaults) ){
-                    $serealized .= serialize($defaults[$property->getName()]);
+                    $serialized .= serialize($defaults[$property->getName()]);
                 } else {
-                    $serealized .= serialize(null);
+                    $serialized .= serialize(null);
                 }
             }
-            $serealized .="}";
-            return unserialize($serealized);
+            $serialized .="}";
+            return unserialize($serialized);
         }
     }
 

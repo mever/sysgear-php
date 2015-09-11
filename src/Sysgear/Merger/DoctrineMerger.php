@@ -31,14 +31,14 @@ class DoctrineMerger implements MergerInterface
     const FETCH_BY_ATTRIBUTES = 1;
 
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
     public $entityManager;
 
     /**
      * Create a doctrine merger.
      *
-     * @param \Doctrine\ORM\EntityManager $entityManager
+     * @param EntityManager $entityManager
      */
     public function __construct(EntityManager $entityManager)
     {
@@ -46,8 +46,7 @@ class DoctrineMerger implements MergerInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\Merger.MergerInterface::merge()
+     * {@inheritdoc}
      */
     public function merge($object)
     {
@@ -70,8 +69,7 @@ class DoctrineMerger implements MergerInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\Merger.MergerInterface::find()
+     * {@inheritdoc}
      */
     public function find($object)
     {
@@ -84,8 +82,7 @@ class DoctrineMerger implements MergerInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\Merger.MergerInterface::getObjectId()
+     * {@inheritdoc}
      */
     public function getObjectId($object)
     {
@@ -94,8 +91,7 @@ class DoctrineMerger implements MergerInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\Merger.MergerInterface::flush()
+     * {@inheritdoc}
      */
     public function flush()
     {
@@ -103,8 +99,7 @@ class DoctrineMerger implements MergerInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\Merger.MergerInterface::getMandatoryProperties()
+     * {@inheritdoc}
      */
     public function getMandatoryProperties($object)
     {

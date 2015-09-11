@@ -26,8 +26,7 @@ class BackupRestorer extends ObjectRestorer
     protected $name;
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Restorer.RestorerInterface::restore()
+     * {@inheritdoc}
      */
     public function restore(Node $node, $object = null)
     {
@@ -46,6 +45,8 @@ class BackupRestorer extends ObjectRestorer
      * @return array Return a list of remaining properties, those that could not
      *               be set because the restorer was not able to access the
      *               modifiers of the $object.
+     *
+     * @throws Exception
      */
     public function toObject($object)
     {

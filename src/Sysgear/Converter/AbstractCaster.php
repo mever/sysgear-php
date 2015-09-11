@@ -15,24 +15,21 @@ namespace Sysgear\Converter;
 abstract class AbstractCaster implements CasterInterface
 {
     /**
-     * (non-PHPdoc)
-     * @see \Sysgear\Converter\CasterInterface::setTimezone()
+     * {@inheritdoc}
      */
     public function setTimezone(\DateTimeZone $timezone)
     {
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Serializable::serialize()
+     * {@inheritdoc}
      */
     public function serialize()
     {
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Serializable::unserialize()
+     * {@inheritdoc}
      */
     public function unserialize($data)
     {

@@ -47,8 +47,7 @@ class DynamicCaster implements CasterInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Sysgear\Converter\CasterInterface::cast()
+     * {@inheritdoc}
      */
     public function cast($value, $type)
     {
@@ -61,8 +60,7 @@ class DynamicCaster implements CasterInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Sysgear\Converter\CasterInterface::setTimezone()
+     * {@inheritdoc}
      */
     public function setTimezone(\DateTimeZone $timezone)
     {
@@ -70,8 +68,7 @@ class DynamicCaster implements CasterInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Serializable::serialize()
+     * {@inheritdoc}
      */
     public function serialize()
     {
@@ -81,8 +78,7 @@ class DynamicCaster implements CasterInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Serializable::unserialize()
+     * {@inheritdoc}
      */
     public function unserialize($serialized)
     {

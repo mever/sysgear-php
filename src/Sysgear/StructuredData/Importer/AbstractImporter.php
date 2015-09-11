@@ -30,8 +30,7 @@ abstract class AbstractImporter implements ImporterInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Importer.ImporterInterface::getNode()
+     * {@inheritdoc}
      */
     public function getNode()
     {

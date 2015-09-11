@@ -16,8 +16,7 @@ class DebugExporter extends AbstractExporter
     protected $visited = array();
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Exporter.ExporterInterface::__toString()
+     * {@inheritdoc}
      */
     public function __toString()
     {

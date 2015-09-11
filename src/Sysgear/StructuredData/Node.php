@@ -108,6 +108,7 @@ class Node extends NodeInterface
      *
      * @param string $key
      * @param mixed $default
+     * @return mixed
      */
     public function getMeta($key, $default = null)
     {

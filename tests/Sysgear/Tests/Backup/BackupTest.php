@@ -224,10 +224,10 @@ class BackupTest extends TestCase
      */
     public function testOnlyImplementorBackup()
     {
-        $onlyImplementor = true;
+        $onlyImplementer = true;
         $comp = $this->inheritedBasicCompany();
         $tool = new BackupTool(new XmlExporter(), new XmlImporter(), array('datetime' => false));
-        $export = $tool->backup($comp, array('onlyImplementor' => $onlyImplementor));
+        $export = $tool->backup($comp, array('onlyImplementer' => $onlyImplementer));
         $export->setMetaTypeField(null);
         $string = $this->removeDateLine($export->formatOutput(true)->__toString());
 

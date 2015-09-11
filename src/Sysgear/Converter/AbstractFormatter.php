@@ -29,8 +29,7 @@ abstract class AbstractFormatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Sysgear\Converter\FormatterInterface::setFormats()
+     * {@inheritdoc}
      */
     public function setFormats(FormatCollection $formats)
     {
@@ -38,8 +37,7 @@ abstract class AbstractFormatter implements FormatterInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Sysgear\Converter\FormatterInterface::getFormats()
+     * {@inheritdoc}
      */
     public function getFormats()
     {

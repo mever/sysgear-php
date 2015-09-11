@@ -2,8 +2,6 @@
 
 namespace Sysgear\StructuredData\Collector;
 
-use Sysgear\StructuredData\Exporter\ExporterInterface;
-
 abstract class AbstractCollector implements CollectorInterface
 {
     /**
@@ -45,8 +43,7 @@ abstract class AbstractCollector implements CollectorInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Collector.CollectorInterface::setOption()
+     * {@inheritdoc}
      */
     public function setOption($key, $value)
     {
@@ -70,8 +67,7 @@ abstract class AbstractCollector implements CollectorInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Collector.CollectorInterface::getNode()
+     * {@inheritdoc}
      */
     public function getNode()
     {

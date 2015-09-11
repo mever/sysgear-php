@@ -32,8 +32,7 @@ class DefaultCaster implements CasterInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\Converter.CasterInterface::cast()
+     * {@inheritdoc}
      */
     public function cast($value, $type)
     {
@@ -61,8 +60,7 @@ class DefaultCaster implements CasterInterface
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\Converter.CasterInterface::setTimezone()
+     * {@inheritdoc}
      */
     public function setTimezone(\DateTimeZone $timezone)
     {

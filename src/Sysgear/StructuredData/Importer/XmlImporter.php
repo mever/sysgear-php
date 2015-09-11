@@ -33,8 +33,7 @@ class XmlImporter extends AbstractImporter
     }
 
     /**
-     * (non-PHPdoc)
-     * @see Sysgear\StructuredData\Importer.ImporterInterface::fromString()
+     * {@inheritdoc}
      */
     public function fromString($string)
     {
@@ -54,6 +53,7 @@ class XmlImporter extends AbstractImporter
      * @param \DOMElement $domNode
      * @param string $sequence XPointer child sequence.
      * @return \Sysgear\StructuredData\NodeInterface
+     * @throws ImporterException
      */
     protected function compile(\DOMElement $domNode, $sequence = '/1')
     {

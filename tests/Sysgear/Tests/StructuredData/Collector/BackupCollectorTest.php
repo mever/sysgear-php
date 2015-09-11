@@ -14,7 +14,7 @@ use Sysgear\Operator;
 
 class BackupCollectorTest extends \PHPUnit_Framework_TestCase
 {
-    public function testContruct()
+    public function testConstruct()
     {
         $collector = new BackupCollector();
         $this->assertNull($collector->getNode());
@@ -168,7 +168,7 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($col[0], $col[1]);
     }
 
-    public function testOption_onlyImplementor_disabled()
+    public function testOption_onlyImplementer_disabled()
     {
         $supClassName = $this->createClass(
             array('public $col', 'public $col2 = "abc"'),
@@ -196,7 +196,7 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('abc', $props['col2']->getValue());
     }
 
-    public function testOption_onlyImplementor_enabled()
+    public function testOption_onlyImplementer_enabled()
     {
         $supClassName = $this->createClass(
             array('public $col', 'public $col2 = "abc"'),
@@ -210,7 +210,7 @@ class BackupCollectorTest extends \PHPUnit_Framework_TestCase
         ), array(), array(), $supClassName);
 
         $object = new $className();
-        $collector = new BackupCollector(array('onlyImplementor' => true));
+        $collector = new BackupCollector(array('onlyImplementer' => true));
         $node = $collector->fromObject($object);
 
         $this->assertEquals(get_parent_class($object), __CLASS__ . '\\' . $node->getName());
