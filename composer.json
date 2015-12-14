@@ -2,12 +2,15 @@
     "name": "sysgear/php",
     "description": "Sysgear PHP Library",
     "autoload": {
-        "psr-0": { "": "src/" }
+        "psr-0": {
+            "Sysgear\\": "src/"
+        }
     },
     "require": {
-        "php": ">=5.3.3"
+        "php": ">=5.3.3",
+        "doctrine/orm": "^2.5"
     },
     "require-dev": {
-      "phpunit/phpunit": "4.5.*"
+      "phpunit/phpunit": "4.*"
     }
 }

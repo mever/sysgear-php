@@ -10,11 +10,6 @@
  */
 
 error_reporting(E_ALL | E_STRICT);
-require_once __DIR__ . '/../src/Sysgear/UniversalClassLoader.php';
 
-$loader = new Sysgear\UniversalClassLoader();
-$loader->registerNamespaces(array(
-	'Sysgear\Tests' => __DIR__,
-    'Sysgear' => __DIR__ . '/../src',
-));
-$loader->register();
+$loader = require __DIR__ . '/../vendor/autoload.php';
+$loader->add('Sysgear\Tests', __DIR__);
