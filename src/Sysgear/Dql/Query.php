@@ -12,46 +12,43 @@
 namespace Sysgear\Dql;
 
 use Doctrine\ORM\EntityManager,
-    Doctrine\ORM\QueryBuilder;
+    Doctrine\ORM\Query\Expr\OrderBy;
 
-use Sysgear\Filter\Collection;
+use Sysgear\Filter\Collection,
+    Sysgear\Filter\Expression,
+    Sysgear\Operator;
 
 class Query
 {
     /**
      * @var string
      */
-    protected $entityClass;
+    public $entityClass;
 
     /**
      * @var \Sysgear\Filter\Collection
      */
-    protected $filters;
+    public $filters;
 
     /**
      * @var array
      */
-    protected $selects;
+    protected $selects = array();
 
     /**
      * @var \Doctrine\ORM\EntityManager
      */
-    protected $entityManager;
+    public $entityManager;
 
     /**
      * @var array
      */
-    protected $orderBy;
+    public $orderBy;
 
     /**
      * @var array
      */
-    protected $limit;
-
-    /**
-     * @var array
-     */
-    protected $joins = array();
+    public $limit;
 
     /**
      * Create rest query tool.
@@ -59,18 +56,9 @@ class Query
      * @param EntityManager $entityManager
      * @param string $entityClass
      */
-    public function __construct(EntityManager $entityManager, $entityClass) {
+    public function __construct(EntityManager $entityManager, $entityClass = null) {
         $this->entityManager = $entityManager;
         $this->entityClass = $entityClass;
-    }
-
-    /**
-     * Set filters as where clause.
-     *
-     * @param Collection $filters
-     */
-    public function where(Collection $filters) {
-        $this->filters = $filters;
     }
 
     /**
@@ -87,57 +75,41 @@ class Query
     }
 
     /**
-     * Set order by clause.
-     *
-     * @param array $orderBy
-     */
-    public function orderBy(array $orderBy = null) {
-        $this->orderBy = $orderBy;
-    }
-
-    /**
-     * Set limit clause.
-     *
-     * @param array $limit
-     */
-    public function limit(array $limit = null) {
-        $this->limit = $limit;
-    }
-
-    /**
-     * Executes the query and returns an IterableResult that can be used to incrementally
-     * iterate over the result.
-     */
-    public function iterate()
-    {
-        return $this->build()->iterate();
-    }
-
-    /**
      * Build query.
      *
+     * @param boolean $countQuery
      * @return \Doctrine\ORM\Query
      */
-    protected function build()
+    public function build($countQuery = false)
     {
+        if (null === $this->entityClass) {
+            throw new \RuntimeException("No entity class given.");
+        }
+
         $queryBuilder = $this->entityManager->createQueryBuilder();
         $queryBuilder->from($this->entityClass, '_');
 
         // first build where clause, as it can determine
         // the select and joins involved.
+        $joins = array();
         if (null !== $this->filters && ! $this->filters->isEmpty()) {
-            $queryBuilder->where($this->toWhereClause($this->filters));
+            $queryBuilder->where($this->toWhereClause($this->filters, $joins));
         }
 
-        // if we have joins make sure we can iterate, thus distinct
-        $queryBuilder->select((0 === count($this->joins) ? '' : 'DISTINCT ') . '_');
-
-        foreach ($this->joins as $spec) {
+        foreach ($joins as $spec) {
             $queryBuilder->innerJoin($spec['join'], $spec['alias']);
         }
 
-        if ($this->orderBy) {
-            $queryBuilder->add('orderBy', $this->buildOrderByClause($this->orderBy));
+        if ($countQuery) {
+            $queryBuilder->select('COUNT(_.id)');
+
+        } else {
+            // if we have joins make sure we can iterate, thus distinct
+            $queryBuilder->select((0 === count($joins) ? '' : 'DISTINCT ') . '_');
+
+            if ($this->orderBy) {
+                $queryBuilder->addOrderBy($this->buildOrderByClause($this->orderBy));
+            }
         }
 
         if (null !== $this->limit) {
@@ -149,39 +121,47 @@ class Query
     }
 
     /**
-     * Build SQL ORDER BY clause to sort the dataset.
+     * Build SQL ORDER BY clause to sort the data set.
      *
      * @param array[] $sorting Array of sort array's. Each sort is an array where
      *                         the first element should be the field name as string and the second element
      *                         the sort direction as boolean. Use true for ascending or false for descending.
-     * @return string
+     *
+     * @return \Doctrine\ORM\Query\Expr\OrderBy
      */
     protected function buildOrderByClause(array $sorting = array())
     {
-        $ordering = array();
+        $orderBy = new OrderBy();
         foreach ($sorting as $sort) {
-            $ordering[] = "_.{$sort[0]} " . (($sort[1]) ? 'ASC' : 'DESC');
+            $field = $this->normalizeField($sort[0]);
+            $orderBy->add($field, ($sort[1]) ? 'ASC' : 'DESC');
         }
 
-        return join(', ', $ordering);
+        return $orderBy;
     }
 
     /**
-     * Build SQL WHERE clause to filter dataset.
+     * Build SQL WHERE clause to filter data set.
      *
+     * @param Collection $filters
+     * @param array $joins
      * @return string
      */
-    protected function toWhereClause(Collection $filters)
+    private function toWhereClause(Collection $filters, &$joins)
     {
         $that = $this;
         $connection = $this->entityManager->getConnection();
         $selectAliases = array();
-        $joins =& $this->joins;
         foreach ($this->selects as $field) {
             list($alias) = explode('.', $field, 2);
             $selectAliases[] = $alias;
         }
 
+        /**
+         * @param string $type
+         * @param Collection|Expression $filter
+         * @return array|string
+         */
         $compiler = function($type, $filter) use ($that, $connection, $selectAliases, &$joins) {
             if ($type === Collection::COMPILE_COL) {
 
@@ -190,11 +170,13 @@ class Query
                 return array('(', " {$type} ", ')');
             } else {
 
-                $operator = $filter->getOperator();
-                $sqlOperator = \Sysgear\Operator::toSqlComparison($operator);
                 $value = $filter->getValue();
+                if  (null === $value) {
+                    $sqlOperator = 'IS';
+                    $right = 'NULL';
+                }
 
-                if (is_array($value)) {
+                elseif (is_array($value)) {
                     $inClause = array();
                     foreach ($value as $val) {
                         $inClause[] = $connection->quote($val);
@@ -202,13 +184,18 @@ class Query
                     $sqlOperator = 'IN';
                     $right = '(' . join(',', $inClause) . ')';
 
-                } else {
+                }
+
+                else {
+
+                    $operator = $filter->getOperator();
+                    $sqlOperator = Operator::toSqlComparison($operator);
 
                     // build left comparison expression
                     switch ($operator) {
-                        case \Sysgear\Operator::STR_START_WITH: $right = $connection->quote($value . '%'); break;
-                        case \Sysgear\Operator::STR_END_WITH: $right = $connection->quote('%' . $value); break;
-                        case \Sysgear\Operator::LIKE: $right = $connection->quote('%' . $value . '%'); break;
+                        case Operator::STR_START_WITH: $right = $connection->quote($value . '%'); break;
+                        case Operator::STR_END_WITH: $right = $connection->quote('%' . $value); break;
+                        case Operator::LIKE: $right = $connection->quote('%' . $value . '%'); break;
                         default: $right = $connection->quote($value);
                     }
                 }
@@ -217,13 +204,15 @@ class Query
                 $left = $that->normalizeField($filter->getField());
 
                 // add join if a field in the filter traverses a relation
-                $pos = strpos($left, '.');
-                if (false !== $pos && ! in_array(substr($left, 0, $pos), $selectAliases, true)) {
-                    $field = substr($left, 0, $pos);
-                    $joins[] = array('join' => '_.' . $field, 'alias' => $field);
+                if ('_.' !== substr($left, 0, 2)) {
+                    $pos = strpos($left, '.');
+                    if (false !== $pos && !in_array(substr($left, 0, $pos), $selectAliases, true)) {
+                        $field = substr($left, 0, $pos);
+                        $joins[] = array('join' => '_.' . $field, 'alias' => $field);
+                    }
                 }
 
-                // build complete comparison expresssion
+                // build complete comparison expression
                 return "{$left} {$sqlOperator} {$right}";
             }
         };
