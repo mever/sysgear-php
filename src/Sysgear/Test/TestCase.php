@@ -192,8 +192,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
     protected function getAbstractMethodNames($class)
     {
         $names = array();
-        $reflClass = new \ReflectionClass($class);
-        foreach ($reflClass->getMethods(\ReflectionMethod::IS_ABSTRACT) as $method) {
+        $rClass = new \ReflectionClass($class);
+        foreach ($rClass->getMethods(\ReflectionMethod::IS_ABSTRACT) as $method) {
             $names[] = $method->getName();
         }
 
