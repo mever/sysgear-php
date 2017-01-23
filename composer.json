@@ -1,6 +1,7 @@
 {
     "name": "sysgear/php",
     "description": "Sysgear PHP Library",
+    "license": "LGPL-3.0",
     "autoload": {
         "psr-0": {
             "Sysgear\\": "src/"
