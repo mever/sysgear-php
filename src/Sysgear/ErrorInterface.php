@@ -7,12 +7,12 @@ interface ErrorInterface
     /**
      * Return component specific code.
      *
-     * Any application can split parts of it in seperate components. E.g.:
+     * Any application be split in separate components. E.g.:
      * a login system, user management, blog and forum. Each component may
-     * define a seperate namespace for error codes. Each component implementing
+     * define a separate namespace for error codes. Each component implementing
      * its own namespace must define a class implementing this interface and
      * choose a unique (within the total application) integer above zero. This
-     * chosen integer needs to be retuned by this overwitten method.
+     * chosen integer needs to be returned by this method.
      *
      * @return integer
      */

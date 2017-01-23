@@ -218,7 +218,7 @@ class Datatype
      * @param string $value One of the values confirm the datatype given
      *
      * @throws \Exception
-     * @return \DateTime Datetime object in Zulu timzone (UTC).
+     * @return \DateTime Datetime object in Zulu timezone (UTC).
      */
     public static function castDate($timezone, $datatype, $value)
     {

@@ -138,7 +138,7 @@ class DataSource implements \Serializable
     /**
      * Set filters.
      *
-     * @param Collection $filter
+     * @param Collection $filters
      */
     public function setFilters(Collection $filters)
     {
