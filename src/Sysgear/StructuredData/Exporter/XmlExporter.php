@@ -54,6 +54,7 @@ class XmlExporter extends AbstractExporter
      * @param string $sequence XPointer child sequence.
      * @param string $name Optional element name
      * @return \DOMElement
+     * @throws \Exception
      */
     protected function compiler(Node $node, $sequence = '/1', $name = null)
     {
@@ -100,7 +101,13 @@ class XmlExporter extends AbstractExporter
                 $pos = 0;
                 foreach ($n as $e) {
                     $pos++;
-                    $colElem->appendChild($this->compiler($e, "{$sequence}/{$childCount}/{$pos}"));
+                    if ($e instanceof Node) {
+                        $colElem->appendChild($this->compiler($e, "{$sequence}/{$childCount}/{$pos}"));
+                    } elseif ($e instanceof NodeProperty) {
+                        $colElem->appendChild($this->compileProperty('item', $e));
+                    } else {
+                        throw new \Exception("NodeCollection in NodeCollection not implemented yet");
+                    }
                 }
 
                 $elem->appendChild($colElem);
@@ -114,16 +121,26 @@ class XmlExporter extends AbstractExporter
 
             // set primitive
             else {
-                $propElem = $doc->createElement($key);
-                $propElem->setAttribute('type', $n->getType());
-                $propElem->setAttribute('value', $n->getValue());
-                if ('' !== $this->metaTypeField) {
-                    $propElem->setAttribute($this->metaTypeField, 'property');
-                }
-                $elem->appendChild($propElem);
+                $elem->appendChild($this->compileProperty($key, $n));
             }
         }
 
         return $elem;
+    }
+
+    /**
+     * @param string $name
+     * @param NodeProperty $node
+     * @return \DOMElement
+     */
+    protected function compileProperty($name, NodeProperty $node) {
+        $propElem = $this->document->createElement($name);
+        $propElem->setAttribute('type', $node->getType());
+        $propElem->setAttribute('value', $node->getValue());
+        if ('' !== $this->metaTypeField) {
+            $propElem->setAttribute($this->metaTypeField, 'property');
+        }
+
+        return $propElem;
     }
 }

@@ -274,10 +274,13 @@ class BackupCollector extends AbstractObjectCollector
                     }
 
                     $node = $this->createChildNode($val, $doNotDescent, $elemPath, $name);
-                    if (null !== $node) {
+                    if (null !== $node && $node instanceof Node) {
                         $node->setMetadata('key', (is_integer($key) ? 'i' : 's') . ';' . $key);
                         $collection->add($node);
                     }
+
+                } elseif (is_scalar($val)) {
+                    $collection->add(new NodeProperty(gettype($val), $val));
                 }
             }
 
