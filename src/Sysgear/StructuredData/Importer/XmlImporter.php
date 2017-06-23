@@ -119,6 +119,9 @@ class XmlImporter extends AbstractImporter
                         $childCount++;
                     }
                 }
+                foreach ($metadata as $name => $data) {
+                    $node->setMetadata($name, $data);
+                }
                 break;
 
             case self::NODE_TYPE_PROPERTY:
