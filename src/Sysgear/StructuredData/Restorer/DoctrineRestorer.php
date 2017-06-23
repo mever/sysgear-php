@@ -272,6 +272,12 @@ class DoctrineRestorer extends AbstractRestorer
             } elseif ($node instanceof NodeCollection) {
                 $value = array();
                 foreach ($node as $elem) {
+
+                    $meta = $node->getMetadata();
+                    if (isset($meta['merge'])) {
+                        $elem->setMetadata('merge', $meta['merge']);
+                    }
+
                     if ($insert) {
                         $elem->setMetadata('$$insert', true);
                     }
@@ -322,7 +328,7 @@ class DoctrineRestorer extends AbstractRestorer
                 $criteria[$field] = $this->getIdentity($this->findEntity($value));
 
             } else {
-                throw new \RuntimeException("Finding an entity with a collection property '{$field}' is not implemented!");
+                $criteria[$field] = null;
             }
         }
 

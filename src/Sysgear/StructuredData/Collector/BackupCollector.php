@@ -252,6 +252,10 @@ class BackupCollector extends AbstractObjectCollector
                 $collection->setMetadata('class', get_class($value));
             }
 
+            if (null !== $this->merge) {
+                $collection->setMetadata('merge', json_encode($this->merge));
+            }
+
             if (null !== $propertyPath) {
                 $propertyPath->add(NodePath::COLLECTION, $name);
             }
