@@ -141,7 +141,7 @@ class DoctrineRestorer extends AbstractRestorer
     }
 
     /**
-     * Create an entity property. If the propery is not mandatory and an assocciation
+     * Create an entity property. If the property is not mandatory and an association
      * push it on the $deferredProperties array.
      *
      * @param Node $node
@@ -161,7 +161,7 @@ class DoctrineRestorer extends AbstractRestorer
             return;
         }
 
-        // update inverse side of assocciation properties
+        // update inverse side of association properties
         if ($metadata->isAssociationInverseSide($name)) {
             $targetName = $metadata->getAssociationMappedByTargetField($name);
             if ($prop instanceof Node) {
@@ -174,7 +174,7 @@ class DoctrineRestorer extends AbstractRestorer
             }
         }
 
-        // set a X-to-one or X-to-many assocciation
+        // set a X-to-one or X-to-many association
         if ($this->isAssociationMandatory($metadata, $name)) {
             $this->setProperty($entity, $name, $prop, $insert);
         } else {
@@ -408,12 +408,12 @@ class DoctrineRestorer extends AbstractRestorer
     protected function getIdentity($entity)
     {
         $identity = array();
-        $reflClass = new \ReflectionClass($entity);
+        $reflectionClass = new \ReflectionClass($entity);
         $metadata = $this->entityManager->getClassMetadata(get_class($entity));
         foreach ($metadata->getIdentifierFieldNames() as $field) {
-            $reflProp = $reflClass->getProperty($field);
-            $reflProp->setAccessible(true);
-            $identity[$field] = $reflProp->getValue($entity);
+            $reflectionProperty = $reflectionClass->getProperty($field);
+            $reflectionProperty->setAccessible(true);
+            $identity[$field] = $reflectionProperty->getValue($entity);
         }
 
         return $identity;

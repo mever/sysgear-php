@@ -71,7 +71,7 @@ class XmlImporter extends AbstractImporter
         // collect node attributes
         $type = null;
         $value = null;
-        $metaDatas = array();
+        $metadata = array();
         $nodeType = null;
         foreach ($domNode->attributes as $attribute) {
             switch ($attribute->nodeName) {
@@ -88,7 +88,7 @@ class XmlImporter extends AbstractImporter
                     break;
 
                 default:
-                    $metaDatas[$attribute->nodeName] = $attribute->nodeValue;
+                    $metadata[$attribute->nodeName] = $attribute->nodeValue;
             }
         }
 
@@ -105,7 +105,7 @@ class XmlImporter extends AbstractImporter
                     }
                 }
 
-                foreach ($metaDatas as $name => $data) {
+                foreach ($metadata as $name => $data) {
                     $node->setMetadata($name, $data);
                 }
                 break;

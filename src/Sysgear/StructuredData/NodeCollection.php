@@ -30,7 +30,7 @@ class NodeCollection extends NodeInterface implements Countable,
     /**
      * Return node metadata.
      *
-     * @return map
+     * @return array[string]
      */
     public function getMetadata()
     {

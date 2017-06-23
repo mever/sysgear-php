@@ -2,7 +2,6 @@
 
 namespace Sysgear\StructuredData\Exporter;
 
-use Sysgear\StructuredData\NodeInterface;
 use Sysgear\StructuredData\NodeCollection;
 use Sysgear\StructuredData\NodeProperty;
 use Sysgear\StructuredData\Node;
