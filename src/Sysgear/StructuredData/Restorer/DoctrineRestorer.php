@@ -79,7 +79,7 @@ class DoctrineRestorer extends AbstractRestorer
             return $this->list[$hash];
         }
 
-        if ($this->isInsert($node)) {
+        $insert = function(Node $node) {
             $deferredProperties = array();
             $entity = $this->createEntity($node, $deferredProperties);
             $this->insertEntity($entity, $node);
@@ -89,12 +89,17 @@ class DoctrineRestorer extends AbstractRestorer
             }
 
             return $entity;
+        };
+
+        if ($this->isInsert($node)) {
+            return $insert($node);
 
         } else {
             $entity = $this->findEntity($node);
             $this->list[$hash] = $entity;
             if (null === $entity) {
                 $this->logMissing($node);
+                return $insert($node);
             }
         }
 
