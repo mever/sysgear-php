@@ -154,10 +154,14 @@ class DoctrineRestorer extends AbstractRestorer
      */
     protected function createEntityProperty(Node $node, ClassMetadata $metadata, $entity, $name, NodeInterface $prop, array &$deferredProperties, $insert)
     {
-        // set a primitive property (e.g.: string, int, datetime) or
-        // more complex native php objects, arrays or anything else than Doctrine assocciations.
+        // set a primitive property (e.g.: string, int, datetime)
         if ($prop instanceof NodeProperty) {
             $this->setProperty($entity, $name, $prop, $insert);
+            return;
+        }
+
+        if ($this->isPhpArray($prop)) {
+            $this->setProperty($entity, $name, $prop);
             return;
         }
 
@@ -238,6 +242,16 @@ class DoctrineRestorer extends AbstractRestorer
      */
     protected function getValue(NodeInterface $node, $insert = false)
     {
+        // we assume here an entity property of type array which is not a Doctrine association
+        if ($this->isPhpArray($node)) {
+            $array = [];
+            /** @var NodeProperty $elem */
+            foreach ($node as $elem) {
+                $array[] = $elem->getValue();
+            }
+            return count($array) ? $array : null;
+        }
+
         $value = null;
         if ($node instanceof NodeProperty) {
             $value = $node->getValue();
@@ -417,5 +431,15 @@ class DoctrineRestorer extends AbstractRestorer
         }
 
         return $identity;
+    }
+
+    /**
+     * Return if given node represents a simple PHP array.
+     *
+     * @param NodeInterface $node
+     * @return bool
+     */
+    protected function isPhpArray(NodeInterface $node) {
+        return $node instanceof NodeCollection && !isset($node->getMetadata()['class']);
     }
 }
