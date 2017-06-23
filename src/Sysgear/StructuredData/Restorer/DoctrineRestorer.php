@@ -299,7 +299,7 @@ class DoctrineRestorer extends AbstractRestorer
      *
      * @param Node $node
      * @throws \RuntimeException
-     * @return object Found entity.
+     * @return object|null Found entity.
      */
     protected function findEntity(Node $node)
     {
@@ -309,7 +309,7 @@ class DoctrineRestorer extends AbstractRestorer
         }
 
         if (! is_array($mergeFields)) {
-            return;
+            return null;
         }
 
         $criteria = array();
@@ -332,17 +332,17 @@ class DoctrineRestorer extends AbstractRestorer
     /**
      * Get property of reflection class. Include inherited properties.
      *
-     * @param \ReflectionClass $reflClass
+     * @param \ReflectionClass $reflectionClass
      * @param string $name
      * @return \ReflectionProperty
      */
-    protected function getInheritedReflectionProperty(\ReflectionClass $reflClass, $name)
+    protected function getInheritedReflectionProperty(\ReflectionClass $reflectionClass, $name)
     {
-        if ($reflClass->hasProperty($name)) {
-            return $reflClass->getProperty($name);
+        if ($reflectionClass->hasProperty($name)) {
+            return $reflectionClass->getProperty($name);
 
         } else {
-            $reflParent = $reflClass->getParentClass();
+            $reflParent = $reflectionClass->getParentClass();
             if ($reflParent) {
                 return $this->getInheritedReflectionProperty($reflParent, $name);
             }
