@@ -96,10 +96,12 @@ class DoctrineRestorer extends AbstractRestorer
 
         } else {
             $entity = $this->findEntity($node);
-            $this->list[$hash] = $entity;
             if (null === $entity) {
                 $this->logMissing($node);
                 return $insert($node);
+            } else {
+                $this->list[$hash] = $entity;
+                $this->logFound($node);
             }
         }
 
@@ -112,8 +114,7 @@ class DoctrineRestorer extends AbstractRestorer
      * @param Node $node
      * @return boolean
      */
-    protected function isInsert(Node $node)
-    {
+    protected function isInsert(Node $node) {
         return $node->getMeta('$$insert', false);
     }
 
@@ -348,9 +349,9 @@ class DoctrineRestorer extends AbstractRestorer
             return $reflectionClass->getProperty($name);
 
         } else {
-            $reflParent = $reflectionClass->getParentClass();
-            if ($reflParent) {
-                return $this->getInheritedReflectionProperty($reflParent, $name);
+            $reflectionParent = $reflectionClass->getParentClass();
+            if ($reflectionParent) {
+                return $this->getInheritedReflectionProperty($reflectionParent, $name);
             }
         }
     }
@@ -379,7 +380,7 @@ class DoctrineRestorer extends AbstractRestorer
         $logger = $this->logger;
         if (null !== $logger) {
             if (method_exists($entity, '__toString')) {
-                $desc = (string) $entity;
+                $desc = $entity->__toString();
 
             } else {
                 $desc = get_class($entity) . ': ';
@@ -387,6 +388,7 @@ class DoctrineRestorer extends AbstractRestorer
                     $desc .= json_encode($this->getDescFields($describeNode));
                 }
             }
+
             $logger("insert new entity {$desc}", 'debug');
         }
     }
@@ -401,6 +403,19 @@ class DoctrineRestorer extends AbstractRestorer
         $logger = $this->logger;
         if (null !== $logger) {
             $logger("could not find {$node->getMeta('class')}: " . json_encode($this->getDescFields($node, true)), 'warning');
+        }
+    }
+
+    /**
+     * Log a found node.
+     *
+     * @param Node $node
+     */
+    protected function logFound(Node $node)
+    {
+        $logger = $this->logger;
+        if (null !== $logger) {
+            $logger("find {$node->getMeta('class')}: " . json_encode($this->getDescFields($node, true)), 'debug');
         }
     }
 
